@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1795389984-2" author="app_core">
+        <addForeignKeyConstraint
+            baseColumnNames="ressource_id"
+            baseTableName="document_ressource"
+            constraintName="fk_document_ressource_ressource_id"
+            referencedColumnNames="id"
+            referencedTableName="ressource" />
+        <addForeignKeyConstraint
+            baseColumnNames="contrat_id"
+            baseTableName="document_ressource"
+            constraintName="fk_document_ressource_contrat_id"
+            referencedColumnNames="id"
+            referencedTableName="contrat" />
+        <addForeignKeyConstraint
+            baseColumnNames="entreprise_id"
+            baseTableName="document_ressource"
+            constraintName="fk_document_ressource_entreprise_id"
+            referencedColumnNames="id"
+            referencedTableName="contrat" />
+        <addForeignKeyConstraint
+            baseColumnNames="employe_id"
+            baseTableName="document_ressource"
+            constraintName="fk_document_ressource_employe_id"
+            referencedColumnNames="id"
+            referencedTableName="employe" />
+        <addForeignKeyConstraint
+            baseColumnNames="type_document_id"
+            baseTableName="document_ressource"
+            constraintName="fk_document_ressource_type_document_id"
+            referencedColumnNames="id"
+            referencedTableName="type_document" />
+    </changeSet>
+</databaseChangeLog>

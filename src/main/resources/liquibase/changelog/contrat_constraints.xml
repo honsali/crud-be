@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="951542707-2" author="app_core">
+        <addForeignKeyConstraint
+            baseColumnNames="ressource_id"
+            baseTableName="contrat"
+            constraintName="fk_contrat_ressource_id"
+            referencedColumnNames="id"
+            referencedTableName="ressource" />
+        <addForeignKeyConstraint
+            baseColumnNames="entreprise_id"
+            baseTableName="contrat"
+            constraintName="fk_contrat_entreprise_id"
+            referencedColumnNames="id"
+            referencedTableName="entreprise" />
+        <addForeignKeyConstraint
+            baseColumnNames="type_contrat_id"
+            baseTableName="contrat"
+            constraintName="fk_contrat_type_contrat_id"
+            referencedColumnNames="id"
+            referencedTableName="type_contrat" />
+        <addForeignKeyConstraint
+            baseColumnNames="etat_contrat_id"
+            baseTableName="contrat"
+            constraintName="fk_contrat_etat_contrat_id"
+            referencedColumnNames="id"
+            referencedTableName="etat_contrat" />
+        <addForeignKeyConstraint
+            baseColumnNames="poste_id"
+            baseTableName="contrat"
+            constraintName="fk_contrat_poste_id"
+            referencedColumnNames="id"
+            referencedTableName="poste" />
+    </changeSet>
+</databaseChangeLog>
