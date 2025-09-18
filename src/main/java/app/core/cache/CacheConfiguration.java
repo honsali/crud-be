@@ -35,11 +35,16 @@ class CacheConfiguration {
     @Bean
     public JCacheManagerCustomizer cacheManagerCustomizer() {
         return cm -> {
-            createCache(cm, app.core.user.UserRepository.USERS_BY_LOGIN_CACHE);
-            createCache(cm, app.core.user.UserRepository.USERS_BY_EMAIL_CACHE);
-            createCache(cm, app.core.user.User.class.getName());
-            createCache(cm, app.core.user.Authority.class.getName());
-            createCache(cm, app.core.user.User.class.getName() + ".authorities");
+            createCache(cm, app.core.user.UserRepository.USERS_BY_LOGIN_CACHE, configuration);
+            createCache(cm, app.core.user.UserRepository.USERS_BY_EMAIL_CACHE, configuration);
+            createCache(cm, app.core.user.User.class.getName(), configuration);
+            createCache(cm, app.core.user.Authority.class.getName(), configuration);
+            createCache(cm, app.core.user.User.class.getName() + ".authorities", configuration);
+            // Add domain entity caches
+            createCache(cm, "app.domain.rh.employe.Employe", configuration);
+            createCache(cm, "app.domain.rh.departement.Departement", configuration);
+            createCache(cm, "app.domain.rh.sexe.Sexe", configuration);
+            createCache(cm, "app.domain.rh.situationFamiliale.SituationFamiliale", configuration);
         };
     }
 

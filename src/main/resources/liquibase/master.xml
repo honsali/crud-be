@@ -14,8 +14,16 @@
     <property name="datetimeType" value="datetime" dbms="postgresql"/>
 
     <include file="liquibase/changelog/_initial_schema.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/conge_table.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/sexe_table.xml" relativeToChangelogFile="false"/>
   <include file="liquibase/changelog/departement_table.xml" relativeToChangelogFile="false"/>
   <include file="liquibase/changelog/employe_table.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/typeConge_table.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/situationFamiliale_table.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/conge_constraints.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/sexe_constraints.xml" relativeToChangelogFile="false"/>
   <include file="liquibase/changelog/departement_constraints.xml" relativeToChangelogFile="false"/>
   <include file="liquibase/changelog/employe_constraints.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/typeConge_constraints.xml" relativeToChangelogFile="false"/>
+  <include file="liquibase/changelog/situationFamiliale_constraints.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

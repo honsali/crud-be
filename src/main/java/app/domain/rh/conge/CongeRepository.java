@@ -1,4 +1,4 @@
-package app.domain.rh.departement;
+package app.domain.rh.conge;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DepartementRepository extends JpaRepository<Departement, Long>, JpaSpecificationExecutor<Departement> {
+public interface CongeRepository extends JpaRepository<Conge, Long>, JpaSpecificationExecutor<Conge> {
 
-    List<Departement> findAllByOrderByNom();
+    List<Conge> findAllByEmploye_IdOrderByCode(Long idEmploye);
 }

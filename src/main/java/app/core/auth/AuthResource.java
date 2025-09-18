@@ -1,12 +1,5 @@
 package app.core.auth;
 
-import app.core.security.SecurityProperties;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -25,6 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import app.core.security.SecurityProperties;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/authenticate")
@@ -56,9 +54,9 @@ public class AuthResource {
 
         Duration tokenValidity = authenticationQuery.isRememberMe() ? this.securityProperties.getRememberMeTokenValidity() : this.securityProperties.getTokenValidity();
         Date validityDate = Date.from(Instant.now().plusSeconds(tokenValidity.toSeconds()));
-        SecretKey key = Keys.hmacShaKeyFor(securityProperties.getJwtBase64Secret().getBytes(StandardCharsets.UTF_8));
+        SecretKey key = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(securityProperties.getJwtBase64Secret()));
 
-        String jwtToken = Jwts.builder().setSubject(authenticationQuery.getUsername()).claim(AUTHORITIES_KEY, authorities).signWith(key, SignatureAlgorithm.HS512).setExpiration(validityDate).compact();
+        String jwtToken = Jwts.builder().setSubject(authenticationQuery.getUsername()).claim(AUTHORITIES_KEY, authorities).setExpiration(validityDate).setIssuedAt(new Date()).signWith(key).compact();
 
         AuthResult authResult = new AuthResult(jwtToken);
 

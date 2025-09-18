@@ -1,4 +1,4 @@
-package app.domain.rh.departement;
+package app.domain.rh.sexe;
 
 import java.io.Serializable;
 import org.hibernate.annotations.Cache;
@@ -13,30 +13,31 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "departement")
+@Table(name = "sexe")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Departement implements Serializable {
+public class Sexe implements Serializable {
 
-    private static final long serialVersionUID = 88666089L;
+    private static final long serialVersionUID = 1119645047L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_departement")
-    @SequenceGenerator(name = "seq_departement", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_sexe")
+    @SequenceGenerator(name = "seq_sexe", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
     @NotNull
-    @Column(name = "nom", nullable = false)
-    private String nom;
+    @Column(name = "libelle", nullable = false)
+    private String libelle;
 
-    @Column(name = "description")
-    private String description;
+    @NotNull
+    @Column(name = "code", nullable = false)
+    private String code;
 
     public Long getId() {
         return this.id;
     }
 
-    public Departement id(Long id) {
+    public Sexe id(Long id) {
         this.setId(id);
         return this;
     }
@@ -45,28 +46,24 @@ public class Departement implements Serializable {
         this.id = id;
     }
 
-    public String getDisplayString() {
-        return nom;
-    }
-
-    public Long getIdDepartement() {
+    public Long getIdSexe() {
         return this.id;
     }
 
-    public String getNom() {
-        return this.nom;
+    public String getLibelle() {
+        return this.libelle;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 
-    public String getDescription() {
-        return this.description;
+    public String getCode() {
+        return this.code;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override
@@ -74,10 +71,10 @@ public class Departement implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Departement)) {
+        if (!(o instanceof Sexe)) {
             return false;
         }
-        return getId() != null && getId().equals(((Departement) o).getId());
+        return getId() != null && getId().equals(((Sexe) o).getId());
     }
 
     @Override

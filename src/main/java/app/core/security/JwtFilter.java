@@ -1,7 +1,6 @@
 package app.core.security;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.crypto.SecretKey;
@@ -34,7 +33,7 @@ public class JwtFilter extends GenericFilterBean {
     private final JwtParser parser;
 
     public JwtFilter(SecurityProperties securityProperties) {
-        SecretKey signingKey = Keys.hmacShaKeyFor(securityProperties.getJwtBase64Secret().getBytes(StandardCharsets.UTF_8));
+        SecretKey signingKey = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(securityProperties.getJwtBase64Secret()));
         this.parser = Jwts.parserBuilder().setSigningKey(signingKey).build();
     }
 
@@ -52,9 +51,13 @@ public class JwtFilter extends GenericFilterBean {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(principal, token, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException e) {
-                log.info("Invalid JWT token");
-                log.trace("Invalid JWT token: {}", e.getMessage(), e);
-
+                log.info("Invalid JWT token: {}", e.getMessage());
+                log.trace("Invalid JWT token trace: ", e);
+                SecurityContextHolder.clearContext();
+            } catch (IllegalArgumentException e) {
+                log.info("JWT token compact of handler are invalid: {}", e.getMessage());
+                log.trace("JWT token compact of handler are invalid trace: ", e);
+                SecurityContextHolder.clearContext();
             }
         }
         chain.doFilter(request, response);

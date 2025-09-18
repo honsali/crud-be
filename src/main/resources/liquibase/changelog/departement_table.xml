@@ -6,16 +6,16 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="516746191-0" author="app_core">
+    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-0" author="app_core">
         <createSequence sequenceName="seq_departement" startValue="100" incrementBy="10" />
     </changeSet>
-    <changeSet id="516746191-1" author="app_core">
+    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-1" author="app_core">
         <createTable tableName="departement">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="nom" type="nvarchar(250)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="description" type="text">
                 <constraints nullable="true" />
@@ -23,7 +23,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="516746191-data" author="app_core">
+    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-data" author="app_core">
         <loadData
             file="liquibase/data/departement.csv"
             separator=";"

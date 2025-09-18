@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import app.domain.rh.departement.Departement;
+import app.domain.rh.sexe.Sexe;
+import app.domain.rh.situationFamiliale.SituationFamiliale;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +22,7 @@ import jakarta.persistence.Table;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Employe implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1311388895L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_employe")
@@ -39,6 +41,12 @@ public class Employe implements Serializable {
 
     @Column(name = "date_naissance")
     private LocalDate dateNaissance;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Sexe sexe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SituationFamiliale situationFamiliale;
 
     @Column(name = "date_entree")
     private LocalDate dateEntree;
@@ -117,6 +125,22 @@ public class Employe implements Serializable {
         this.dateNaissance = dateNaissance;
     }
 
+    public Sexe getSexe() {
+        return this.sexe;
+    }
+
+    public void setSexe(Sexe sexe) {
+        this.sexe = sexe;
+    }
+
+    public SituationFamiliale getSituationFamiliale() {
+        return this.situationFamiliale;
+    }
+
+    public void setSituationFamiliale(SituationFamiliale situationFamiliale) {
+        this.situationFamiliale = situationFamiliale;
+    }
+
     public LocalDate getDateEntree() {
         return this.dateEntree;
     }
@@ -189,7 +213,7 @@ public class Employe implements Serializable {
         if (!(o instanceof Employe)) {
             return false;
         }
-        return getId() != null && getId().equals(((Employe) o).id);
+        return getId() != null && getId().equals(((Employe) o).getId());
     }
 
     @Override

@@ -6,18 +6,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="951526432-2" author="app_core">
-        <addForeignKeyConstraint
-            baseColumnNames="client_id"
-            baseTableName="contact"
-            constraintName="fk_contact_client_id"
-            referencedColumnNames="id"
-            referencedTableName="client" />
-        <addForeignKeyConstraint
-            baseColumnNames="poste_id"
-            baseTableName="contact"
-            constraintName="fk_contact_poste_id"
-            referencedColumnNames="id"
-            referencedTableName="poste" />
+    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-2" author="app_core">
     </changeSet>
 </databaseChangeLog>

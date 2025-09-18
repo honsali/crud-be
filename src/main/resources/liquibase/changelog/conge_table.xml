@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-0" author="app_core">
+        <createSequence sequenceName="seq_conge" startValue="100" incrementBy="10" />
+    </changeSet>
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-1" author="app_core">
+        <createTable tableName="conge">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="code" type="nvarchar(250)">
+                <constraints nullable="true" />
+            </column>
+            <column name="type_conge_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_debut_conge" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_fin_conge" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="commentaire" type="text">
+                <constraints nullable="true" />
+            </column>
+            <column name="employe_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-data" author="app_core">
+        <loadData
+            file="liquibase/data/conge.csv"
+            separator=";"
+            tableName="conge"
+            usePreparedStatements="true">
+            <column name="id" type="numeric" />
+            <column name="code" type="nvarchar(250)" />
+            <column name="type_conge_id" type="numeric" />
+            <column name="date_debut_conge" type="date" />
+            <column name="date_fin_conge" type="date" />
+            <column name="commentaire" type="text" />
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

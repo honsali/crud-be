@@ -6,6 +6,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="1357712437-2" author="app_core">
+    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-2" author="app_core">
     </changeSet>
 </databaseChangeLog>

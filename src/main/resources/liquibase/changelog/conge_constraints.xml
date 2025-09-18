@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-2" author="app_core">
+        <addForeignKeyConstraint
+            baseColumnNames="employe_id"
+            baseTableName="conge"
+            constraintName="fk_conge_employe_id"
+            referencedColumnNames="id"
+            referencedTableName="employe" />
+        <addForeignKeyConstraint
+            baseColumnNames="type_conge_id"
+            baseTableName="conge"
+            constraintName="fk_conge_type_conge_id"
+            referencedColumnNames="id"
+            referencedTableName="type_conge" />
+    </changeSet>
+</databaseChangeLog>

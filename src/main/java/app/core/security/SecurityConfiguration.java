@@ -72,6 +72,8 @@ class SecurityConfiguration {
         .requestMatchers("/api/activate").permitAll()
         .requestMatchers("/api/user/reset-password/init").permitAll()
         .requestMatchers("/api/user/reset-password/finish").permitAll()
+        .requestMatchers("/actuator/health").permitAll()
+        .requestMatchers("/actuator/health/**").permitAll()
         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
         .requestMatchers("/api/**").authenticated() 
         .anyRequest().authenticated()

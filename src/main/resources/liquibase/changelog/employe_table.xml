@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="1624068969-0" author="app_core">
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-0" author="app_core">
         <createSequence sequenceName="seq_employe" startValue="100" incrementBy="10" />
     </changeSet>
-    <changeSet id="1624068969-1" author="app_core">
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-1" author="app_core">
         <createTable tableName="employe">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -24,6 +24,12 @@
                 <constraints nullable="true" />
             </column>
             <column name="date_naissance" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="sexe_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="situation_familiale_id" type="bigint">
                 <constraints nullable="true" />
             </column>
             <column name="date_entree" type="date">
@@ -53,7 +59,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1624068969-data" author="app_core">
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-data" author="app_core">
         <loadData
             file="liquibase/data/employe.csv"
             separator=";"
@@ -64,13 +70,20 @@
             <column name="nom" type="nvarchar(250)" />
             <column name="prenom" type="nvarchar(250)" />
             <column name="date_naissance" type="date" />
+            <column name="debut_date_naissance" type="date" />
+            <column name="fin_date_naissance" type="date" />
+            <column name="sexe_id" type="numeric" />
+            <column name="situation_familiale_id" type="numeric" />
             <column name="date_entree" type="date" />
+            <column name="debut_date_entree" type="date" />
+            <column name="fin_date_entree" type="date" />
             <column name="email" type="nvarchar(250)" />
             <column name="telephone" type="nvarchar(250)" />
             <column name="ville" type="nvarchar(250)" />
             <column name="adresse" type="nvarchar(250)" />
             <column name="fonction" type="nvarchar(250)" />
             <column name="description" type="text" />
+            <column name="departement_id" type="numeric" />
         </loadData>
     </changeSet>
 </databaseChangeLog>

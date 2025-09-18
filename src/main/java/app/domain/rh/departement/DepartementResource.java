@@ -2,52 +2,67 @@ package app.domain.rh.departement;
 
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/departement")
-@Transactional
 public class DepartementResource {
 
-    private final DepartementRepository departementRepository;
+    private final DepartementService departementService;
 
-    public DepartementResource(DepartementRepository departementRepository) {
-        this.departementRepository = departementRepository;
+    public DepartementResource(DepartementService departementService) {
+        this.departementService = departementService;
     }
 
-    @PostMapping
-    public ResponseEntity<DepartementDto> creer(@Valid @RequestBody Departement departement) throws URISyntaxException {
-        Departement result = departementRepository.save(departement);
-        return ResponseEntity.ok().body(DepartementDto.asEntity(result));
+    @PostMapping("/api/departement")
+    public ResponseEntity<DepartementDto> creer(@Valid @RequestBody DepartementDto departementDto) throws URISyntaxException {
+        try {
+            DepartementDto result = departementService.creer(departementDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
-    @PutMapping
-    public ResponseEntity<Void> enregistrer(@Valid @RequestBody Departement departement) throws URISyntaxException {
-        departementRepository.save(departement);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/lister")
+    @GetMapping("/api/departement")
     public List<DepartementDto> lister() {
-        return departementRepository.findAllByOrderByNom().stream().map(DepartementDto::asEntity).collect(Collectors.toList());
+        return departementService.lister();
     }
 
-    @GetMapping("/{id}")
+    @PutMapping("/api/departement/{id}")
+    public ResponseEntity<DepartementDto> maj(@PathVariable Long id, @Valid @RequestBody DepartementDto departementDto) throws URISyntaxException {
+        try {
+            if (departementDto.id() != null && !departementDto.id().equals(id)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
+            }
+            DepartementDto result = departementService.maj(id, departementDto);
+            return ResponseEntity.ok().body(result);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/api/departement/{id}")
     public ResponseEntity<DepartementDto> recupererParId(@PathVariable Long id) {
-        Optional<Departement> departement = departementRepository.findById(id);
-        return departement.map(response -> ResponseEntity.ok().body(DepartementDto.asEntity(response))).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return departementService.recupererParId(id).map(dto -> ResponseEntity.ok().body(dto)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Departement not found"));
+    }
+
+    @DeleteMapping("/api/departement/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        try {
+            departementService.supprimer(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

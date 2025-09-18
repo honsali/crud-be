@@ -12,7 +12,7 @@ public class ReferenceDataService {
 
     private static final HashMap<String, String> fieldMap = new HashMap<>();
     static {
-        fieldMap.put("Entreprise", "raisonSociale");
+        fieldMap.put("Departement", "nom");
     }
     @PersistenceContext
     private EntityManager entityManager;

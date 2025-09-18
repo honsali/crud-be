@@ -6,28 +6,32 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="106855365-0" author="app_core">
-        <createSequence sequenceName="seq_poste" startValue="100" incrementBy="10" />
+    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-0" author="app_core">
+        <createSequence sequenceName="seq_type_conge" startValue="100" incrementBy="10" />
     </changeSet>
-    <changeSet id="106855365-1" author="app_core">
-        <createTable tableName="poste">
+    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-1" author="app_core">
+        <createTable tableName="type_conge">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="libelle" type="nvarchar(250)">
                 <constraints nullable="false" />
             </column>
+            <column name="code" type="nvarchar(250)">
+                <constraints nullable="false" />
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="106855365-data" author="app_core">
+    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-data" author="app_core">
         <loadData
-            file="liquibase/data/poste.csv"
+            file="liquibase/data/typeConge.csv"
             separator=";"
-            tableName="poste"
+            tableName="type_conge"
             usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="libelle" type="nvarchar(250)" />
+            <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
 </databaseChangeLog>
