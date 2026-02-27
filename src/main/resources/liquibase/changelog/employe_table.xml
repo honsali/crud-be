@@ -70,13 +70,9 @@
             <column name="nom" type="nvarchar(250)" />
             <column name="prenom" type="nvarchar(250)" />
             <column name="date_naissance" type="date" />
-            <column name="debut_date_naissance" type="date" />
-            <column name="fin_date_naissance" type="date" />
             <column name="sexe_id" type="numeric" />
             <column name="situation_familiale_id" type="numeric" />
             <column name="date_entree" type="date" />
-            <column name="debut_date_entree" type="date" />
-            <column name="fin_date_entree" type="date" />
             <column name="email" type="nvarchar(250)" />
             <column name="telephone" type="nvarchar(250)" />
             <column name="ville" type="nvarchar(250)" />
