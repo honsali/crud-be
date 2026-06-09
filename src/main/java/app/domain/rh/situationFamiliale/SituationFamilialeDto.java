@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull;
 public record SituationFamilialeDto(//
         Long id, //
         Long idSituationFamiliale, //
-        @NotNull
-        String libelle, //
-        @NotNull
-        String code //
+        @NotNull String libelle, //
+        @NotNull String code //
 ) {
 
     public static SituationFamilialeDto toDtoAsRef(SituationFamiliale entity) {

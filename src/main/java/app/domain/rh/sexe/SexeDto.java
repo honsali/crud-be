@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull;
 public record SexeDto(//
         Long id, //
         Long idSexe, //
-        @NotNull
-        String libelle, //
-        @NotNull
-        String code //
+        @NotNull String libelle, //
+        @NotNull String code //
 ) {
 
     public static SexeDto toDtoAsRef(Sexe entity) {

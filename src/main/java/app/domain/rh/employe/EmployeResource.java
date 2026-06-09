@@ -1,7 +1,6 @@
 package app.domain.rh.employe;
 
 import java.net.URISyntaxException;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -36,7 +35,7 @@ public class EmployeResource {
     }
 
     @PostMapping("/api/employe/filtrer")
-    public Page<EmployeDto> filtrer(@RequestBody EmployeFiltre filtre, @ParameterObject Pageable pageable) {
+    public Page<EmployeDto> filtrer(@RequestBody EmployeFiltre filtre, Pageable pageable) {
         return employeService.filtrer(filtre, pageable);
     }
 

@@ -1,0 +1,2 @@
+id;username;password_hash;roles;activated
+1;admin;$2a$12$BJPIN0c0yhI/Eb2Su4mkp.nJzpmTyBYh/cqCsDXa3u49B8LGf6GIG;ROLE_USER,ROLE_ADMIN;true

@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull;
 public record TypeCongeDto(//
         Long id, //
         Long idTypeConge, //
-        @NotNull
-        String libelle, //
-        @NotNull
-        String code //
+        @NotNull String libelle, //
+        @NotNull String code //
 ) {
 
     public static TypeCongeDto toDtoAsRef(TypeConge entity) {

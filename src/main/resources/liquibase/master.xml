@@ -6,24 +6,24 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <property name="now" value="current_timestamp" dbms="postgresql"/>
-    <property name="floatType" value="float4" dbms="postgresql"/>
-    <property name="clobType" value="longvarchar" dbms="postgresql"/>
-    <property name="blobType" value="bytea" dbms="postgresql"/>
-    <property name="uuidType" value="uuid" dbms="postgresql"/>
-    <property name="datetimeType" value="datetime" dbms="postgresql"/>
+    <property name="now" value="current_timestamp" dbms="postgresql" />
+    <property name="floatType" value="float4" dbms="postgresql" />
+    <property name="clobType" value="longvarchar" dbms="postgresql" />
+    <property name="blobType" value="bytea" dbms="postgresql" />
+    <property name="uuidType" value="uuid" dbms="postgresql" />
 
-    <include file="liquibase/changelog/_initial_schema.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/conge_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/sexe_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/departement_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/employe_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/typeConge_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/situationFamiliale_table.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/conge_constraints.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/sexe_constraints.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/departement_constraints.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/employe_constraints.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/typeConge_constraints.xml" relativeToChangelogFile="false"/>
-  <include file="liquibase/changelog/situationFamiliale_constraints.xml" relativeToChangelogFile="false"/>
+    <include file="liquibase/changelog/security_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/sexe_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/situationFamiliale_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/typeConge_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/departement_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/employe_table.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/conge_table.xml" relativeToChangelogFile="false" />
+
+    <include file="liquibase/changelog/sexe_constraints.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/situationFamiliale_constraints.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/typeConge_constraints.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/departement_constraints.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/employe_constraints.xml" relativeToChangelogFile="false" />
+    <include file="liquibase/changelog/conge_constraints.xml" relativeToChangelogFile="false" />
 </databaseChangeLog>

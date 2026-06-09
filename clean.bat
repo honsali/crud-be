@@ -1,12 +1,11 @@
 @echo off
 setlocal
 
-rem Définir le chemin vers la JDK 17
-set "JAVA_HOME=C:\Logiciels\jdk21"
+rem Use JDK 25 for the Spring Boot 4 showcase
+set "JAVA_HOME=C:\Logiciels\jdk-25.0.3+9"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
-rem Lancer Maven avec les bons arguments
-mvn clean install  -DskipTests  -Dmaven.test.skip=true
+call mvnw.cmd clean package
 
 endlocal
 pause

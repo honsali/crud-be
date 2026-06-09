@@ -2,8 +2,6 @@ package app.domain.rh.employe;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import app.domain.rh.departement.Departement;
 import app.domain.rh.sexe.Sexe;
 import app.domain.rh.situationFamiliale.SituationFamiliale;
@@ -19,7 +17,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "employe")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Employe implements Serializable {
 
     private static final long serialVersionUID = 1311388895L;

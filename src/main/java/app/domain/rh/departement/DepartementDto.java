@@ -6,8 +6,7 @@ public record DepartementDto(//
         Long id, //
         Long idDepartement, //
         String libelle, //
-        @NotNull
-        String nom, //
+        @NotNull String nom, //
         String description //
 ) {
 

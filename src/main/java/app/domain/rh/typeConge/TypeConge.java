@@ -1,8 +1,6 @@
 package app.domain.rh.typeConge;
 
 import java.io.Serializable;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "type_conge")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class TypeConge implements Serializable {
 
     private static final long serialVersionUID = 325140210L;

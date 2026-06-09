@@ -47,6 +47,7 @@
             <column name="date_debut_conge" type="date" />
             <column name="date_fin_conge" type="date" />
             <column name="commentaire" type="text" />
+            <column name="employe_id" type="numeric" />
         </loadData>
     </changeSet>
 </databaseChangeLog>

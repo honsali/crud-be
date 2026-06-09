@@ -4,6 +4,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,5 +56,15 @@ public class CongeResource {
     @GetMapping("/api/conge/{id}")
     public ResponseEntity<CongeDto> recupererParId(@PathVariable Long id) {
         return congeService.recupererParId(id).map(dto -> ResponseEntity.ok().body(dto)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conge not found"));
+    }
+
+    @DeleteMapping("/api/conge/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        try {
+            congeService.supprimer(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

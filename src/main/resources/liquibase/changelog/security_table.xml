@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="security-app-user-sequence" author="app_core">
+        <createSequence sequenceName="seq_app_user" startValue="100" incrementBy="1" />
+    </changeSet>
+
+    <changeSet id="security-app-user-table" author="app_core">
+        <createTable tableName="app_user">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_user_username" />
+            </column>
+            <column name="password_hash" type="varchar(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="roles" type="varchar(250)">
+                <constraints nullable="false" />
+            </column>
+            <column name="activated" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="security-app-user-data" author="app_core">
+        <loadData file="liquibase/data/app_user.csv" separator=";" tableName="app_user" usePreparedStatements="true">
+            <column name="id" type="numeric" />
+            <column name="username" type="string" />
+            <column name="password_hash" type="string" />
+            <column name="roles" type="string" />
+            <column name="activated" type="boolean" />
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

@@ -2,8 +2,6 @@ package app.domain.rh.conge;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import app.domain.rh.employe.Employe;
 import app.domain.rh.typeConge.TypeConge;
 import jakarta.persistence.Column;
@@ -18,7 +16,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "conge")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Conge implements Serializable {
 
     private static final long serialVersionUID = 334770216L;

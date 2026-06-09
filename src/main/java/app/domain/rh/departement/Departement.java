@@ -1,8 +1,6 @@
 package app.domain.rh.departement;
 
 import java.io.Serializable;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "departement")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Departement implements Serializable {
 
     private static final long serialVersionUID = 88666089L;

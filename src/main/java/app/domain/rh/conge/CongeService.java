@@ -52,4 +52,11 @@ public class CongeService {
     public Optional<CongeDto> recupererParId(Long id) {
         return congeRepository.findById(id).map(CongeDto::toDto);
     }
+
+    public void supprimer(Long id) {
+        if (!congeRepository.existsById(id)) {
+            throw new IllegalArgumentException("Conge not found");
+        }
+        congeRepository.deleteById(id);
+    }
 }
