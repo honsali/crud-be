@@ -5,11 +5,20 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 ## Current baseline
 
 - Minimal backend-only Spring Boot CRUD API for HR (`ressources humaines`).
+- Personal/solo-developer application: optimize for the owner, not for enterprise/team process.
 - Java 25 + Spring Boot 4.0.6.
+- Maven artifact/application name stays generic/anonymized: artifact `core`, application name `app_core`, main class `CoreApplication`.
 - CORS and JWT authentication are included for the frontend showcase.
 - No tests are currently present and no tests should be added unless explicitly requested.
 - Auditing and optional JHipster-style infrastructure have been removed.
-- Verification used: `./mvnw -DskipTests package` with JDK 25.
+- Verification used: `./mvnw -DskipTests clean package` with JDK 25.
+
+## Solo-developer preference
+
+- This is a one-developer app made for the owner only.
+- Prefer simple, direct, maintainable solutions over enterprise/team-oriented patterns.
+- Do not add abstractions, process, compatibility layers, or tooling just to satisfy future teams, DBAs, onboarding, or organizational conventions.
+- Keep the workflow lightweight. Destructive resets or migration simplifications can be acceptable during development when the user confirms data can be discarded.
 
 ## Essential commands
 
@@ -25,7 +34,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 Windows scripts:
 
 - `run.bat` sets `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9` and runs Spring Boot.
-- `clean.bat` sets the same `JAVA_HOME` and runs `mvn clean package`.
+- `clean.bat` sets the same `JAVA_HOME` and runs `mvn -DskipTests clean package`.
 - Maven Wrapper files are present (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`).
 
 ## Environment/configuration
@@ -38,6 +47,8 @@ Windows scripts:
 - Default showcase login is seeded in DB table `app_user`: `admin` / `admin`.
 - Server port: `8080`.
 - Liquibase changelog entry point: `src/main/resources/liquibase/master.xml`.
+- Liquibase can be disabled with `SPRING_LIQUIBASE_ENABLED=false`.
+- `SPRING_LIQUIBASE_DROP_FIRST=true` is a destructive local reset-on-start option; never enable it casually.
 - `init.sql` is destructive (`drop schema public cascade; create schema public;`). Do not run it casually.
 
 ## Minimal stack
@@ -52,7 +63,7 @@ Kept:
 - `spring-boot-starter-oauth2-resource-server`
 - PostgreSQL runtime driver
 
-Removed:
+Removed/avoided:
 
 - auditing (`AbstractAuditingEntity`, auditing annotations/config)
 - old JHipster database-backed user/authority modules
@@ -64,6 +75,7 @@ Removed:
 - custom validation framework
 - broad custom config/Jackson infrastructure
 - JHipster-specific user schema seed data
+- placeholder Maven `settings.xml`
 
 ## Architecture map
 
@@ -85,6 +97,7 @@ app
 ## Security/CORS notes
 
 - `POST /api/authenticate` is public and returns `{ "id_token": "..." }`.
+- `GET /api/user` returns the current authenticated user, including `username`, `role`, `roles`, and `authorities` for the frontend.
 - All other `/api/**` endpoints require `Authorization: Bearer <jwt>`.
 - Authentication uses the `app_user` database table seeded by Liquibase.
 - Default user is `admin` / `admin`; password hashes are BCrypt.
@@ -95,32 +108,32 @@ app
 ## CRUD/domain conventions
 
 - REST controller classes are named `*Resource` and commonly use French method names: `creer`, `maj`, `recupererParId`, `supprimer`, `lister`, `filtrer`.
-- Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400`/`404` with `ResponseStatusException`.
-- Repositories extend `JpaRepository`; use `JpaSpecificationExecutor` when filter endpoints are needed.
-- DTOs are records with static mapping helpers:
+- Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400` and `NoSuchElementException`/missing optionals to `404` with `ResponseStatusException`.
+- Repositories extend `JpaRepository`; use `JpaSpecificationExecutor` only when filter endpoints need it.
+- DTOs are Java records with static mapping helpers:
   - `toDto(entity)` for full API output.
   - `toDtoAsRef(entity)` for nested lazy references.
-  - `toEntity(dto)` and `toEntity(dto, id)` for create/update.
+  - `toEntity(dto)` only where simple creation needs it.
   - `toEntityAsRef(dto)` for associations by id.
+  - `copyToEntity(dto, entity)` when creating/updating a managed entity.
+- Keep `getId<Entity>()` entity getters and matching `id<Entity>` DTO fields because the frontend depends on them.
+- Avoid other old generated/JHipster-style helpers such as fluent `id(...)` and `getDisplayString()` unless explicitly requested.
 - JPA relationships are lazy `@ManyToOne` where applicable.
-- Entities normally define `getDisplayString()` and an `id<Entity>()` getter used by DTOs.
 
 ## Liquibase conventions
 
 - Never rely on Hibernate DDL generation; `spring.jpa.hibernate.ddl-auto=none`.
-- Add one or more XML changelog files under `src/main/resources/liquibase/changelog/`.
-- Include new changelog files from `src/main/resources/liquibase/master.xml` in dependency order:
-  1. reference/parent tables
-  2. child tables
-  3. constraints/foreign keys
-  4. seed data as appropriate
+- Keep Liquibase changelog files separated under `src/main/resources/liquibase/changelog/` and include them from `src/main/resources/liquibase/master.xml`.
+- Keep `master.xml` as the entry point only: table changelogs first, then constraints, then seed data where applicable.
 - Store seed data under `src/main/resources/liquibase/data/*.csv` and reference it with `loadData`.
-- Existing domain sequences are named `seq_<table_name>` and usually start at `100`.
+- Existing sequences are named `seq_<table_name>`, start at `100`, and use increment/allocation size `1` for predictable solo-app IDs.
 
 ## Current REST endpoint inventory
 
 - Auth:
   - `POST /api/authenticate`
+- User:
+  - `GET /api/user`
 - Reference data:
   - `GET /api/reference/{entity}`
   - `GET /api/reference/{entity}/{field}/{value}`
@@ -146,6 +159,5 @@ app
 
 ## Watch points for future work
 
-- Existing update services map DTOs to new detached entities. Loading and mutating managed entities would be safer if partial updates are added.
-- Liquibase was simplified for a fresh showcase database. Existing databases may need manual cleanup or a reset with `init.sql`.
 - Keep user changes safe: run `git status --short` before edits and do not overwrite unrelated modified files.
+- If stable real data becomes important, stop rewriting old Liquibase changeSets and add append-only migrations instead.

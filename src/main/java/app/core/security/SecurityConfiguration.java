@@ -1,6 +1,7 @@
 package app.core.security;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import javax.crypto.SecretKey;
@@ -13,12 +14,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -34,7 +33,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 @Configuration
-@EnableWebSecurity
 class SecurityConfiguration {
 
     static final String AUTHORITIES_CLAIM = "auth";
@@ -106,7 +104,7 @@ class SecurityConfiguration {
     }
 
     private static SecretKey jwtSecretKey(String jwtBase64Secret) {
-        byte[] secret = java.util.Base64.getDecoder().decode(jwtBase64Secret);
+        byte[] secret = Base64.getDecoder().decode(jwtBase64Secret);
         return new SecretKeySpec(secret, "HmacSHA512");
     }
 

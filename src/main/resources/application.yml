@@ -14,10 +14,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
-    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
       ddl-auto: none
   liquibase:
+    enabled: ${SPRING_LIQUIBASE_ENABLED:true}
+    drop-first: ${SPRING_LIQUIBASE_DROP_FIRST:false}
     change-log: classpath:liquibase/master.xml
 
 application:

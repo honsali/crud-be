@@ -1,6 +1,6 @@
 package app.core.security;
 
-import java.io.Serializable;
+import java.util.Locale;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,13 +12,11 @@ import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "app_user")
-public class AppUser implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_app_user")
-    @SequenceGenerator(name = "seq_app_user", allocationSize = 1)
+    @SequenceGenerator(name = "seq_app_user", sequenceName = "seq_app_user", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -50,7 +48,7 @@ public class AppUser implements Serializable {
     }
 
     public void setUsername(String username) {
-        this.username = username == null ? null : username.toLowerCase();
+        this.username = username == null ? null : username.toLowerCase(Locale.ROOT);
     }
 
     public String getPasswordHash() {

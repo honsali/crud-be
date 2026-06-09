@@ -2,6 +2,8 @@
 
 Minimal Spring Boot REST API for a small HR (`ressources humaines`) CRUD showcase.
 
+Personal/solo-developer project: favor simple, direct, maintainable choices over enterprise or team-oriented process.
+
 ## Stack
 
 - Java 25 (`C:\Logiciels\jdk-25.0.3+9` locally)
@@ -15,7 +17,7 @@ Minimal Spring Boot REST API for a small HR (`ressources humaines`) CRUD showcas
 - PostgreSQL
 - Maven Wrapper
 
-No auditing, cache, actuator, OpenAPI, devtools, or notification module is kept. Authentication uses a minimal `app_user` table, not the old JHipster user/authority schema.
+No auditing, cache, actuator, OpenAPI, devtools, notification module, or old JHipster user/authority schema is kept.
 
 ## Project structure
 
@@ -53,7 +55,9 @@ Useful environment variables:
 - `SPRING_DATASOURCE_URL`
 - `SPRING_DATASOURCE_USERNAME`
 - `SPRING_DATASOURCE_PASSWORD`
-- `SPRING_JPA_SHOW_SQL`
+- `SPRING_JPA_SHOW_SQL` default `false`
+- `SPRING_LIQUIBASE_ENABLED` default `true`
+- `SPRING_LIQUIBASE_DROP_FIRST` default `false`; set to `true` only for a destructive local reset on startup
 - `APP_CORS_ALLOWED_ORIGINS` comma-separated, default `http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000`
 - `APP_SECURITY_JWT_BASE64_SECRET`
 - `APP_SECURITY_TOKEN_VALIDITY_SECONDS`
@@ -68,7 +72,7 @@ Windows helper scripts use `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9`:
 
 ```bat
 run.bat      :: spring-boot:run
-clean.bat    :: mvn clean package
+clean.bat    :: mvn -DskipTests clean package
 ```
 
 Portable Maven Wrapper commands:
@@ -107,7 +111,20 @@ All `/api/**` endpoints except `/api/authenticate` require:
 Authorization: Bearer <jwt>
 ```
 
+Current user info for the frontend:
+
+```http
+GET /api/user
+Authorization: Bearer <jwt>
+```
+
+Returns fields including `username`, `role`, `roles`, and `authorities`.
+
 ## API overview
+
+### User
+
+- `GET /api/user`
 
 ### Departments
 
@@ -144,7 +161,9 @@ Allowed reference entities include: `departement`, `employe`, `sexe`, `situation
 ## Development notes
 
 - Domain controllers are named `*Resource`; services are named `*Service`; repositories extend Spring Data JPA.
-- DTOs are Java records and usually provide `toDto`, `toDtoAsRef`, `toEntity`, and `toEntityAsRef` methods.
+- DTOs are Java records and provide small mapping helpers such as `toDto`, `toDtoAsRef`, `toEntity`, `toEntityAsRef`, and `copyToEntity` where useful.
+- API DTOs keep both `id` and compatibility fields like `idDepartement` / `idEmploye` because the frontend uses them.
 - Relationships use lazy `@ManyToOne` associations and reference DTOs to avoid deep object graphs.
-- Schema changes should be made only through Liquibase XML files and included from `liquibase/master.xml`.
+- Schema is managed by separated Liquibase files under `src/main/resources/liquibase/changelog/`, included from `src/main/resources/liquibase/master.xml`.
+- Keep development workflow lightweight; avoid abstractions/tooling that only serve future teams or organizational conventions.
 - No tests are included by request.

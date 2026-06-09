@@ -1,6 +1,5 @@
 package app.domain.rh.situationFamiliale;
 
-import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,13 +11,11 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "situation_familiale")
-public class SituationFamiliale implements Serializable {
-
-    private static final long serialVersionUID = 764703712L;
+public class SituationFamiliale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_situation_familiale")
-    @SequenceGenerator(name = "seq_situation_familiale", allocationSize = 1)
+    @SequenceGenerator(name = "seq_situation_familiale", sequenceName = "seq_situation_familiale", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -31,24 +28,19 @@ public class SituationFamiliale implements Serializable {
     private String code;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public SituationFamiliale id(Long id) {
-        this.setId(id);
-        return this;
+    public Long getIdSituationFamiliale() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getIdSituationFamiliale() {
-        return this.id;
-    }
-
     public String getLibelle() {
-        return this.libelle;
+        return libelle;
     }
 
     public void setLibelle(String libelle) {
@@ -56,7 +48,7 @@ public class SituationFamiliale implements Serializable {
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -68,15 +60,14 @@ public class SituationFamiliale implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof SituationFamiliale)) {
+        if (!(o instanceof SituationFamiliale other)) {
             return false;
         }
-        return getId() != null && getId().equals(((SituationFamiliale) o).getId());
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

@@ -1,6 +1,5 @@
 package app.domain.rh.employe;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import app.domain.rh.departement.Departement;
 import app.domain.rh.sexe.Sexe;
@@ -17,13 +16,11 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "employe")
-public class Employe implements Serializable {
-
-    private static final long serialVersionUID = 1311388895L;
+public class Employe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_employe")
-    @SequenceGenerator(name = "seq_employe", allocationSize = 1)
+    @SequenceGenerator(name = "seq_employe", sequenceName = "seq_employe", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -70,28 +67,19 @@ public class Employe implements Serializable {
     private Departement departement;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public Employe id(Long id) {
-        this.setId(id);
-        return this;
+    public Long getIdEmploye() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getDisplayString() {
-        return matricule;
-    }
-
-    public Long getIdEmploye() {
-        return this.id;
-    }
-
     public String getMatricule() {
-        return this.matricule;
+        return matricule;
     }
 
     public void setMatricule(String matricule) {
@@ -99,7 +87,7 @@ public class Employe implements Serializable {
     }
 
     public String getNom() {
-        return this.nom;
+        return nom;
     }
 
     public void setNom(String nom) {
@@ -107,7 +95,7 @@ public class Employe implements Serializable {
     }
 
     public String getPrenom() {
-        return this.prenom;
+        return prenom;
     }
 
     public void setPrenom(String prenom) {
@@ -115,7 +103,7 @@ public class Employe implements Serializable {
     }
 
     public LocalDate getDateNaissance() {
-        return this.dateNaissance;
+        return dateNaissance;
     }
 
     public void setDateNaissance(LocalDate dateNaissance) {
@@ -123,7 +111,7 @@ public class Employe implements Serializable {
     }
 
     public Sexe getSexe() {
-        return this.sexe;
+        return sexe;
     }
 
     public void setSexe(Sexe sexe) {
@@ -131,7 +119,7 @@ public class Employe implements Serializable {
     }
 
     public SituationFamiliale getSituationFamiliale() {
-        return this.situationFamiliale;
+        return situationFamiliale;
     }
 
     public void setSituationFamiliale(SituationFamiliale situationFamiliale) {
@@ -139,7 +127,7 @@ public class Employe implements Serializable {
     }
 
     public LocalDate getDateEntree() {
-        return this.dateEntree;
+        return dateEntree;
     }
 
     public void setDateEntree(LocalDate dateEntree) {
@@ -147,7 +135,7 @@ public class Employe implements Serializable {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -155,7 +143,7 @@ public class Employe implements Serializable {
     }
 
     public String getTelephone() {
-        return this.telephone;
+        return telephone;
     }
 
     public void setTelephone(String telephone) {
@@ -163,7 +151,7 @@ public class Employe implements Serializable {
     }
 
     public String getVille() {
-        return this.ville;
+        return ville;
     }
 
     public void setVille(String ville) {
@@ -171,7 +159,7 @@ public class Employe implements Serializable {
     }
 
     public String getAdresse() {
-        return this.adresse;
+        return adresse;
     }
 
     public void setAdresse(String adresse) {
@@ -179,7 +167,7 @@ public class Employe implements Serializable {
     }
 
     public String getFonction() {
-        return this.fonction;
+        return fonction;
     }
 
     public void setFonction(String fonction) {
@@ -187,7 +175,7 @@ public class Employe implements Serializable {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
@@ -195,7 +183,7 @@ public class Employe implements Serializable {
     }
 
     public Departement getDepartement() {
-        return this.departement;
+        return departement;
     }
 
     public void setDepartement(Departement departement) {
@@ -207,15 +195,14 @@ public class Employe implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Employe)) {
+        if (!(o instanceof Employe other)) {
             return false;
         }
-        return getId() != null && getId().equals(((Employe) o).getId());
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

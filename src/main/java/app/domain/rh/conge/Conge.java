@@ -1,6 +1,5 @@
 package app.domain.rh.conge;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import app.domain.rh.employe.Employe;
 import app.domain.rh.typeConge.TypeConge;
@@ -16,13 +15,11 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "conge")
-public class Conge implements Serializable {
-
-    private static final long serialVersionUID = 334770216L;
+public class Conge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_conge")
-    @SequenceGenerator(name = "seq_conge", allocationSize = 1)
+    @SequenceGenerator(name = "seq_conge", sequenceName = "seq_conge", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -45,28 +42,19 @@ public class Conge implements Serializable {
     private Employe employe;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public Conge id(Long id) {
-        this.setId(id);
-        return this;
+    public Long getIdConge() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getDisplayString() {
-        return code;
-    }
-
-    public Long getIdConge() {
-        return this.id;
-    }
-
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -74,7 +62,7 @@ public class Conge implements Serializable {
     }
 
     public TypeConge getTypeConge() {
-        return this.typeConge;
+        return typeConge;
     }
 
     public void setTypeConge(TypeConge typeConge) {
@@ -82,7 +70,7 @@ public class Conge implements Serializable {
     }
 
     public LocalDate getDateDebutConge() {
-        return this.dateDebutConge;
+        return dateDebutConge;
     }
 
     public void setDateDebutConge(LocalDate dateDebutConge) {
@@ -90,7 +78,7 @@ public class Conge implements Serializable {
     }
 
     public LocalDate getDateFinConge() {
-        return this.dateFinConge;
+        return dateFinConge;
     }
 
     public void setDateFinConge(LocalDate dateFinConge) {
@@ -98,7 +86,7 @@ public class Conge implements Serializable {
     }
 
     public String getCommentaire() {
-        return this.commentaire;
+        return commentaire;
     }
 
     public void setCommentaire(String commentaire) {
@@ -106,7 +94,7 @@ public class Conge implements Serializable {
     }
 
     public Employe getEmploye() {
-        return this.employe;
+        return employe;
     }
 
     public void setEmploye(Employe employe) {
@@ -118,15 +106,14 @@ public class Conge implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Conge)) {
+        if (!(o instanceof Conge other)) {
             return false;
         }
-        return getId() != null && getId().equals(((Conge) o).getId());
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

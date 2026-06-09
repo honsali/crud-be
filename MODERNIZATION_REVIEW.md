@@ -2,18 +2,15 @@
 
 Date: 2026-06-09
 
-## User constraints
+## Direction
 
-- Do not add tests.
-- Do not stay tied to JHipster.
-- Use the latest showcase stack directly.
-- Remove auditing and optional components.
-- Keep the app minimal, but include CORS and JWT authentication for the separate frontend showcase.
-- Local JDK 25 path: `C:\Logiciels\jdk-25.0.3+9`.
+- Solo-developer app: keep it simple and optimized for the owner only.
+- Stay on current Spring Boot 4 + Java 25 stack.
+- Remove former JHipster/generated style where it does not help the app.
+- Keep CORS + JWT because the separate frontend showcase needs them.
+- Do not add tests unless explicitly requested.
 
-## Final target stack
-
-Kept:
+## Current stack
 
 - Java 25.
 - Spring Boot 4.0.6.
@@ -23,14 +20,14 @@ Kept:
 - Minimal CORS configuration.
 - Spring Data JPA / Hibernate 7.
 - Bean Validation.
-- Liquibase 5 through `spring-boot-starter-liquibase`.
+- Liquibase through `spring-boot-starter-liquibase`.
 - PostgreSQL runtime driver.
 - Maven Wrapper.
 
-Removed:
+## Removed / avoided
 
 - JHipster-style auditing (`AbstractAuditingEntity`).
-- Database-backed user/authority modules and seed data.
+- Old database-backed user/authority modules and seed data.
 - Cache/Ehcache/JCache/Caffeine.
 - Actuator.
 - SpringDoc/OpenAPI.
@@ -39,7 +36,9 @@ Removed:
 - Custom validation/assertion framework.
 - Custom async Liquibase.
 - Broad custom Jackson/date config.
-- JHipster user/authority/notification Liquibase schema and seed data.
+- Placeholder Maven `settings.xml`.
+- Generated entity helpers like fluent `id(...)`, `getDisplayString()`, and `Serializable`.
+- Kept `getId<Entity>()` entity getters and matching `id<Entity>` DTO fields because the frontend depends on them.
 
 ## Resulting source shape
 
@@ -58,52 +57,32 @@ src/main/java/app
     └── typeConge
 ```
 
-Current compile/package footprint: 32 Java source files.
+## Latest cleanup pass
 
-## Main changes
+### Build/application identity
 
-### Build
+- Maven artifact/name intentionally stays generic/anonymized: `core` / `app_core`.
+- Spring application name intentionally stays `app_core`.
+- Main class intentionally stays `CoreApplication` for easy reuse between projects.
 
-- `pom.xml` contains the minimal runtime needs plus frontend security:
-  - `spring-boot-starter-webmvc`
-  - `spring-boot-starter-data-jpa`
-  - `spring-boot-starter-validation`
-  - `spring-boot-starter-liquibase`
-  - `spring-boot-starter-security`
-  - `spring-boot-starter-oauth2-resource-server`
-  - `postgresql` runtime driver
-- Java release remains `25`.
-- Spring Boot parent remains `4.0.6`.
-- Maven Wrapper is present.
+### Java/Spring style
 
-### Configuration
+- DTO/filter objects use Java records where useful.
+- Repositories only declare the Spring Data interfaces they actually need.
+- Removed redundant `@Repository` and `@EnableWebSecurity` annotations.
+- Removed unused checked exceptions from controllers.
+- Update services now load and mutate managed entities instead of saving new detached replacements.
+- Missing resources now consistently become `404`, while invalid input remains `400`.
+- `SPRING_JPA_SHOW_SQL` now defaults to `false` to keep local logs quieter.
 
-- Reduced to one configuration file: `src/main/resources/application.yml`.
-- Kept environment-variable overrides for database, CORS, JWT secret, and token TTL.
-- Kept Java virtual threads enabled.
+### Liquibase/database
 
-### Security/CORS
+- Liquibase files intentionally stay separated under `src/main/resources/liquibase/changelog/`.
+- `src/main/resources/liquibase/master.xml` remains the entry point that includes table and constraint changelogs.
+- Seed CSVs remain under `src/main/resources/liquibase/data/`.
+- JPA sequence allocation and Liquibase sequence increments are set directly to `1`.
 
-- Added `src/main/java/app/core/security/SecurityConfiguration.java`.
-- Added `src/main/java/app/core/security/AuthResource.java`.
-- `POST /api/authenticate` is public and returns `{ "id_token": "..." }`.
-- All other `/api/**` endpoints require `Authorization: Bearer <jwt>`.
-- Authentication is backed by the `app_user` database table.
-- Default showcase login is seeded by Liquibase as `admin` / `admin` with a BCrypt password hash.
-- CORS defaults support localhost frontend ports `3000`, `4200`, `5173`, and `9000`.
-
-### Database/Liquibase
-
-- Removed `_initial_schema.xml` and old JHipster user/authority/notification seed data.
-- `liquibase/master.xml` now includes only RH domain tables, seed data, and constraints.
-- Master changelog order was simplified: reference tables, child tables, then constraints.
-
-### Auditing
-
-- Removed `AbstractAuditingEntity` and all auditing infrastructure.
-- No domain entity uses auditing annotations.
-
-## Verification performed
+## Verification
 
 Using JDK 25:
 
@@ -111,13 +90,7 @@ Using JDK 25:
 export JAVA_HOME=/c/Logiciels/jdk-25.0.3+9
 export PATH="$JAVA_HOME/bin:$PATH"
 
-./mvnw -DskipTests package
+./mvnw -DskipTests clean package
 ```
 
-Build completed successfully.
-
-Notes:
-
-- No tests were added.
-- Maven/JDK 25 still emits native-access and `Unsafe` warnings from Maven internals; they do not break the build.
-- Existing databases with old user/authority/notification tables should be reset for this showcase version, or cleaned manually.
+`clean package` completed successfully.

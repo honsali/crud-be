@@ -1,6 +1,5 @@
 package app.domain.rh.sexe;
 
-import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,13 +11,11 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "sexe")
-public class Sexe implements Serializable {
-
-    private static final long serialVersionUID = 1119645047L;
+public class Sexe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_sexe")
-    @SequenceGenerator(name = "seq_sexe", allocationSize = 1)
+    @SequenceGenerator(name = "seq_sexe", sequenceName = "seq_sexe", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -31,24 +28,19 @@ public class Sexe implements Serializable {
     private String code;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public Sexe id(Long id) {
-        this.setId(id);
-        return this;
+    public Long getIdSexe() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getIdSexe() {
-        return this.id;
-    }
-
     public String getLibelle() {
-        return this.libelle;
+        return libelle;
     }
 
     public void setLibelle(String libelle) {
@@ -56,7 +48,7 @@ public class Sexe implements Serializable {
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -68,15 +60,14 @@ public class Sexe implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Sexe)) {
+        if (!(o instanceof Sexe other)) {
             return false;
         }
-        return getId() != null && getId().equals(((Sexe) o).getId());
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

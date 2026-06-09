@@ -7,7 +7,7 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-0" author="app_core">
-        <createSequence sequenceName="seq_conge" startValue="100" incrementBy="10" />
+        <createSequence sequenceName="seq_conge" startValue="100" incrementBy="1" />
     </changeSet>
     <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-1" author="app_core">
         <createTable tableName="conge">

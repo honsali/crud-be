@@ -1,6 +1,5 @@
 package app.domain.rh.typeConge;
 
-import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,13 +11,11 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "type_conge")
-public class TypeConge implements Serializable {
-
-    private static final long serialVersionUID = 325140210L;
+public class TypeConge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_type_conge")
-    @SequenceGenerator(name = "seq_type_conge", allocationSize = 1)
+    @SequenceGenerator(name = "seq_type_conge", sequenceName = "seq_type_conge", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -31,24 +28,19 @@ public class TypeConge implements Serializable {
     private String code;
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public TypeConge id(Long id) {
-        this.setId(id);
-        return this;
+    public Long getIdTypeConge() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getIdTypeConge() {
-        return this.id;
-    }
-
     public String getLibelle() {
-        return this.libelle;
+        return libelle;
     }
 
     public void setLibelle(String libelle) {
@@ -56,7 +48,7 @@ public class TypeConge implements Serializable {
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -68,15 +60,14 @@ public class TypeConge implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof TypeConge)) {
+        if (!(o instanceof TypeConge other)) {
             return false;
         }
-        return getId() != null && getId().equals(((TypeConge) o).getId());
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

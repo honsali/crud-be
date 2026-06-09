@@ -1,7 +1,7 @@
 package app.domain.rh.conge;
 
-import java.net.URISyntaxException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,11 +24,10 @@ public class CongeResource {
     }
 
     @PostMapping("/api/employe/{idEmploye}/conge")
-    public ResponseEntity<CongeDto> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeDto congeDto) throws URISyntaxException {
+    public ResponseEntity<CongeDto> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeDto congeDto) {
         try {
-            CongeDto result = congeService.creer(idEmploye, congeDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } catch (java.util.NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(congeService.creer(idEmploye, congeDto));
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -37,25 +36,31 @@ public class CongeResource {
 
     @GetMapping("/api/employe/{idEmploye}/conge")
     public List<CongeDto> listerParIdEmploye(@PathVariable Long idEmploye) {
-        return congeService.listerParIdEmploye(idEmploye);
+        try {
+            return congeService.listerParIdEmploye(idEmploye);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @PutMapping("/api/conge/{id}")
-    public ResponseEntity<CongeDto> maj(@PathVariable Long id, @Valid @RequestBody CongeDto congeDto) throws URISyntaxException {
+    public CongeDto maj(@PathVariable Long id, @Valid @RequestBody CongeDto congeDto) {
+        if (congeDto.id() != null && !congeDto.id().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
+        }
+
         try {
-            if (congeDto.id() != null && !congeDto.id().equals(id)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
-            }
-            CongeDto result = congeService.maj(id, congeDto);
-            return ResponseEntity.ok().body(result);
+            return congeService.maj(id, congeDto);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @GetMapping("/api/conge/{id}")
-    public ResponseEntity<CongeDto> recupererParId(@PathVariable Long id) {
-        return congeService.recupererParId(id).map(dto -> ResponseEntity.ok().body(dto)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conge not found"));
+    public CongeDto recupererParId(@PathVariable Long id) {
+        return congeService.recupererParId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conge not found"));
     }
 
     @DeleteMapping("/api/conge/{id}")
@@ -63,7 +68,7 @@ public class CongeResource {
         try {
             congeService.supprimer(id);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }

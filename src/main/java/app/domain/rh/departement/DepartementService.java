@@ -1,8 +1,8 @@
 package app.domain.rh.departement;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,16 +24,13 @@ public class DepartementService {
 
     @Transactional(readOnly = true)
     public List<DepartementDto> lister() {
-        return departementRepository.findAllByOrderByNom().stream().map(DepartementDto::toDto).collect(Collectors.toList());
+        return departementRepository.findAllByOrderByNom().stream().map(DepartementDto::toDto).toList();
     }
 
     public DepartementDto maj(Long id, DepartementDto dto) {
-        if (!departementRepository.existsById(id)) {
-            throw new IllegalArgumentException("Departement not found");
-        }
-        Departement departement = DepartementDto.toEntity(dto, id);
-        Departement saved = departementRepository.save(departement);
-        return DepartementDto.toDto(saved);
+        Departement departement = departementRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Departement not found"));
+        DepartementDto.copyToEntity(dto, departement);
+        return DepartementDto.toDto(departement);
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +40,7 @@ public class DepartementService {
 
     public void supprimer(Long id) {
         if (!departementRepository.existsById(id)) {
-            throw new IllegalArgumentException("Departement not found");
+            throw new NoSuchElementException("Departement not found");
         }
         departementRepository.deleteById(id);
     }
