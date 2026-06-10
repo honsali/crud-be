@@ -5,12 +5,10 @@ import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/reference")
 public class ReferenceDataController {
 
     private final ReferenceDataService referenceDataService;
@@ -19,7 +17,7 @@ public class ReferenceDataController {
         this.referenceDataService = referenceDataService;
     }
 
-    @GetMapping("/{entity}")
+    @GetMapping("/api/reference/{entity}")
     public List<ReferenceDataDto> lister(@PathVariable String entity) {
         try {
             return referenceDataService.getReferenceData(entity);
@@ -28,7 +26,7 @@ public class ReferenceDataController {
         }
     }
 
-    @GetMapping("/{entity}/{field}/{value}")
+    @GetMapping("/api/reference/{entity}/{field}/{value}")
     public List<ReferenceDataDto> filtrer(@PathVariable String entity, @PathVariable String field, @PathVariable Long value) {
         try {
             return referenceDataService.getReferenceData(entity, field, value);
@@ -37,7 +35,7 @@ public class ReferenceDataController {
         }
     }
 
-    @GetMapping("/{entity}/{id}")
+    @GetMapping("/api/reference/{entity}/{id}")
     public ReferenceDataDto recupererParId(@PathVariable String entity, @PathVariable Long id) {
         try {
             return referenceDataService.getReferenceData(entity, id);

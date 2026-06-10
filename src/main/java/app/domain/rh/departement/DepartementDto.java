@@ -9,11 +9,11 @@ public record DepartementDto(
         String description) {
 
     public static DepartementDto toDto(Departement entity) {
-        return entity == null ? null : new DepartementDto(entity.getId(), entity.getIdDepartement(), entity.getNom(), entity.getDescription());
+        return entity == null ? null : new DepartementDto(entity.getId(), entity.getId(), entity.getNom(), entity.getDescription());
     }
 
     public static DepartementDto toDtoAsRef(Departement entity) {
-        return entity == null ? null : new DepartementDto(entity.getId(), entity.getIdDepartement(), entity.getNom(), null);
+        return entity == null ? null : new DepartementDto(entity.getId(), entity.getId(), entity.getNom(), null);
     }
 
     public static Departement toEntity(DepartementDto dto) {

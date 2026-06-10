@@ -18,7 +18,7 @@ public record CongeDto(
         return entity == null ? null
                 : new CongeDto(
                         entity.getId(),
-                        entity.getIdConge(),
+                        entity.getId(),
                         entity.getCode(),
                         TypeCongeDto.toDtoAsRef(entity.getTypeConge()),
                         entity.getDateDebutConge(),
@@ -28,7 +28,17 @@ public record CongeDto(
     }
 
     public static CongeDto toDtoAsRef(Conge entity) {
-        return entity == null ? null : new CongeDto(entity.getId(), entity.getIdConge(), entity.getCode(), null, null, null, null, null);
+        return entity == null ? null : new CongeDto(entity.getId(), entity.getId(), entity.getCode(), null, null, null, null, null);
+    }
+
+    public static Conge toEntity(CongeDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Conge entity = new Conge();
+        copyToEntity(dto, entity);
+        return entity;
     }
 
     public static Conge toEntityAsRef(CongeDto dto) {

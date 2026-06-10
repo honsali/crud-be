@@ -28,11 +28,7 @@ public class SituationFamiliale {
     private String code;
 
     public Long getId() {
-        return id;
-    }
-
-    public Long getIdSituationFamiliale() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -40,7 +36,7 @@ public class SituationFamiliale {
     }
 
     public String getLibelle() {
-        return libelle;
+        return this.libelle;
     }
 
     public void setLibelle(String libelle) {
@@ -48,7 +44,7 @@ public class SituationFamiliale {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public void setCode(String code) {

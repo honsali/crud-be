@@ -9,7 +9,7 @@ public record SexeDto(
         String code) {
 
     public static SexeDto toDtoAsRef(Sexe entity) {
-        return entity == null ? null : new SexeDto(entity.getId(), entity.getIdSexe(), entity.getLibelle(), null);
+        return entity == null ? null : new SexeDto(entity.getId(), entity.getId(), entity.getLibelle(), null);
     }
 
     public static Sexe toEntityAsRef(SexeDto dto) {

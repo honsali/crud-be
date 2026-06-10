@@ -9,7 +9,7 @@ public record TypeCongeDto(
         String code) {
 
     public static TypeCongeDto toDtoAsRef(TypeConge entity) {
-        return entity == null ? null : new TypeCongeDto(entity.getId(), entity.getIdTypeConge(), entity.getLibelle(), null);
+        return entity == null ? null : new TypeCongeDto(entity.getId(), entity.getId(), entity.getLibelle(), null);
     }
 
     public static TypeConge toEntityAsRef(TypeCongeDto dto) {

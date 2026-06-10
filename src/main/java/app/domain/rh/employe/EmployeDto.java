@@ -27,7 +27,7 @@ public record EmployeDto(
         return entity == null ? null
                 : new EmployeDto(
                         entity.getId(),
-                        entity.getIdEmploye(),
+                        entity.getId(),
                         entity.getMatricule(),
                         entity.getNom(),
                         entity.getPrenom(),
@@ -48,7 +48,7 @@ public record EmployeDto(
         return entity == null ? null
                 : new EmployeDto(
                         entity.getId(),
-                        entity.getIdEmploye(),
+                        entity.getId(),
                         entity.getMatricule(),
                         null,
                         null,
@@ -63,6 +63,16 @@ public record EmployeDto(
                         null,
                         null,
                         null);
+    }
+
+    public static Employe toEntity(EmployeDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Employe entity = new Employe();
+        copyToEntity(dto, entity);
+        return entity;
     }
 
     public static Employe toEntityAsRef(EmployeDto dto) {

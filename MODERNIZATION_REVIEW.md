@@ -37,8 +37,8 @@ Date: 2026-06-09
 - Custom async Liquibase.
 - Broad custom Jackson/date config.
 - Placeholder Maven `settings.xml`.
-- Generated entity helpers like fluent `id(...)`, `getDisplayString()`, and `Serializable`.
-- Kept `getId<Entity>()` entity getters and matching `id<Entity>` DTO fields because the frontend depends on them.
+- Generated entity helpers like fluent `id(...)`, `getDisplayString()`, `getId<Entity>()`, and `Serializable`.
+- Kept matching `id<Entity>` DTO fields because the frontend depends on them; those fields are mapped from the normal entity `getId()`.
 
 ## Resulting source shape
 

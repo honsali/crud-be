@@ -67,11 +67,7 @@ public class Employe {
     private Departement departement;
 
     public Long getId() {
-        return id;
-    }
-
-    public Long getIdEmploye() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -79,7 +75,7 @@ public class Employe {
     }
 
     public String getMatricule() {
-        return matricule;
+        return this.matricule;
     }
 
     public void setMatricule(String matricule) {
@@ -87,7 +83,7 @@ public class Employe {
     }
 
     public String getNom() {
-        return nom;
+        return this.nom;
     }
 
     public void setNom(String nom) {
@@ -95,7 +91,7 @@ public class Employe {
     }
 
     public String getPrenom() {
-        return prenom;
+        return this.prenom;
     }
 
     public void setPrenom(String prenom) {
@@ -103,7 +99,7 @@ public class Employe {
     }
 
     public LocalDate getDateNaissance() {
-        return dateNaissance;
+        return this.dateNaissance;
     }
 
     public void setDateNaissance(LocalDate dateNaissance) {
@@ -111,7 +107,7 @@ public class Employe {
     }
 
     public Sexe getSexe() {
-        return sexe;
+        return this.sexe;
     }
 
     public void setSexe(Sexe sexe) {
@@ -119,7 +115,7 @@ public class Employe {
     }
 
     public SituationFamiliale getSituationFamiliale() {
-        return situationFamiliale;
+        return this.situationFamiliale;
     }
 
     public void setSituationFamiliale(SituationFamiliale situationFamiliale) {
@@ -127,7 +123,7 @@ public class Employe {
     }
 
     public LocalDate getDateEntree() {
-        return dateEntree;
+        return this.dateEntree;
     }
 
     public void setDateEntree(LocalDate dateEntree) {
@@ -135,7 +131,7 @@ public class Employe {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -143,7 +139,7 @@ public class Employe {
     }
 
     public String getTelephone() {
-        return telephone;
+        return this.telephone;
     }
 
     public void setTelephone(String telephone) {
@@ -151,7 +147,7 @@ public class Employe {
     }
 
     public String getVille() {
-        return ville;
+        return this.ville;
     }
 
     public void setVille(String ville) {
@@ -159,7 +155,7 @@ public class Employe {
     }
 
     public String getAdresse() {
-        return adresse;
+        return this.adresse;
     }
 
     public void setAdresse(String adresse) {
@@ -167,7 +163,7 @@ public class Employe {
     }
 
     public String getFonction() {
-        return fonction;
+        return this.fonction;
     }
 
     public void setFonction(String fonction) {
@@ -175,7 +171,7 @@ public class Employe {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -183,7 +179,7 @@ public class Employe {
     }
 
     public Departement getDepartement() {
-        return departement;
+        return this.departement;
     }
 
     public void setDepartement(Departement departement) {

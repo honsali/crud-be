@@ -19,6 +19,7 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 - Prefer simple, direct, maintainable solutions over enterprise/team-oriented patterns.
 - Do not add abstractions, process, compatibility layers, or tooling just to satisfy future teams, DBAs, onboarding, or organizational conventions.
 - Keep the workflow lightweight. Destructive resets or migration simplifications can be acceptable during development when the user confirms data can be discarded.
+- Use plain Maven versions without `-SNAPSHOT`; snapshot versioning is unnecessary for this solo project.
 
 ## Essential commands
 
@@ -108,15 +109,24 @@ app
 ## CRUD/domain conventions
 
 - REST controller classes are named `*Resource` and commonly use French method names: `creer`, `maj`, `recupererParId`, `supprimer`, `lister`, `filtrer`.
+- Prefer full endpoint paths directly on each `@GetMapping`/`@PostMapping`/`@PutMapping`/`@DeleteMapping`; avoid class-level `@RequestMapping` prefixes.
+- For an `XResource` endpoint filtering by a `Y` field, keep the path under `x/y`, e.g. `GET /api/conge/employe/{idEmploye}`.
+- In create/update endpoints, assign the service response to a local variable named `result` before returning it, to make debugging easier.
 - Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400` and `NoSuchElementException`/missing optionals to `404` with `ResponseStatusException`.
-- Repositories extend `JpaRepository`; use `JpaSpecificationExecutor` only when filter endpoints need it.
+- It is fine for every `creer` endpoint to catch `NoSuchElementException`, even when the current entity has no references yet, for consistency and future changes.
+- Repositories extend `JpaRepository`; do not add `@Repository` to Spring Data repository interfaces.
+- Use `JpaSpecificationExecutor` only when filter endpoints need it.
+- Normal CRUD services should use DTO mapping helpers for entity/DTO conversion; avoid direct `EntityManager` use there unless there is a real need.
 - DTOs are Java records with static mapping helpers:
   - `toDto(entity)` for full API output.
   - `toDtoAsRef(entity)` for nested lazy references.
   - `toEntity(dto)` only where simple creation needs it.
   - `toEntityAsRef(dto)` for associations by id.
   - `copyToEntity(dto, entity)` when creating/updating a managed entity.
-- Keep `getId<Entity>()` entity getters and matching `id<Entity>` DTO fields because the frontend depends on them.
+- Keep matching `id<Entity>` DTO fields because the frontend depends on them; map those fields from the normal entity `getId()`.
+- Do not add extra entity getters like `getId<Entity>()` just for DTO compatibility.
+- Entity getters use explicit `return this.field;` style.
+- Entities do not implement `Serializable` unless a real serialization need is introduced.
 - Avoid other old generated/JHipster-style helpers such as fluent `id(...)` and `getDisplayString()` unless explicitly requested.
 - JPA relationships are lazy `@ManyToOne` where applicable.
 
@@ -152,7 +162,7 @@ app
   - `DELETE /api/employe/{id}`
 - Conge:
   - `POST /api/employe/{idEmploye}/conge`
-  - `GET /api/employe/{idEmploye}/conge`
+  - `GET /api/conge/employe/{idEmploye}`
   - `GET /api/conge/{id}`
   - `PUT /api/conge/{id}`
   - `DELETE /api/conge/{id}`

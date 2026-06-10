@@ -11,13 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/employe")
 public class EmployeResource {
 
     private final EmployeService employeService;
@@ -26,10 +24,11 @@ public class EmployeResource {
         this.employeService = employeService;
     }
 
-    @PostMapping
+    @PostMapping("/api/employe")
     public ResponseEntity<EmployeDto> creer(@Valid @RequestBody EmployeDto employeDto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(employeService.creer(employeDto));
+            EmployeDto result = employeService.creer(employeDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -37,19 +36,20 @@ public class EmployeResource {
         }
     }
 
-    @PostMapping("/filtrer")
+    @PostMapping("/api/employe/filtrer")
     public Page<EmployeDto> filtrer(@RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
         return employeService.filtrer(filtre, pageable);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/api/employe/{id}")
     public EmployeDto maj(@PathVariable Long id, @Valid @RequestBody EmployeDto employeDto) {
         if (employeDto.id() != null && !employeDto.id().equals(id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
         }
 
         try {
-            return employeService.maj(id, employeDto);
+            EmployeDto result = employeService.maj(id, employeDto);
+            return result;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -57,12 +57,12 @@ public class EmployeResource {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/employe/{id}")
     public EmployeDto recupererParId(@PathVariable Long id) {
         return employeService.recupererParId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employe not found"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/employe/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         try {
             employeService.supprimer(id);

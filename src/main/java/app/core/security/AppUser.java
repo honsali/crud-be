@@ -36,7 +36,7 @@ public class AppUser {
     private boolean activated = true;
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -44,7 +44,7 @@ public class AppUser {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -52,7 +52,7 @@ public class AppUser {
     }
 
     public String getPasswordHash() {
-        return passwordHash;
+        return this.passwordHash;
     }
 
     public void setPasswordHash(String passwordHash) {
@@ -60,7 +60,7 @@ public class AppUser {
     }
 
     public String getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public void setRoles(String roles) {
@@ -68,7 +68,7 @@ public class AppUser {
     }
 
     public boolean isActivated() {
-        return activated;
+        return this.activated;
     }
 
     public void setActivated(boolean activated) {

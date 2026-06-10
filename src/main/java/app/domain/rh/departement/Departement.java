@@ -27,11 +27,7 @@ public class Departement {
     private String description;
 
     public Long getId() {
-        return id;
-    }
-
-    public Long getIdDepartement() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -39,7 +35,7 @@ public class Departement {
     }
 
     public String getNom() {
-        return nom;
+        return this.nom;
     }
 
     public void setNom(String nom) {
@@ -47,7 +43,7 @@ public class Departement {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {

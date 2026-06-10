@@ -145,7 +145,7 @@ Returns fields including `username`, `role`, `roles`, and `authorities`.
 ### Employee leave (`conge`)
 
 - `POST /api/employe/{idEmploye}/conge`
-- `GET /api/employe/{idEmploye}/conge`
+- `GET /api/conge/employe/{idEmploye}`
 - `GET /api/conge/{id}`
 - `PUT /api/conge/{id}`
 - `DELETE /api/conge/{id}`
@@ -160,10 +160,17 @@ Allowed reference entities include: `departement`, `employe`, `sexe`, `situation
 
 ## Development notes
 
-- Domain controllers are named `*Resource`; services are named `*Service`; repositories extend Spring Data JPA.
+- Domain controllers are named `*Resource`; services are named `*Service`; repositories extend Spring Data JPA without `@Repository` on repository interfaces.
+- Controller methods declare the full endpoint path directly on their mapping annotation instead of relying on class-level `@RequestMapping` prefixes.
+- Filtering by another entity field stays under the current resource path, for example `GET /api/conge/employe/{idEmploye}`.
+- Create/update endpoints store the service response in a local variable named `result` before returning it, for easier debugging.
+- CRUD resources map `IllegalArgumentException` to `400` and `NoSuchElementException` to `404`; `creer` endpoints may keep the `NoSuchElementException` catch consistently even before references exist.
+- Normal CRUD services use DTO mapping helpers for entity/DTO conversion instead of direct `EntityManager` use.
 - DTOs are Java records and provide small mapping helpers such as `toDto`, `toDtoAsRef`, `toEntity`, `toEntityAsRef`, and `copyToEntity` where useful.
 - API DTOs keep both `id` and compatibility fields like `idDepartement` / `idEmploye` because the frontend uses them.
+- Entity getters use explicit `return this.field;` style, and entities do not implement `Serializable` unless a real serialization need appears.
 - Relationships use lazy `@ManyToOne` associations and reference DTOs to avoid deep object graphs.
 - Schema is managed by separated Liquibase files under `src/main/resources/liquibase/changelog/`, included from `src/main/resources/liquibase/master.xml`.
 - Keep development workflow lightweight; avoid abstractions/tooling that only serve future teams or organizational conventions.
+- Maven versions intentionally avoid `-SNAPSHOT` for this solo project.
 - No tests are included by request.

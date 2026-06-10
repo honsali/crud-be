@@ -9,7 +9,7 @@ public record SituationFamilialeDto(
         String code) {
 
     public static SituationFamilialeDto toDtoAsRef(SituationFamiliale entity) {
-        return entity == null ? null : new SituationFamilialeDto(entity.getId(), entity.getIdSituationFamiliale(), entity.getLibelle(), null);
+        return entity == null ? null : new SituationFamilialeDto(entity.getId(), entity.getId(), entity.getLibelle(), null);
     }
 
     public static SituationFamiliale toEntityAsRef(SituationFamilialeDto dto) {

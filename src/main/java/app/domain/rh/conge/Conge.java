@@ -42,11 +42,7 @@ public class Conge {
     private Employe employe;
 
     public Long getId() {
-        return id;
-    }
-
-    public Long getIdConge() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -54,7 +50,7 @@ public class Conge {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public void setCode(String code) {
@@ -62,7 +58,7 @@ public class Conge {
     }
 
     public TypeConge getTypeConge() {
-        return typeConge;
+        return this.typeConge;
     }
 
     public void setTypeConge(TypeConge typeConge) {
@@ -70,7 +66,7 @@ public class Conge {
     }
 
     public LocalDate getDateDebutConge() {
-        return dateDebutConge;
+        return this.dateDebutConge;
     }
 
     public void setDateDebutConge(LocalDate dateDebutConge) {
@@ -78,7 +74,7 @@ public class Conge {
     }
 
     public LocalDate getDateFinConge() {
-        return dateFinConge;
+        return this.dateFinConge;
     }
 
     public void setDateFinConge(LocalDate dateFinConge) {
@@ -86,7 +82,7 @@ public class Conge {
     }
 
     public String getCommentaire() {
-        return commentaire;
+        return this.commentaire;
     }
 
     public void setCommentaire(String commentaire) {
@@ -94,7 +90,7 @@ public class Conge {
     }
 
     public Employe getEmploye() {
-        return employe;
+        return this.employe;
     }
 
     public void setEmploye(Employe employe) {

@@ -26,7 +26,8 @@ public class CongeResource {
     @PostMapping("/api/employe/{idEmploye}/conge")
     public ResponseEntity<CongeDto> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeDto congeDto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(congeService.creer(idEmploye, congeDto));
+            CongeDto result = congeService.creer(idEmploye, congeDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -34,7 +35,7 @@ public class CongeResource {
         }
     }
 
-    @GetMapping("/api/employe/{idEmploye}/conge")
+    @GetMapping("/api/conge/employe/{idEmploye}")
     public List<CongeDto> listerParIdEmploye(@PathVariable Long idEmploye) {
         try {
             return congeService.listerParIdEmploye(idEmploye);
@@ -50,7 +51,8 @@ public class CongeResource {
         }
 
         try {
-            return congeService.maj(id, congeDto);
+            CongeDto result = congeService.maj(id, congeDto);
+            return result;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {

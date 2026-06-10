@@ -15,14 +15,12 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/api/authenticate")
 class AuthResource {
 
     private static final String ISSUER = "app_core";
@@ -37,7 +35,7 @@ class AuthResource {
         this.tokenValiditySeconds = tokenValiditySeconds;
     }
 
-    @PostMapping
+    @PostMapping("/api/authenticate")
     ResponseEntity<TokenResponse> authenticate(@Valid @RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         Instant now = Instant.now();
