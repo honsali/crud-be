@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: app_core
+  data:
+    web:
+      pageable:
+        default-page-size: ${SPRING_DATA_WEB_PAGEABLE_DEFAULT_PAGE_SIZE:20}
+        max-page-size: ${SPRING_DATA_WEB_PAGEABLE_MAX_PAGE_SIZE:100}
   threads:
     virtual:
       enabled: true

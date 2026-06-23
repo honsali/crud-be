@@ -38,7 +38,11 @@ public class EmployeResource {
 
     @PostMapping("/api/employe/filtrer")
     public Page<EmployeDto> filtrer(@RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
-        return employeService.filtrer(filtre, pageable);
+        try {
+            return employeService.filtrer(filtre, pageable);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @PutMapping("/api/employe/{id}")

@@ -18,6 +18,7 @@ public class EmployeService {
     }
 
     public EmployeDto creer(EmployeDto dto) {
+        verifierMatriculeDisponible(dto.matricule());
         Employe employe = EmployeDto.toEntity(dto);
         Employe saved = employeRepository.save(employe);
         return EmployeDto.toDto(saved);
@@ -25,11 +26,15 @@ public class EmployeService {
 
     @Transactional(readOnly = true)
     public Page<EmployeDto> filtrer(EmployeFiltre filtre, Pageable pageable) {
+        if (filtre != null) {
+            filtre.valider();
+        }
         return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), pageable).map(EmployeDto::toDto);
     }
 
     public EmployeDto maj(Long id, EmployeDto dto) {
         Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
+        verifierMatriculeDisponible(id, dto.matricule());
         EmployeDto.copyToEntity(dto, employe);
         return EmployeDto.toDto(employe);
     }
@@ -40,9 +45,19 @@ public class EmployeService {
     }
 
     public void supprimer(Long id) {
-        if (!employeRepository.existsById(id)) {
-            throw new NoSuchElementException("Employe not found");
+        Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
+        employeRepository.delete(employe);
+    }
+
+    private void verifierMatriculeDisponible(String matricule) {
+        if (employeRepository.existsByMatricule(matricule)) {
+            throw new IllegalArgumentException("Matricule already exists");
         }
-        employeRepository.deleteById(id);
+    }
+
+    private void verifierMatriculeDisponible(Long id, String matricule) {
+        if (employeRepository.existsByMatriculeAndIdNot(matricule, id)) {
+            throw new IllegalArgumentException("Matricule already exists");
+        }
     }
 }

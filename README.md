@@ -4,6 +4,8 @@ Minimal Spring Boot REST API for a small HR (`ressources humaines`) CRUD showcas
 
 Personal/solo-developer project: favor simple, direct, maintainable choices over enterprise or team-oriented process.
 
+The domain CRUD code is generated from a DSL, but the generated output is intended to be a clean, explicit, hand-editable foundation for future AI/manual tweaks. Genericity belongs in the generator/templates, not in the generated runtime code.
+
 ## Stack
 
 - Java 25 (`C:\Logiciels\jdk-25.0.3+9` locally)
@@ -25,8 +27,9 @@ No auditing, cache, actuator, OpenAPI, devtools, notification module, or old JHi
 src/main/java/app
 ├── CoreApplication.java
 ├── core
-│   ├── referenceData       # Minimal allow-listed reference data endpoint
-│   └── security            # Minimal CORS + JWT configuration and login endpoint
+│   ├── BaseSpecification.java # Small shared Specification predicate helpers
+│   ├── referenceData          # Minimal allow-listed reference data endpoint
+│   └── security               # Minimal CORS + JWT configuration and login endpoint
 └── domain/rh
     ├── conge                # Leave requests
     ├── departement          # Departments
@@ -56,6 +59,8 @@ Useful environment variables:
 - `SPRING_DATASOURCE_USERNAME`
 - `SPRING_DATASOURCE_PASSWORD`
 - `SPRING_JPA_SHOW_SQL` default `false`
+- `SPRING_DATA_WEB_PAGEABLE_DEFAULT_PAGE_SIZE` default `20`
+- `SPRING_DATA_WEB_PAGEABLE_MAX_PAGE_SIZE` default `100`
 - `SPRING_LIQUIBASE_ENABLED` default `true`
 - `SPRING_LIQUIBASE_DROP_FIRST` default `false`; set to `true` only for a destructive local reset on startup
 - `APP_CORS_ALLOWED_ORIGINS` comma-separated, default `http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000`

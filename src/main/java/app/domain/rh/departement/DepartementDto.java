@@ -9,11 +9,21 @@ public record DepartementDto(
         String description) {
 
     public static DepartementDto toDto(Departement entity) {
-        return entity == null ? null : new DepartementDto(entity.getId(), entity.getId(), entity.getNom(), entity.getDescription());
+        return entity == null ? null
+                : new DepartementDto(
+                        entity.getId(),
+                        entity.getId(),
+                        entity.getNom(),
+                        entity.getDescription());
     }
 
     public static DepartementDto toDtoAsRef(Departement entity) {
-        return entity == null ? null : new DepartementDto(entity.getId(), entity.getId(), entity.getNom(), null);
+        return entity == null ? null
+                : new DepartementDto(
+                        entity.getId(),
+                        entity.getId(),
+                        entity.getNom(),
+                        null);
     }
 
     public static Departement toEntity(DepartementDto dto) {
@@ -27,17 +37,12 @@ public record DepartementDto(
     }
 
     public static Departement toEntityAsRef(DepartementDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Long id = dto.id() != null ? dto.id() : dto.idDepartement();
-        if (id == null) {
+        if (dto == null || dto.id() == null) {
             return null;
         }
 
         Departement entity = new Departement();
-        entity.setId(id);
+        entity.setId(dto.id());
         return entity;
     }
 

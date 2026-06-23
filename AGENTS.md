@@ -21,6 +21,14 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 - Keep the workflow lightweight. Destructive resets or migration simplifications can be acceptable during development when the user confirms data can be discarded.
 - Use plain Maven versions without `-SNAPSHOT`; snapshot versioning is unnecessary for this solo project.
 
+## Generated foundation model
+
+- The domain CRUD backend is generated from a DSL and then used as a clean initial state for AI/manual tweaking.
+- The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, repositories, specifications, and Liquibase files.
+- Put genericity in the generator/templates, not in the generated runtime code. Avoid generic CRUD engines or hidden abstractions in the generated application.
+- Repetition in generated code is acceptable when it makes each entity easy to understand, debug, and extend by hand.
+- DSL `.isId()` means a business identifier and requires uniqueness.
+
 ## Essential commands
 
 ```bash
@@ -45,6 +53,7 @@ Windows scripts:
 - Main config: `src/main/resources/application.yml`.
 - PostgreSQL dev database: `crud_db`; username/password: `crud/crud`.
 - Default frontend CORS origins: `http://localhost:3000`, `http://localhost:4200`, `http://localhost:5173`, `http://localhost:9000`.
+- Default pageable size: `20`; maximum pageable size: `100`.
 - Default showcase login is seeded in DB table `app_user`: `admin` / `admin`.
 - Server port: `8080`.
 - Liquibase changelog entry point: `src/main/resources/liquibase/master.xml`.
@@ -84,8 +93,9 @@ Removed/avoided:
 app
 ├── CoreApplication.java
 ├── core
-│   ├── referenceData       # Minimal allow-listed reference data endpoint
-│   └── security            # Minimal CORS, database login, JWT issue/validate
+│   ├── BaseSpecification.java # Small shared Specification predicate helpers
+│   ├── referenceData          # Minimal allow-listed reference data endpoint
+│   └── security               # Minimal CORS, database login, JWT issue/validate
 └── domain/rh
     ├── conge                # Leave request CRUD, nested under employee for create/list
     ├── departement          # Department CRUD
@@ -124,6 +134,9 @@ app
   - `toEntityAsRef(dto)` for associations by id.
   - `copyToEntity(dto, entity)` when creating/updating a managed entity.
 - Keep matching `id<Entity>` DTO fields because the frontend depends on them; map those fields from the normal entity `getId()`.
+- Treat `id<Entity>` DTO fields as representation-only compatibility fields; association mapping must rely on the normal `id()` field.
+- DTOs convey the frontend/user intent. If a nested reference DTO is `null` in an update payload, the mapper may nullify that association; add explicit validation elsewhere when a relation is mandatory.
+- Reference-entity DTOs with `libelle` and `code` require both fields to be `@NotNull`.
 - Do not add extra entity getters like `getId<Entity>()` just for DTO compatibility.
 - Entity getters use explicit `return this.field;` style.
 - Entities do not implement `Serializable` unless a real serialization need is introduced.

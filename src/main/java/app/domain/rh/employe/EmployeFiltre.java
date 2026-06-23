@@ -22,4 +22,15 @@ public record EmployeFiltre(
         String fonction,
         String description,
         DepartementDto departement) {
+
+    public void valider() {
+        verifierIntervalle("dateNaissance", debutDateNaissance, finDateNaissance);
+        verifierIntervalle("dateEntree", debutDateEntree, finDateEntree);
+    }
+
+    private static void verifierIntervalle(String champ, LocalDate debut, LocalDate fin) {
+        if (debut != null && fin != null && debut.isAfter(fin)) {
+            throw new IllegalArgumentException(champ + " start date must be before or equal to end date");
+        }
+    }
 }

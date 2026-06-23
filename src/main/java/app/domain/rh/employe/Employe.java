@@ -10,9 +10,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "employe")
@@ -24,22 +27,28 @@ public class Employe {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "matricule")
+    @NotBlank
+    @Column(name = "matricule", nullable = false, unique = true)
     private String matricule;
 
-    @Column(name = "nom")
+    @NotBlank
+    @Column(name = "nom", nullable = false)
     private String nom;
 
-    @Column(name = "prenom")
+    @NotBlank
+    @Column(name = "prenom", nullable = false)
     private String prenom;
 
-    @Column(name = "date_naissance")
+    @NotNull
+    @Column(name = "date_naissance", nullable = false)
     private LocalDate dateNaissance;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sexe_id")
     private Sexe sexe;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "situation_familiale_id")
     private SituationFamiliale situationFamiliale;
 
     @Column(name = "date_entree")
@@ -60,10 +69,11 @@ public class Employe {
     @Column(name = "fonction")
     private String fonction;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "departement_id")
     private Departement departement;
 
     public Long getId() {

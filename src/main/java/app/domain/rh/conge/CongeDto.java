@@ -28,7 +28,16 @@ public record CongeDto(
     }
 
     public static CongeDto toDtoAsRef(Conge entity) {
-        return entity == null ? null : new CongeDto(entity.getId(), entity.getId(), entity.getCode(), null, null, null, null, null);
+        return entity == null ? null
+                : new CongeDto(
+                        entity.getId(),
+                        entity.getId(),
+                        entity.getCode(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
     }
 
     public static Conge toEntity(CongeDto dto) {
@@ -42,17 +51,12 @@ public record CongeDto(
     }
 
     public static Conge toEntityAsRef(CongeDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Long id = dto.id() != null ? dto.id() : dto.idConge();
-        if (id == null) {
+        if (dto == null || dto.id() == null) {
             return null;
         }
 
         Conge entity = new Conge();
-        entity.setId(id);
+        entity.setId(dto.id());
         return entity;
     }
 

@@ -1,17 +1,15 @@
 package app.domain.rh.employe;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
+import app.core.BaseSpecification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-public final class EmployeSpecification {
+public final class EmployeSpecification extends BaseSpecification {
 
     private EmployeSpecification() {
     }
@@ -41,26 +39,5 @@ public final class EmployeSpecification {
 
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
         };
-    }
-
-    private static void addLike(List<Predicate> predicates, CriteriaBuilder criteriaBuilder, Expression<String> field, String value) {
-        if (value != null && !value.isBlank()) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(field), "%" + value.trim().toLowerCase(Locale.ROOT) + "%"));
-        }
-    }
-
-    private static void addDateRange(List<Predicate> predicates, CriteriaBuilder criteriaBuilder, Expression<LocalDate> field, LocalDate start, LocalDate end) {
-        if (start != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(field, start));
-        }
-        if (end != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(field, end));
-        }
-    }
-
-    private static void addEqual(List<Predicate> predicates, CriteriaBuilder criteriaBuilder, Expression<Long> field, Long value) {
-        if (value != null) {
-            predicates.add(criteriaBuilder.equal(field, value));
-        }
     }
 }

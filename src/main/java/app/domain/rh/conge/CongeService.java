@@ -42,11 +42,7 @@ public class CongeService {
 
     public CongeDto maj(Long id, CongeDto dto) {
         Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
-        Employe employe = conge.getEmploye();
         CongeDto.copyToEntity(dto, conge);
-        if (dto.employe() == null) {
-            conge.setEmploye(employe);
-        }
         return CongeDto.toDto(conge);
     }
 

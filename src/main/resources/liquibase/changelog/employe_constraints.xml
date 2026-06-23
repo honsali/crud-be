@@ -26,4 +26,12 @@
             referencedColumnNames="id"
             referencedTableName="departement" />
     </changeSet>
+
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-3" author="app_core">
+        <addNotNullConstraint tableName="employe" columnName="matricule" columnDataType="nvarchar(250)" />
+        <addNotNullConstraint tableName="employe" columnName="nom" columnDataType="nvarchar(250)" />
+        <addNotNullConstraint tableName="employe" columnName="prenom" columnDataType="nvarchar(250)" />
+        <addNotNullConstraint tableName="employe" columnName="date_naissance" columnDataType="date" />
+        <addUniqueConstraint tableName="employe" columnNames="matricule" constraintName="ux_employe_matricule" />
+    </changeSet>
 </databaseChangeLog>
