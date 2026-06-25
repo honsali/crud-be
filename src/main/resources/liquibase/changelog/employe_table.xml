@@ -15,16 +15,16 @@
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="matricule" type="nvarchar(250)">
-                <constraints nullable="true" />
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_employe_matricule" />
             </column>
             <column name="nom" type="nvarchar(250)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="prenom" type="nvarchar(250)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="date_naissance" type="date">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="sexe_id" type="bigint">
                 <constraints nullable="true" />

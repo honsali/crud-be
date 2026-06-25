@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "situation_familiale")
@@ -19,11 +19,11 @@ public class SituationFamiliale {
     @Column(name = "id")
     private Long id;
 
-    @NotNull
-    @Column(name = "libelle", nullable = false)
+    @NotBlank
+    @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
 
-    @NotNull
+    @NotBlank
     @Column(name = "code", nullable = false)
     private String code;
 

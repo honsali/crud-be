@@ -172,10 +172,13 @@ Allowed reference entities include: `departement`, `employe`, `sexe`, `situation
 - CRUD resources map `IllegalArgumentException` to `400` and `NoSuchElementException` to `404`; `creer` endpoints may keep the `NoSuchElementException` catch consistently even before references exist.
 - Normal CRUD services use DTO mapping helpers for entity/DTO conversion instead of direct `EntityManager` use.
 - DTOs are Java records and provide small mapping helpers such as `toDto`, `toDtoAsRef`, `toEntity`, `toEntityAsRef`, and `copyToEntity` where useful.
+- Generated DTO validation stays simple: required strings use `@NotBlank`, required non-strings use `@NotNull`, and generated DTOs do not add `@Size(max = 250)` or semantic validators such as `@Email` for now.
 - API DTOs keep both `id` and compatibility fields like `idDepartement` / `idEmploye` because the frontend uses them.
 - Entity getters use explicit `return this.field;` style, and entities do not implement `Serializable` unless a real serialization need appears.
 - Relationships use lazy `@ManyToOne` associations and reference DTOs to avoid deep object graphs.
+- Filter DTOs are search criteria only; inconsistent filters may simply return no results instead of failing validation.
 - Schema is managed by separated Liquibase files under `src/main/resources/liquibase/changelog/`, included from `src/main/resources/liquibase/master.xml`.
+- Generated initial Liquibase tables define required and single-column unique constraints inline on columns; constraints changelogs are mainly for foreign keys or later append-only migrations.
 - Keep development workflow lightweight; avoid abstractions/tooling that only serve future teams or organizational conventions.
 - Maven versions intentionally avoid `-SNAPSHOT` for this solo project.
 - No tests are included by request.

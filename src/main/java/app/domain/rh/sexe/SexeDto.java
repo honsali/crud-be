@@ -1,12 +1,12 @@
 package app.domain.rh.sexe;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record SexeDto(
         Long id,
         Long idSexe,
-        @NotNull String libelle,
-        @NotNull String code) {
+        @NotBlank String libelle,
+        @NotBlank String code) {
 
     public static SexeDto toDtoAsRef(Sexe entity) {
         return entity == null ? null

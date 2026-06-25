@@ -27,7 +27,9 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 - The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, repositories, specifications, and Liquibase files.
 - Put genericity in the generator/templates, not in the generated runtime code. Avoid generic CRUD engines or hidden abstractions in the generated application.
 - Repetition in generated code is acceptable when it makes each entity easy to understand, debug, and extend by hand.
-- DSL `.isId()` means a business identifier and requires uniqueness.
+- Use the current `Employe` code as the style reference when aligning generator output across other entities.
+- Generated DTO validation stays deliberately simple: required strings use `@NotBlank`, required non-strings use `@NotNull`, and generated DTOs do not add `@Size(max = 250)` or semantic validators such as `@Email` for now.
+- DSL `.isId()` means a business identifier and requires uniqueness in both the generated code and Liquibase schema.
 
 ## Essential commands
 
@@ -136,18 +138,21 @@ app
 - Keep matching `id<Entity>` DTO fields because the frontend depends on them; map those fields from the normal entity `getId()`.
 - Treat `id<Entity>` DTO fields as representation-only compatibility fields; association mapping must rely on the normal `id()` field.
 - DTOs convey the frontend/user intent. If a nested reference DTO is `null` in an update payload, the mapper may nullify that association; add explicit validation elsewhere when a relation is mandatory.
-- Reference-entity DTOs with `libelle` and `code` require both fields to be `@NotNull`.
+- Reference-entity DTOs with `libelle` and `code` require both fields to be `@NotBlank`.
 - Do not add extra entity getters like `getId<Entity>()` just for DTO compatibility.
 - Entity getters use explicit `return this.field;` style.
 - Entities do not implement `Serializable` unless a real serialization need is introduced.
 - Avoid other old generated/JHipster-style helpers such as fluent `id(...)` and `getDisplayString()` unless explicitly requested.
 - JPA relationships are lazy `@ManyToOne` where applicable.
+- Filter DTOs are search criteria only; do not add validation such as date-range checks unless it prevents a real technical error. Inconsistent filters may simply return no results.
 
 ## Liquibase conventions
 
 - Never rely on Hibernate DDL generation; `spring.jpa.hibernate.ddl-auto=none`.
 - Keep Liquibase changelog files separated under `src/main/resources/liquibase/changelog/` and include them from `src/main/resources/liquibase/master.xml`.
-- Keep `master.xml` as the entry point only: table changelogs first, then constraints, then seed data where applicable.
+- Keep `master.xml` as the entry point only: table changelogs first, then constraints changelogs.
+- Table changelogs contain `createSequence`, `createTable`, and `loadData` where seed data exists.
+- For the generated initial schema, put required and single-column unique constraints inline on table columns with `<constraints nullable="false" unique="true" uniqueConstraintName="ux_<table>_<column>" />`; keep constraints changelogs mainly for foreign keys or later append-only migrations.
 - Store seed data under `src/main/resources/liquibase/data/*.csv` and reference it with `loadData`.
 - Existing sequences are named `seq_<table_name>`, start at `100`, and use increment/allocation size `1` for predictable solo-app IDs.
 

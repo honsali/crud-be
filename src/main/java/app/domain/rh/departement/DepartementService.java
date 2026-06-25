@@ -17,6 +17,9 @@ public class DepartementService {
     }
 
     public DepartementDto creer(DepartementDto dto) {
+        if (departementRepository.existsByNom(dto.nom())) {
+            throw new IllegalArgumentException("Nom already exists");
+        }
         Departement departement = DepartementDto.toEntity(dto);
         Departement saved = departementRepository.save(departement);
         return DepartementDto.toDto(saved);
@@ -29,6 +32,9 @@ public class DepartementService {
 
     public DepartementDto maj(Long id, DepartementDto dto) {
         Departement departement = departementRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Departement not found"));
+        if (departementRepository.existsByNomAndIdNot(dto.nom(), id)) {
+            throw new IllegalArgumentException("Nom already exists");
+        }
         DepartementDto.copyToEntity(dto, departement);
         return DepartementDto.toDto(departement);
     }
@@ -39,9 +45,7 @@ public class DepartementService {
     }
 
     public void supprimer(Long id) {
-        if (!departementRepository.existsById(id)) {
-            throw new NoSuchElementException("Departement not found");
-        }
-        departementRepository.deleteById(id);
+        Departement departement = departementRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Departement not found"));
+        departementRepository.delete(departement);
     }
 }

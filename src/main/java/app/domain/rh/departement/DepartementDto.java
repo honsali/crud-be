@@ -1,11 +1,11 @@
 package app.domain.rh.departement;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record DepartementDto(
         Long id,
         Long idDepartement,
-        @NotNull String nom,
+        @NotBlank String nom,
         String description) {
 
     public static DepartementDto toDto(Departement entity) {

@@ -15,7 +15,7 @@
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="libelle" type="nvarchar(250)">
-                <constraints nullable="false" />
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_type_conge_libelle" />
             </column>
             <column name="code" type="nvarchar(250)">
                 <constraints nullable="false" />

@@ -1,12 +1,12 @@
 package app.domain.rh.situationFamiliale;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record SituationFamilialeDto(
         Long id,
         Long idSituationFamiliale,
-        @NotNull String libelle,
-        @NotNull String code) {
+        @NotBlank String libelle,
+        @NotBlank String code) {
 
     public static SituationFamilialeDto toDtoAsRef(SituationFamiliale entity) {
         return entity == null ? null

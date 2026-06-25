@@ -21,6 +21,9 @@ public class CongeService {
     }
 
     public CongeDto creer(Long idEmploye, CongeDto dto) {
+        if (congeRepository.existsByCode(dto.code())) {
+            throw new IllegalArgumentException("Code already exists");
+        }
         if (dto != null && dto.employe() != null && dto.employe().id() != null && !dto.employe().id().equals(idEmploye)) {
             throw new IllegalArgumentException("Employe ID mismatch");
         }
@@ -42,6 +45,9 @@ public class CongeService {
 
     public CongeDto maj(Long id, CongeDto dto) {
         Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
+        if (congeRepository.existsByCodeAndIdNot(dto.code(), id)) {
+            throw new IllegalArgumentException("Code already exists");
+        }
         CongeDto.copyToEntity(dto, conge);
         return CongeDto.toDto(conge);
     }
@@ -52,9 +58,7 @@ public class CongeService {
     }
 
     public void supprimer(Long id) {
-        if (!congeRepository.existsById(id)) {
-            throw new NoSuchElementException("Conge not found");
-        }
-        congeRepository.deleteById(id);
+        Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
+        congeRepository.delete(conge);
     }
 }

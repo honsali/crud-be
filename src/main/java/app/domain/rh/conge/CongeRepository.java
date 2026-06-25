@@ -6,6 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CongeRepository extends JpaRepository<Conge, Long> {
 
+    boolean existsByCode(String code);
+
     @EntityGraph(attributePaths = { "typeConge", "employe" })
     List<Conge> findAllByEmploye_IdOrderByCode(Long idEmploye);
+
+    boolean existsByCodeAndIdNot(String code, Long id);
 }

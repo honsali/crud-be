@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "departement")
@@ -19,11 +19,11 @@ public class Departement {
     @Column(name = "id")
     private Long id;
 
-    @NotNull
-    @Column(name = "nom", nullable = false)
+    @NotBlank
+    @Column(name = "nom", nullable = false, unique = true)
     private String nom;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     public Long getId() {

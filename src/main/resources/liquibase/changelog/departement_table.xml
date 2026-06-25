@@ -15,7 +15,7 @@
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="nom" type="nvarchar(250)">
-                <constraints nullable="false" />
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_departement_nom" />
             </column>
             <column name="description" type="text">
                 <constraints nullable="true" />

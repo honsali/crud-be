@@ -1,12 +1,12 @@
 package app.domain.rh.typeConge;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record TypeCongeDto(
         Long id,
         Long idTypeConge,
-        @NotNull String libelle,
-        @NotNull String code) {
+        @NotBlank String libelle,
+        @NotBlank String code) {
 
     public static TypeCongeDto toDtoAsRef(TypeConge entity) {
         return entity == null ? null

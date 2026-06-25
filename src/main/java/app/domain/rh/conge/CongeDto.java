@@ -3,11 +3,12 @@ package app.domain.rh.conge;
 import java.time.LocalDate;
 import app.domain.rh.employe.EmployeDto;
 import app.domain.rh.typeConge.TypeCongeDto;
+import jakarta.validation.constraints.NotBlank;
 
 public record CongeDto(
         Long id,
         Long idConge,
-        String code,
+        @NotBlank String code,
         TypeCongeDto typeConge,
         LocalDate dateDebutConge,
         LocalDate dateFinConge,
