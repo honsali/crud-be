@@ -7,6 +7,7 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,7 @@ class SecurityConfiguration {
 
     static final String AUTHORITIES_CLAIM = "auth";
     static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
+    private static final String UNSAFE_DEV_JWT_BASE64_SECRET = "ODljMGVhM2Q1MjM4M2JkNDYxZmRjNjk0NWJkZGFkYWM5ZWQ4NjYyOTY0NWJkMmQ2ZjMzMjFiYzU4Njk3OTQzMw==";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +50,7 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/authenticate").permitAll()
                         .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll())
+                        .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
@@ -80,13 +82,19 @@ class SecurityConfiguration {
     }
 
     @Bean
-    JwtEncoder jwtEncoder(@Value("${application.security.jwt-base64-secret}") String jwtBase64Secret) {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecretKey(jwtBase64Secret)));
+    JwtEncoder jwtEncoder(
+            @Value("${application.security.jwt-base64-secret:}") String jwtBase64Secret,
+            @Value("${application.security.allow-unsafe-dev-secret:false}") boolean allowUnsafeDevSecret,
+            Environment environment) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecretKey(jwtBase64Secret, allowUnsafeDevSecret, environment)));
     }
 
     @Bean
-    JwtDecoder jwtDecoder(@Value("${application.security.jwt-base64-secret}") String jwtBase64Secret) {
-        return NimbusJwtDecoder.withSecretKey(jwtSecretKey(jwtBase64Secret)).macAlgorithm(JWT_ALGORITHM).build();
+    JwtDecoder jwtDecoder(
+            @Value("${application.security.jwt-base64-secret:}") String jwtBase64Secret,
+            @Value("${application.security.allow-unsafe-dev-secret:false}") boolean allowUnsafeDevSecret,
+            Environment environment) {
+        return NimbusJwtDecoder.withSecretKey(jwtSecretKey(jwtBase64Secret, allowUnsafeDevSecret, environment)).macAlgorithm(JWT_ALGORITHM).build();
     }
 
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -103,9 +111,23 @@ class SecurityConfiguration {
         return authorities.stream().map(SimpleGrantedAuthority::new).map(GrantedAuthority.class::cast).toList();
     }
 
-    private static SecretKey jwtSecretKey(String jwtBase64Secret) {
-        byte[] secret = Base64.getDecoder().decode(jwtBase64Secret);
+    private static SecretKey jwtSecretKey(String jwtBase64Secret, boolean allowUnsafeDevSecret, Environment environment) {
+        byte[] secret = Base64.getDecoder().decode(resolveJwtSecret(jwtBase64Secret, allowUnsafeDevSecret, environment));
         return new SecretKeySpec(secret, "HmacSHA512");
+    }
+
+    private static String resolveJwtSecret(String jwtBase64Secret, boolean allowUnsafeDevSecret, Environment environment) {
+        if (jwtBase64Secret != null && !jwtBase64Secret.isBlank()) {
+            return jwtBase64Secret;
+        }
+        if (allowUnsafeDevSecret && !hasActiveProfile(environment, "prod")) {
+            return UNSAFE_DEV_JWT_BASE64_SECRET;
+        }
+        throw new IllegalStateException("APP_SECURITY_JWT_BASE64_SECRET must be configured. Set APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true only for local development.");
+    }
+
+    private static boolean hasActiveProfile(Environment environment, String profile) {
+        return Arrays.asList(environment.getActiveProfiles()).contains(profile);
     }
 
     private static List<String> splitCsv(String value) {

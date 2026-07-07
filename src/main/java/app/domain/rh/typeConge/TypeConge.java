@@ -24,7 +24,7 @@ public class TypeConge {
     private String libelle;
 
     @NotBlank
-    @Column(name = "code", nullable = false)
+    @Column(name = "code", nullable = false, unique = true)
     private String code;
 
     public Long getId() {

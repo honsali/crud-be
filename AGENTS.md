@@ -24,7 +24,7 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 ## Generated foundation model
 
 - The domain CRUD backend is generated from a DSL and then used as a clean initial state for AI/manual tweaking.
-- The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, repositories, specifications, and Liquibase files.
+- The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, mappers, repositories, specifications, and Liquibase files.
 - Put genericity in the generator/templates, not in the generated runtime code. Avoid generic CRUD engines or hidden abstractions in the generated application.
 - Repetition in generated code is acceptable when it makes each entity easy to understand, debug, and extend by hand.
 - Use the current `Employe` code as the style reference when aligning generator output across other entities.
@@ -36,6 +36,8 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 ```bash
 export JAVA_HOME=/c/Logiciels/jdk-25.0.3+9
 export PATH="$JAVA_HOME/bin:$PATH"
+export APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true
+export SPRING_LIQUIBASE_CONTEXTS=dev
 
 ./mvnw spring-boot:run
 ./mvnw -DskipTests compile
@@ -56,11 +58,12 @@ Windows scripts:
 - PostgreSQL dev database: `crud_db`; username/password: `crud/crud`.
 - Default frontend CORS origins: `http://localhost:3000`, `http://localhost:4200`, `http://localhost:5173`, `http://localhost:9000`.
 - Default pageable size: `20`; maximum pageable size: `100`.
-- Default showcase login is seeded in DB table `app_user`: `admin` / `admin`.
+- Default showcase login is seeded in DB table `app_user` only when Liquibase runs with the `dev` context: `admin` / `admin`.
 - Server port: `8080`.
 - Liquibase changelog entry point: `src/main/resources/liquibase/master.xml`.
 - Liquibase can be disabled with `SPRING_LIQUIBASE_ENABLED=false`.
 - `SPRING_LIQUIBASE_DROP_FIRST=true` is a destructive local reset-on-start option; never enable it casually.
+- `SPRING_LIQUIBASE_CONTEXTS=dev` loads local showcase seed data such as `admin/admin`; do not enable it in production.
 - `init.sql` is destructive (`drop schema public cascade; create schema public;`). Do not run it casually.
 
 ## Minimal stack
@@ -102,9 +105,9 @@ app
     ├── conge                # Leave request CRUD, nested under employee for create/list
     ├── departement          # Department CRUD
     ├── employe              # Employee CRUD and Specification-based filtering
-    ├── sexe                 # Reference entity/DTO only
-    ├── situationFamiliale   # Reference entity/DTO only
-    └── typeConge            # Reference entity/DTO only
+    ├── sexe                 # Reference entity/repository/mapper/DTO
+    ├── situationFamiliale   # Reference entity/repository/mapper/DTO
+    └── typeConge            # Reference entity/repository/mapper/DTO
 ```
 
 ## Security/CORS notes
@@ -113,8 +116,8 @@ app
 - `GET /api/user` returns the current authenticated user, including `username`, `role`, `roles`, and `authorities` for the frontend.
 - All other `/api/**` endpoints require `Authorization: Bearer <jwt>`.
 - Authentication uses the `app_user` database table seeded by Liquibase.
-- Default user is `admin` / `admin`; password hashes are BCrypt.
-- JWT signing uses `APP_SECURITY_JWT_BASE64_SECRET`.
+- Default user is `admin` / `admin` only in the Liquibase `dev` context; password hashes are BCrypt.
+- JWT signing uses `APP_SECURITY_JWT_BASE64_SECRET`; the unsafe fallback secret is disabled unless `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true` is set for local development.
 - Token TTL uses `APP_SECURITY_TOKEN_VALIDITY_SECONDS`.
 - CORS origins use comma-separated `APP_CORS_ALLOWED_ORIGINS`.
 
@@ -125,15 +128,18 @@ app
 - For an `XResource` endpoint filtering by a `Y` field, keep the path under `x/y`, e.g. `GET /api/conge/employe/{idEmploye}`.
 - In create/update endpoints, assign the service response to a local variable named `result` before returning it, to make debugging easier.
 - Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400` and `NoSuchElementException`/missing optionals to `404` with `ResponseStatusException`.
+- Shared infrastructure in `ApiExceptionHandler` maps uncaught validation, conflict, authentication, bad sort, and data-integrity errors to stable Problem Details responses.
 - It is fine for every `creer` endpoint to catch `NoSuchElementException`, even when the current entity has no references yet, for consistency and future changes.
 - Repositories extend `JpaRepository`; do not add `@Repository` to Spring Data repository interfaces.
 - Use `JpaSpecificationExecutor` only when filter endpoints need it.
-- Normal CRUD services should use DTO mapping helpers for entity/DTO conversion; avoid direct `EntityManager` use there unless there is a real need.
-- DTOs are Java records with static mapping helpers:
+- Normal CRUD services should use dedicated `*Mapper` classes for entity/DTO conversion; avoid direct `EntityManager` use there unless there is a real need.
+- When a mapper needs to attach a referenced entity from an incoming DTO, use the referenced entity mapper's repository-backed `toEntityAsRef(dto)` method instead of creating a detached id-only stub.
+- DTOs are Java records only: they declare the API shape and validation annotations, while mapping code stays in `*Mapper` classes.
+- Mappers expose the explicit mapping helpers:
   - `toDto(entity)` for full API output.
   - `toDtoAsRef(entity)` for nested lazy references.
   - `toEntity(dto)` only where simple creation needs it.
-  - `toEntityAsRef(dto)` for associations by id.
+  - `toEntityAsRef(dto)` for associations by id, resolving the referenced entity through its repository.
   - `copyToEntity(dto, entity)` when creating/updating a managed entity.
 - Keep matching `id<Entity>` DTO fields because the frontend depends on them; map those fields from the normal entity `getId()`.
 - Treat `id<Entity>` DTO fields as representation-only compatibility fields; association mapping must rely on the normal `id()` field.
@@ -145,6 +151,7 @@ app
 - Avoid other old generated/JHipster-style helpers such as fluent `id(...)` and `getDisplayString()` unless explicitly requested.
 - JPA relationships are lazy `@ManyToOne` where applicable.
 - Filter DTOs are search criteria only; do not add validation such as date-range checks unless it prevents a real technical error. Inconsistent filters may simply return no results.
+- Filter endpoints may return Spring Data `Page<Dto>` directly as an accepted solo-dev trade-off; keep stable fallback sorting and append `id` as a tie-breaker.
 
 ## Liquibase conventions
 

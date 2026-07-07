@@ -3,6 +3,7 @@ package app.domain.rh.conge;
 import java.time.LocalDate;
 import app.domain.rh.employe.EmployeDto;
 import app.domain.rh.typeConge.TypeCongeDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
 public record CongeDto(
@@ -13,60 +14,5 @@ public record CongeDto(
         LocalDate dateDebutConge,
         LocalDate dateFinConge,
         String commentaire,
-        EmployeDto employe) {
-
-    public static CongeDto toDto(Conge entity) {
-        return entity == null ? null
-                : new CongeDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getCode(),
-                        TypeCongeDto.toDtoAsRef(entity.getTypeConge()),
-                        entity.getDateDebutConge(),
-                        entity.getDateFinConge(),
-                        entity.getCommentaire(),
-                        EmployeDto.toDtoAsRef(entity.getEmploye()));
-    }
-
-    public static CongeDto toDtoAsRef(Conge entity) {
-        return entity == null ? null
-                : new CongeDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getCode(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
-    }
-
-    public static Conge toEntity(CongeDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Conge entity = new Conge();
-        copyToEntity(dto, entity);
-        return entity;
-    }
-
-    public static Conge toEntityAsRef(CongeDto dto) {
-        if (dto == null || dto.id() == null) {
-            return null;
-        }
-
-        Conge entity = new Conge();
-        entity.setId(dto.id());
-        return entity;
-    }
-
-    public static void copyToEntity(CongeDto dto, Conge entity) {
-        entity.setCode(dto.code());
-        entity.setTypeConge(TypeCongeDto.toEntityAsRef(dto.typeConge()));
-        entity.setDateDebutConge(dto.dateDebutConge());
-        entity.setDateFinConge(dto.dateFinConge());
-        entity.setCommentaire(dto.commentaire());
-        entity.setEmploye(EmployeDto.toEntityAsRef(dto.employe()));
-    }
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY) EmployeDto employe) {
 }

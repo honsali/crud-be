@@ -30,7 +30,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="security-app-user-data" author="app_core">
+    <changeSet id="security-app-user-data" author="app_core" context="@dev">
         <loadData file="liquibase/data/app_user.csv" separator=";" tableName="app_user" usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="username" type="string" />

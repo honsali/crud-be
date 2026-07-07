@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "conge")
@@ -42,8 +43,9 @@ public class Conge {
     @Column(name = "commentaire", columnDefinition = "text")
     private String commentaire;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employe_id")
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "employe_id", nullable = false)
     private Employe employe;
 
     public Long getId() {

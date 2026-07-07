@@ -3,50 +3,65 @@ package app.domain.rh.employe;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import app.core.ConflictException;
 
 @Service
 @Transactional
 public class EmployeService {
 
     private final EmployeRepository employeRepository;
+    private final EmployeMapper employeMapper;
 
-    public EmployeService(EmployeRepository employeRepository) {
+    public EmployeService(EmployeRepository employeRepository, EmployeMapper employeMapper) {
         this.employeRepository = employeRepository;
+        this.employeMapper = employeMapper;
     }
 
     public EmployeDto creer(EmployeDto dto) {
         if (employeRepository.existsByMatricule(dto.matricule())) {
-            throw new IllegalArgumentException("Matricule already exists");
+            throw new ConflictException("Matricule already exists");
         }
-        Employe employe = EmployeDto.toEntity(dto);
+        Employe employe = employeMapper.toEntity(dto);
         Employe saved = employeRepository.save(employe);
-        return EmployeDto.toDto(saved);
+        return employeMapper.toDto(saved);
     }
 
     @Transactional(readOnly = true)
     public Page<EmployeDto> filtrer(EmployeFiltre filtre, Pageable pageable) {
-        return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), pageable).map(EmployeDto::toDto);
+        return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), avecTriStable(pageable)).map(employeMapper::toDto);
     }
 
     public EmployeDto maj(Long id, EmployeDto dto) {
         Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
         if (employeRepository.existsByMatriculeAndIdNot(dto.matricule(), id)) {
-            throw new IllegalArgumentException("Matricule already exists");
+            throw new ConflictException("Matricule already exists");
         }
-        EmployeDto.copyToEntity(dto, employe);
-        return EmployeDto.toDto(employe);
+        employeMapper.copyToEntity(dto, employe);
+        return employeMapper.toDto(employe);
     }
 
     @Transactional(readOnly = true)
     public Optional<EmployeDto> recupererParId(Long id) {
-        return employeRepository.findById(id).map(EmployeDto::toDto);
+        return employeRepository.findById(id).map(employeMapper::toDto);
     }
 
     public void supprimer(Long id) {
         Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
         employeRepository.delete(employe);
+    }
+
+    private Pageable avecTriStable(Pageable pageable) {
+        Sort sort = pageable.getSort();
+        if (sort.isUnsorted()) {
+            sort = Sort.by("id");
+        } else if (sort.getOrderFor("id") == null) {
+            sort = sort.and(Sort.by("id"));
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 }
