@@ -120,14 +120,15 @@ class SecurityConfiguration {
         if (jwtBase64Secret != null && !jwtBase64Secret.isBlank()) {
             return jwtBase64Secret;
         }
-        if (allowUnsafeDevSecret && !hasActiveProfile(environment, "prod")) {
+        if (allowUnsafeDevSecret && hasAnyActiveProfile(environment, "dev", "local")) {
             return UNSAFE_DEV_JWT_BASE64_SECRET;
         }
-        throw new IllegalStateException("APP_SECURITY_JWT_BASE64_SECRET must be configured. Set APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true only for local development.");
+        throw new IllegalStateException("APP_SECURITY_JWT_BASE64_SECRET must be configured. Set APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true only with the dev or local Spring profile.");
     }
 
-    private static boolean hasActiveProfile(Environment environment, String profile) {
-        return Arrays.asList(environment.getActiveProfiles()).contains(profile);
+    private static boolean hasAnyActiveProfile(Environment environment, String... profiles) {
+        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
+        return Arrays.stream(profiles).anyMatch(activeProfiles::contains);
     }
 
     private static List<String> splitCsv(String value) {

@@ -1,5 +1,6 @@
 package app.domain.rh.conge;
 
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Component;
 import app.domain.rh.employe.EmployeMapper;
 import app.domain.rh.typeConge.TypeCongeMapper;
@@ -7,10 +8,12 @@ import app.domain.rh.typeConge.TypeCongeMapper;
 @Component
 public class CongeMapper {
 
+    private final CongeRepository congeRepository;
     private final EmployeMapper employeMapper;
     private final TypeCongeMapper typeCongeMapper;
 
-    public CongeMapper(EmployeMapper employeMapper, TypeCongeMapper typeCongeMapper) {
+    public CongeMapper(CongeRepository congeRepository, EmployeMapper employeMapper, TypeCongeMapper typeCongeMapper) {
+        this.congeRepository = congeRepository;
         this.employeMapper = employeMapper;
         this.typeCongeMapper = typeCongeMapper;
     }
@@ -49,6 +52,13 @@ public class CongeMapper {
         Conge entity = new Conge();
         copyToEntity(dto, entity);
         return entity;
+    }
+
+    public Conge toEntityAsRef(CongeDto dto) {
+        if (dto == null || dto.id() == null) {
+            return null;
+        }
+        return congeRepository.findById(dto.id()).orElseThrow(() -> new NoSuchElementException("Conge not found"));
     }
 
     public void copyToEntity(CongeDto dto, Conge entity) {

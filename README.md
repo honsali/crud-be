@@ -64,9 +64,10 @@ Useful environment variables:
 - `SPRING_LIQUIBASE_ENABLED` default `true`
 - `SPRING_LIQUIBASE_DROP_FIRST` default `false`; set to `true` only for a destructive local reset on startup
 - `SPRING_LIQUIBASE_CONTEXTS`; set to `dev` locally to load the showcase `admin/admin` user
+- `SPRING_PROFILES_ACTIVE`; set to `dev` or `local` when using the unsafe local JWT fallback secret
 - `APP_CORS_ALLOWED_ORIGINS` comma-separated, default `http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000`
-- `APP_SECURITY_JWT_BASE64_SECRET` required unless the local-only unsafe dev secret is explicitly enabled
-- `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET` default `false`; set to `true` only for local development
+- `APP_SECURITY_JWT_BASE64_SECRET` required unless the local-only unsafe dev secret is explicitly enabled with a `dev` or `local` Spring profile
+- `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET` default `false`; set to `true` only for local development with `SPRING_PROFILES_ACTIVE=dev` or `local`
 - `APP_SECURITY_TOKEN_VALIDITY_SECONDS`
 
 Liquibase runs `classpath:liquibase/master.xml` and loads seed CSVs from `src/main/resources/liquibase/data/`.
@@ -75,7 +76,7 @@ Liquibase runs `classpath:liquibase/master.xml` and loads seed CSVs from `src/ma
 
 ## Run and build
 
-Windows helper scripts use `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9`:
+Windows helper scripts use `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9`; `run.bat` also enables the local dev profile, Liquibase `dev` context, and unsafe local JWT fallback:
 
 ```bat
 run.bat      :: spring-boot:run
@@ -88,6 +89,7 @@ Portable Maven Wrapper commands:
 export JAVA_HOME=/c/Logiciels/jdk-25.0.3+9
 export PATH="$JAVA_HOME/bin:$PATH"
 export APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true
+export SPRING_PROFILES_ACTIVE=dev
 export SPRING_LIQUIBASE_CONTEXTS=dev
 
 ./mvnw spring-boot:run
@@ -173,7 +175,7 @@ Allowed reference entities include: `departement`, `employe`, `sexe`, `situation
 - Controller methods declare the full endpoint path directly on their mapping annotation instead of relying on class-level `@RequestMapping` prefixes.
 - Filtering by another entity field stays under the current resource path, for example `GET /api/conge/employe/{idEmploye}`.
 - Create/update endpoints store the service response in a local variable named `result` before returning it, for easier debugging.
-- CRUD resources map `IllegalArgumentException` to `400` and `NoSuchElementException` to `404`; `creer` endpoints may keep the `NoSuchElementException` catch consistently even before references exist. Shared infrastructure maps uncaught validation, conflict, authentication, bad sort, and data-integrity errors to stable Problem Details responses.
+- CRUD resources map `IllegalArgumentException` to `400` and `NoSuchElementException` to `404`; `creer` endpoints may keep the `NoSuchElementException` catch consistently even before references exist. Shared infrastructure maps uncaught validation, conflict, authentication, bad sort, data-integrity, and unexpected errors to stable Problem Details responses; unexpected `500` details stay generic to avoid leaking internals.
 - Normal CRUD services use dedicated `*Mapper` classes for entity/DTO conversion instead of direct `EntityManager` use.
 - Mappers attach referenced entities through repository-backed `toEntityAsRef(dto)` methods, so invalid references fail cleanly before database flush.
 - DTOs are Java records only: they declare the API shape and validation annotations, while mapping code stays in `*Mapper` classes.

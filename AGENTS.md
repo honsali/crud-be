@@ -26,6 +26,8 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 - The domain CRUD backend is generated from a DSL and then used as a clean initial state for AI/manual tweaking.
 - The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, mappers, repositories, specifications, and Liquibase files.
 - Put genericity in the generator/templates, not in the generated runtime code. Avoid generic CRUD engines or hidden abstractions in the generated application.
+- `ReferenceDataService` is the intentional exception: a small generic, read-only reference-data endpoint is acceptable because entities and filter fields are strictly allow-listed.
+- Any entity or field added to `ReferenceDataService.REFERENCES` must remain explicitly allow-listed; never interpolate user-provided entity or field names outside that allow-list.
 - Repetition in generated code is acceptable when it makes each entity easy to understand, debug, and extend by hand.
 - Use the current `Employe` code as the style reference when aligning generator output across other entities.
 - Generated DTO validation stays deliberately simple: required strings use `@NotBlank`, required non-strings use `@NotNull`, and generated DTOs do not add `@Size(max = 250)` or semantic validators such as `@Email` for now.
@@ -37,6 +39,7 @@ Agent-facing guide for this repository. Keep this file and `README.md` in sync w
 export JAVA_HOME=/c/Logiciels/jdk-25.0.3+9
 export PATH="$JAVA_HOME/bin:$PATH"
 export APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true
+export SPRING_PROFILES_ACTIVE=dev
 export SPRING_LIQUIBASE_CONTEXTS=dev
 
 ./mvnw spring-boot:run
@@ -46,7 +49,7 @@ export SPRING_LIQUIBASE_CONTEXTS=dev
 
 Windows scripts:
 
-- `run.bat` sets `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9` and runs Spring Boot.
+- `run.bat` sets `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9`, enables local dev security/Liquibase settings, and runs Spring Boot.
 - `clean.bat` sets the same `JAVA_HOME` and runs `mvn -DskipTests clean package`.
 - Maven Wrapper files are present (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`).
 
@@ -64,6 +67,7 @@ Windows scripts:
 - Liquibase can be disabled with `SPRING_LIQUIBASE_ENABLED=false`.
 - `SPRING_LIQUIBASE_DROP_FIRST=true` is a destructive local reset-on-start option; never enable it casually.
 - `SPRING_LIQUIBASE_CONTEXTS=dev` loads local showcase seed data such as `admin/admin`; do not enable it in production.
+- `SPRING_PROFILES_ACTIVE=dev` or `local` is required when using `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true`; production should set a real `APP_SECURITY_JWT_BASE64_SECRET` instead.
 - `init.sql` is destructive (`drop schema public cascade; create schema public;`). Do not run it casually.
 
 ## Minimal stack
@@ -117,7 +121,7 @@ app
 - All other `/api/**` endpoints require `Authorization: Bearer <jwt>`.
 - Authentication uses the `app_user` database table seeded by Liquibase.
 - Default user is `admin` / `admin` only in the Liquibase `dev` context; password hashes are BCrypt.
-- JWT signing uses `APP_SECURITY_JWT_BASE64_SECRET`; the unsafe fallback secret is disabled unless `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true` is set for local development.
+- JWT signing uses `APP_SECURITY_JWT_BASE64_SECRET`; the unsafe fallback secret is disabled unless `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true` is set together with the `dev` or `local` Spring profile for local development.
 - Token TTL uses `APP_SECURITY_TOKEN_VALIDITY_SECONDS`.
 - CORS origins use comma-separated `APP_CORS_ALLOWED_ORIGINS`.
 
@@ -128,7 +132,7 @@ app
 - For an `XResource` endpoint filtering by a `Y` field, keep the path under `x/y`, e.g. `GET /api/conge/employe/{idEmploye}`.
 - In create/update endpoints, assign the service response to a local variable named `result` before returning it, to make debugging easier.
 - Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400` and `NoSuchElementException`/missing optionals to `404` with `ResponseStatusException`.
-- Shared infrastructure in `ApiExceptionHandler` maps uncaught validation, conflict, authentication, bad sort, and data-integrity errors to stable Problem Details responses.
+- Shared infrastructure in `ApiExceptionHandler` maps uncaught validation, conflict, authentication, bad sort, data-integrity, and unexpected errors to stable Problem Details responses; unexpected `500` details stay generic to avoid leaking internals.
 - It is fine for every `creer` endpoint to catch `NoSuchElementException`, even when the current entity has no references yet, for consistency and future changes.
 - Repositories extend `JpaRepository`; do not add `@Repository` to Spring Data repository interfaces.
 - Use `JpaSpecificationExecutor` only when filter endpoints need it.
