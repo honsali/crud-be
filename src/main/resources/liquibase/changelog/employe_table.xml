@@ -82,4 +82,8 @@
             <column name="departement_id" type="numeric" />
         </loadData>
     </changeSet>
+
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval('seq_employe', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM employe;</sql>
+    </changeSet>
 </databaseChangeLog>

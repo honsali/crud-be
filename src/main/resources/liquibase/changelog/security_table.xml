@@ -30,7 +30,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="security-app-user-data" author="app_core" context="@dev">
+    <changeSet id="security-app-user-data" author="app_core">
         <loadData file="liquibase/data/app_user.csv" separator=";" tableName="app_user" usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="username" type="string" />
@@ -38,5 +38,10 @@
             <column name="roles" type="string" />
             <column name="activated" type="boolean" />
         </loadData>
+    </changeSet>
+
+    <changeSet id="security-app-user-integrity" author="app_core">
+        <sql dbms="postgresql">CREATE UNIQUE INDEX ux_app_user_username_lower ON app_user (lower(username));</sql>
+        <sql dbms="postgresql">SELECT setval('seq_app_user', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM app_user;</sql>
     </changeSet>
 </databaseChangeLog>

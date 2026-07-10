@@ -24,10 +24,9 @@ spring:
     open-in-view: false
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
   liquibase:
     enabled: ${SPRING_LIQUIBASE_ENABLED:true}
-    drop-first: ${SPRING_LIQUIBASE_DROP_FIRST:false}
     change-log: classpath:liquibase/master.xml
 
 application:
@@ -35,7 +34,6 @@ application:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000}
   security:
     jwt-base64-secret: ${APP_SECURITY_JWT_BASE64_SECRET:}
-    allow-unsafe-dev-secret: ${APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET:false}
     issuer: ${APP_SECURITY_JWT_ISSUER:app_core}
     audience: ${APP_SECURITY_JWT_AUDIENCE:app_core}
     token-validity-seconds: ${APP_SECURITY_TOKEN_VALIDITY_SECONDS:86400}

@@ -20,4 +20,15 @@
             referencedColumnNames="id"
             referencedTableName="type_conge" />
     </changeSet>
+
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-3" author="app_core">
+        <createIndex indexName="ix_conge_employe_code" tableName="conge">
+            <column name="employe_id" />
+            <column name="code" />
+        </createIndex>
+        <createIndex indexName="ix_conge_type_conge_id" tableName="conge">
+            <column name="type_conge_id" />
+        </createIndex>
+        <sql>ALTER TABLE conge ADD CONSTRAINT ck_conge_date_order CHECK (date_fin_conge IS NULL OR date_debut_conge IS NULL OR date_fin_conge &gt;= date_debut_conge)</sql>
+    </changeSet>
 </databaseChangeLog>

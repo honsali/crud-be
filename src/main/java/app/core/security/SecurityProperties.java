@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 @ConfigurationProperties("application.security")
 record SecurityProperties(
         String jwtBase64Secret,
-        boolean allowUnsafeDevSecret,
         @NotBlank String issuer,
         @NotBlank String audience,
         @Min(1) @Max(604800) long tokenValiditySeconds) {

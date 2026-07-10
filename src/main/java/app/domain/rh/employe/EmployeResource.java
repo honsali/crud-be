@@ -1,7 +1,6 @@
 package app.domain.rh.employe;
 
 import java.util.NoSuchElementException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import app.core.PageResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -37,8 +37,8 @@ public class EmployeResource {
     }
 
     @PostMapping("/api/employe/filtrer")
-    public Page<EmployeDto> filtrer(@RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
-        return employeService.filtrer(filtre, pageable);
+    public PageResponse<EmployeDto> filtrer(@RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
+        return PageResponse.from(employeService.filtrer(filtre, pageable));
     }
 
     @PutMapping("/api/employe/{id}")

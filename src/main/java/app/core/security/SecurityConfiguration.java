@@ -1,17 +1,13 @@
 package app.core.security;
 
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,10 +46,9 @@ class SecurityConfiguration {
 
     static final String AUTHORITIES_CLAIM = "auth";
     static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfiguration.class);
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityExceptionHandler securityExceptionHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -63,7 +58,13 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().denyAll())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(securityExceptionHandler)
+                        .accessDeniedHandler(securityExceptionHandler))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(securityExceptionHandler)
+                        .accessDeniedHandler(securityExceptionHandler)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
@@ -74,7 +75,7 @@ class SecurityConfiguration {
         configuration.setAllowedOrigins(splitCsv(allowedOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
-        configuration.setExposedHeaders(List.of("Authorization", "Link", "X-Total-Count"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(1800L);
 
@@ -94,24 +95,22 @@ class SecurityConfiguration {
     }
 
     @Bean
-    SecretKey jwtSecretKey(SecurityProperties properties, Environment environment) {
+    SecretKey jwtSecretKey(SecurityProperties properties) {
         String encodedSecret = properties.jwtBase64Secret();
-        if (encodedSecret != null && !encodedSecret.isBlank()) {
-            byte[] secret;
-            try {
-                secret = Base64.getDecoder().decode(encodedSecret);
-            } catch (IllegalArgumentException exception) {
-                throw new IllegalStateException("JWT secret must be valid Base64.", exception);
-            }
-            if (secret.length < 64) {
-                throw new IllegalStateException("JWT secret must decode to at least 64 bytes for HS512.");
-            }
-            return new SecretKeySpec(secret, "HmacSHA512");
+        if (encodedSecret == null || encodedSecret.isBlank()) {
+            throw new IllegalStateException("APP_SECURITY_JWT_BASE64_SECRET must be configured.");
         }
-        if (properties.allowUnsafeDevSecret() && hasAnyActiveProfile(environment, "dev", "local")) {
-            return EphemeralJwtKeyHolder.KEY;
+
+        byte[] secret;
+        try {
+            secret = Base64.getDecoder().decode(encodedSecret);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException("JWT secret must be valid Base64.", exception);
         }
-        throw new IllegalStateException("Configure APP_SECURITY_JWT_BASE64_SECRET, or explicitly set APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true with the dev or local Spring profile to use an ephemeral local-only key.");
+        if (secret.length < 64) {
+            throw new IllegalStateException("JWT secret must decode to at least 64 bytes for HS512.");
+        }
+        return new SecretKeySpec(secret, "HmacSHA512");
     }
 
     @Bean
@@ -161,24 +160,7 @@ class SecurityConfiguration {
         return authority != null && authority.startsWith("ROLE_");
     }
 
-    private static SecretKey createEphemeralJwtKey() {
-        byte[] secret = new byte[64];
-        new SecureRandom().nextBytes(secret);
-        LOGGER.warn("Using an ephemeral local-only JWT signing key; tokens become invalid after restart.");
-        return new SecretKeySpec(secret, "HmacSHA512");
-    }
-
-    private static boolean hasAnyActiveProfile(Environment environment, String... profiles) {
-        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        return Arrays.stream(profiles).anyMatch(activeProfiles::contains);
-    }
-
     private static List<String> splitCsv(String value) {
         return Arrays.stream(value.split(",")).map(String::trim).filter(item -> !item.isBlank()).toList();
-    }
-
-    private static final class EphemeralJwtKeyHolder {
-
-        private static final SecretKey KEY = createEphemeralJwtKey();
     }
 }

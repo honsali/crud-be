@@ -50,4 +50,8 @@
             <column name="employe_id" type="numeric" />
         </loadData>
     </changeSet>
+
+    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval('seq_conge', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM conge;</sql>
+    </changeSet>
 </databaseChangeLog>

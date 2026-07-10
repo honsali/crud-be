@@ -34,4 +34,8 @@
             <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
+
+    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval('seq_type_conge', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM type_conge;</sql>
+    </changeSet>
 </databaseChangeLog>

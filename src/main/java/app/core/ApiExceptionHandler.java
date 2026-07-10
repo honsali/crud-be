@@ -77,8 +77,10 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    ProblemDetail handleAuthentication(AuthenticationException exception) {
-        return problem(HttpStatus.UNAUTHORIZED, "Authentication failed", exception.getMessage());
+    ProblemDetail handleAuthentication() {
+        ProblemDetail problem = problem(HttpStatus.UNAUTHORIZED, "Authentication failed", "Invalid username or password.");
+        problem.setProperty("code", "INVALID_CREDENTIALS");
+        return problem;
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

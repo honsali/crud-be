@@ -26,4 +26,16 @@
             referencedColumnNames="id"
             referencedTableName="departement" />
     </changeSet>
+
+    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-3" author="app_core">
+        <createIndex indexName="ix_employe_sexe_id" tableName="employe">
+            <column name="sexe_id" />
+        </createIndex>
+        <createIndex indexName="ix_employe_situation_familiale_id" tableName="employe">
+            <column name="situation_familiale_id" />
+        </createIndex>
+        <createIndex indexName="ix_employe_departement_id" tableName="employe">
+            <column name="departement_id" />
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

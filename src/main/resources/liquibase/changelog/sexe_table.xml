@@ -34,4 +34,8 @@
             <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
+
+    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval('seq_sexe', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM sexe;</sql>
+    </changeSet>
 </databaseChangeLog>

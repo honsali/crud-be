@@ -34,4 +34,8 @@
             <column name="description" type="text" />
         </loadData>
     </changeSet>
+
+    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval('seq_departement', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM departement;</sql>
+    </changeSet>
 </databaseChangeLog>
