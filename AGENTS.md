@@ -1,202 +1,46 @@
-# AGENTS.md
+# Agent instructions
 
-Agent-facing guide for this repository. Keep this file and `README.md` in sync when architecture, commands, or conventions change.
+## Project baseline
 
-## Current baseline
+- This is a Maven/Spring Boot backend that compiles with Java 25.
+- The authoritative application version is the top-level `<version>` in `pom.xml`.
+- Validate source changes with `./mvnw test`; the repository currently has no test sources, so this gate proves compilation only.
+- Preserve unrelated working-tree changes before editing.
+- The HR entity/DTO/mapper/repository/service/resource and Liquibase files are generated as an overlay by the sibling `../engine` project, then reviewed and selectively copied here. Security and shared application infrastructure are maintained in this backend.
+- Keep generated runtime code explicit and hand-editable. Put reusable generation logic in `../engine`; do not introduce a generic runtime CRUD framework.
+- `review_260710.md` is the dated modernization review and implementation checklist.
 
-- Minimal backend-only Spring Boot CRUD API for HR (`ressources humaines`).
-- Personal/solo-developer application: optimize for the owner, not for enterprise/team process.
-- Java 25 + Spring Boot 4.0.6.
-- Maven artifact/application name stays generic/anonymized: artifact `core`, application name `app_core`, main class `CoreApplication`.
-- CORS and JWT authentication are included for the frontend showcase.
-- No tests are currently present and no tests should be added unless explicitly requested.
-- Auditing and optional JHipster-style infrastructure have been removed.
-- Verification used: `./mvnw -DskipTests clean package` with JDK 25.
+## Current security contract
 
-## Solo-developer preference
+- `POST /api/authenticate` is the only public application endpoint. It returns the existing `{ "id_token": "..." }` response contract.
+- All other `/api/**` routes require either `ROLE_USER` or `ROLE_ADMIN`. Both roles have equal CRUD access by default.
+- Spring method security is enabled. No endpoint is currently ADMIN-only; add a focused `@PreAuthorize("hasRole('ADMIN')")` only when a concrete business rule requires it.
+- Only application-owned `ROLE_*` authorities are copied into JWT claims or returned by `/api/user`. Spring Security `FACTOR_*` authorities remain internal and are filtered from JWT claims, decoded application authorities, and public user data.
+- JWTs use HS512 and contain configured issuer, audience, timestamps, subject, and application roles.
+- `SecurityProperties` binds and validates `application.security`: issuer and audience must be nonblank, and token validity must be between 1 and 604800 seconds.
+- An explicit JWT secret must be strict Base64 and decode to at least 64 bytes. Invalid or short explicit secrets fail startup and never fall back.
+- Without an explicit secret, an ephemeral random 64-byte key is allowed only when `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true` and the active profile is `dev` or `local`. It is generated once per process, is never logged, and restart invalidates existing local tokens.
+- `application-dev.yml` and `application-local.yml` bind the server to `127.0.0.1` by default. `SERVER_ADDRESS` is the deliberate override for Docker or LAN access.
+- The Liquibase `dev` context seeds the local `admin/admin` account. Treat it as loopback-only demo access, not production credentials.
 
-- This is a one-developer app made for the owner only.
-- Prefer simple, direct, maintainable solutions over enterprise/team-oriented patterns.
-- Do not add abstractions, process, compatibility layers, or tooling just to satisfy future teams, DBAs, onboarding, or organizational conventions.
-- Keep the workflow lightweight. Destructive resets or migration simplifications can be acceptable during development when the user confirms data can be discarded.
-- Use plain Maven versions without `-SNAPSHOT`; snapshot versioning is unnecessary for this solo project.
+## Security configuration variables
 
-## Generated foundation model
+- `APP_SECURITY_JWT_BASE64_SECRET`
+- `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET`
+- `APP_SECURITY_JWT_ISSUER` (default `app_core`)
+- `APP_SECURITY_JWT_AUDIENCE` (default `app_core`)
+- `APP_SECURITY_TOKEN_VALIDITY_SECONDS` (default `86400`, allowed `1..604800`)
+- `SERVER_ADDRESS` (dev/local default `127.0.0.1`)
+- `APP_CORS_ALLOWED_ORIGINS`
 
-- The domain CRUD backend is generated from a DSL and then used as a clean initial state for AI/manual tweaking.
-- The generated code should look like good, simple hand-written code: explicit per-entity controllers, services, DTOs, mappers, repositories, specifications, and Liquibase files.
-- Put genericity in the generator/templates, not in the generated runtime code. Avoid generic CRUD engines or hidden abstractions in the generated application.
-- `ReferenceDataService` is the intentional exception: a small generic, read-only reference-data endpoint is acceptable because entities and filter fields are strictly allow-listed.
-- Any entity or field added to `ReferenceDataService.REFERENCES` must remain explicitly allow-listed; never interpolate user-provided entity or field names outside that allow-list.
-- Repetition in generated code is acceptable when it makes each entity easy to understand, debug, and extend by hand.
-- Use the current `Employe` code as the style reference when aligning generator output across other entities.
-- Generated DTO validation stays deliberately simple: required strings use `@NotBlank`, required non-strings use `@NotNull`, and generated DTOs do not add `@Size(max = 250)` or semantic validators such as `@Email` for now.
-- DSL `.isId()` means a business identifier and requires uniqueness in both the generated code and Liquibase schema.
+## Existing architecture conventions
 
-## Essential commands
-
-```bash
-export JAVA_HOME=/c/Logiciels/jdk-25.0.3+9
-export PATH="$JAVA_HOME/bin:$PATH"
-export APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true
-export SPRING_PROFILES_ACTIVE=dev
-export SPRING_LIQUIBASE_CONTEXTS=dev
-
-./mvnw spring-boot:run
-./mvnw -DskipTests compile
-./mvnw -DskipTests package
-```
-
-Windows scripts:
-
-- `run.bat` sets `JAVA_HOME=C:\Logiciels\jdk-25.0.3+9`, enables local dev security/Liquibase settings, and runs Spring Boot.
-- `clean.bat` sets the same `JAVA_HOME` and runs `mvn -DskipTests clean package`.
-- Maven Wrapper files are present (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`).
-
-## Environment/configuration
-
-- Java 25 is required (`pom.xml` sets `<java.version>25</java.version>`).
-- Spring Boot parent: `4.0.6`.
-- Main config: `src/main/resources/application.yml`.
-- PostgreSQL dev database: `crud_db`; username/password: `crud/crud`.
-- Default frontend CORS origins: `http://localhost:3000`, `http://localhost:4200`, `http://localhost:5173`, `http://localhost:9000`.
-- Default pageable size: `20`; maximum pageable size: `100`.
-- Default showcase login is seeded in DB table `app_user` only when Liquibase runs with the `dev` context: `admin` / `admin`.
-- Server port: `8080`.
-- Liquibase changelog entry point: `src/main/resources/liquibase/master.xml`.
-- Liquibase can be disabled with `SPRING_LIQUIBASE_ENABLED=false`.
-- `SPRING_LIQUIBASE_DROP_FIRST=true` is a destructive local reset-on-start option; never enable it casually.
-- `SPRING_LIQUIBASE_CONTEXTS=dev` loads local showcase seed data such as `admin/admin`; do not enable it in production.
-- `SPRING_PROFILES_ACTIVE=dev` or `local` is required when using `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true`; production should set a real `APP_SECURITY_JWT_BASE64_SECRET` instead.
-- `init.sql` is destructive (`drop schema public cascade; create schema public;`). Do not run it casually.
-
-## Minimal stack
-
-Kept:
-
-- `spring-boot-starter-webmvc`
-- `spring-boot-starter-data-jpa`
-- `spring-boot-starter-validation`
-- `spring-boot-starter-liquibase`
-- `spring-boot-starter-security`
-- `spring-boot-starter-oauth2-resource-server`
-- PostgreSQL runtime driver
-
-Removed/avoided:
-
-- auditing (`AbstractAuditingEntity`, auditing annotations/config)
-- old JHipster database-backed user/authority modules
-- cache/Ehcache/Caffeine/JCache
-- actuator
-- OpenAPI/SpringDoc
-- devtools
-- notification module
-- custom validation framework
-- broad custom config/Jackson infrastructure
-- JHipster-specific user schema seed data
-- placeholder Maven `settings.xml`
-
-## Architecture map
-
-```text
-app
-├── CoreApplication.java
-├── core
-│   ├── BaseSpecification.java # Small shared Specification predicate helpers
-│   ├── referenceData          # Minimal allow-listed reference data endpoint
-│   └── security               # Minimal CORS, database login, JWT issue/validate
-└── domain/rh
-    ├── conge                # Leave request CRUD, nested under employee for create/list
-    ├── departement          # Department CRUD
-    ├── employe              # Employee CRUD and Specification-based filtering
-    ├── sexe                 # Reference entity/repository/mapper/DTO
-    ├── situationFamiliale   # Reference entity/repository/mapper/DTO
-    └── typeConge            # Reference entity/repository/mapper/DTO
-```
-
-## Security/CORS notes
-
-- `POST /api/authenticate` is public and returns `{ "id_token": "..." }`.
-- `GET /api/user` returns the current authenticated user, including `username`, `role`, `roles`, and `authorities` for the frontend.
-- All other `/api/**` endpoints require `Authorization: Bearer <jwt>`.
-- Authentication uses the `app_user` database table seeded by Liquibase.
-- Default user is `admin` / `admin` only in the Liquibase `dev` context; password hashes are BCrypt.
-- JWT signing uses `APP_SECURITY_JWT_BASE64_SECRET`; the unsafe fallback secret is disabled unless `APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET=true` is set together with the `dev` or `local` Spring profile for local development.
-- Token TTL uses `APP_SECURITY_TOKEN_VALIDITY_SECONDS`.
-- CORS origins use comma-separated `APP_CORS_ALLOWED_ORIGINS`.
-
-## CRUD/domain conventions
-
-- REST controller classes are named `*Resource` and commonly use French method names: `creer`, `maj`, `recupererParId`, `supprimer`, `lister`, `filtrer`.
-- Prefer full endpoint paths directly on each `@GetMapping`/`@PostMapping`/`@PutMapping`/`@DeleteMapping`; avoid class-level `@RequestMapping` prefixes.
-- For an `XResource` endpoint filtering by a `Y` field, keep the path under `x/y`, e.g. `GET /api/conge/employe/{idEmploye}`.
-- In create/update endpoints, assign the service response to a local variable named `result` before returning it, to make debugging easier.
-- Business logic belongs in `*Service`; controllers translate `IllegalArgumentException` to `400` and `NoSuchElementException`/missing optionals to `404` with `ResponseStatusException`.
-- Shared infrastructure in `ApiExceptionHandler` maps uncaught validation, conflict, authentication, bad sort, data-integrity, and unexpected errors to stable Problem Details responses; unexpected `500` details stay generic to avoid leaking internals.
-- It is fine for every `creer` endpoint to catch `NoSuchElementException`, even when the current entity has no references yet, for consistency and future changes.
-- Repositories extend `JpaRepository`; do not add `@Repository` to Spring Data repository interfaces.
-- Use `JpaSpecificationExecutor` only when filter endpoints need it.
-- Normal CRUD services should use dedicated `*Mapper` classes for entity/DTO conversion; avoid direct `EntityManager` use there unless there is a real need.
-- When a mapper needs to attach a referenced entity from an incoming DTO, use the referenced entity mapper's repository-backed `toEntityAsRef(dto)` method instead of creating a detached id-only stub.
-- DTOs are Java records only: they declare the API shape and validation annotations, while mapping code stays in `*Mapper` classes.
-- Mappers expose the explicit mapping helpers:
-  - `toDto(entity)` for full API output.
-  - `toDtoAsRef(entity)` for nested lazy references.
-  - `toEntity(dto)` only where simple creation needs it.
-  - `toEntityAsRef(dto)` for associations by id, resolving the referenced entity through its repository.
-  - `copyToEntity(dto, entity)` when creating/updating a managed entity.
-- Keep matching `id<Entity>` DTO fields because the frontend depends on them; map those fields from the normal entity `getId()`.
-- Treat `id<Entity>` DTO fields as representation-only compatibility fields; association mapping must rely on the normal `id()` field.
-- DTOs convey the frontend/user intent. If a nested reference DTO is `null` in an update payload, the mapper may nullify that association; add explicit validation elsewhere when a relation is mandatory.
-- Reference-entity DTOs with `libelle` and `code` require both fields to be `@NotBlank`.
-- Do not add extra entity getters like `getId<Entity>()` just for DTO compatibility.
-- Entity getters use explicit `return this.field;` style.
-- Entities do not implement `Serializable` unless a real serialization need is introduced.
-- Avoid other old generated/JHipster-style helpers such as fluent `id(...)` and `getDisplayString()` unless explicitly requested.
-- JPA relationships are lazy `@ManyToOne` where applicable.
-- Filter DTOs are search criteria only; do not add validation such as date-range checks unless it prevents a real technical error. Inconsistent filters may simply return no results.
-- Filter endpoints may return Spring Data `Page<Dto>` directly as an accepted solo-dev trade-off; keep stable fallback sorting and append `id` as a tie-breaker.
-
-## Liquibase conventions
-
-- Never rely on Hibernate DDL generation; `spring.jpa.hibernate.ddl-auto=none`.
-- Keep Liquibase changelog files separated under `src/main/resources/liquibase/changelog/` and include them from `src/main/resources/liquibase/master.xml`.
-- Keep `master.xml` as the entry point only: table changelogs first, then constraints changelogs.
-- Table changelogs contain `createSequence`, `createTable`, and `loadData` where seed data exists.
-- For the generated initial schema, put required and single-column unique constraints inline on table columns with `<constraints nullable="false" unique="true" uniqueConstraintName="ux_<table>_<column>" />`; keep constraints changelogs mainly for foreign keys or later append-only migrations.
-- Store seed data under `src/main/resources/liquibase/data/*.csv` and reference it with `loadData`.
-- Existing sequences are named `seq_<table_name>`, start at `100`, and use increment/allocation size `1` for predictable solo-app IDs.
-
-## Current REST endpoint inventory
-
-- Auth:
-  - `POST /api/authenticate`
-- User:
-  - `GET /api/user`
-- Reference data:
-  - `GET /api/reference/{entity}`
-  - `GET /api/reference/{entity}/{field}/{value}`
-  - `GET /api/reference/{entity}/{id}`
-- Departement:
-  - `POST /api/departement`
-  - `GET /api/departement`
-  - `GET /api/departement/{id}`
-  - `PUT /api/departement/{id}`
-  - `DELETE /api/departement/{id}`
-- Employe:
-  - `POST /api/employe`
-  - `POST /api/employe/filtrer`
-  - `GET /api/employe/{id}`
-  - `PUT /api/employe/{id}`
-  - `DELETE /api/employe/{id}`
-- Conge:
-  - `POST /api/employe/{idEmploye}/conge`
-  - `GET /api/conge/employe/{idEmploye}`
-  - `GET /api/conge/{id}`
-  - `PUT /api/conge/{id}`
-  - `DELETE /api/conge/{id}`
-
-## Watch points for future work
-
-- Keep user changes safe: run `git status --short` before edits and do not overwrite unrelated modified files.
-- If stable real data becomes important, stop rewriting old Liquibase changeSets and add append-only migrations instead.
+- Services own transaction boundaries; read operations use `@Transactional(readOnly = true)`.
+- `spring.jpa.open-in-view` is disabled and Liquibase owns the schema.
+- JPA relationships are lazy; collection queries use entity graphs where needed.
+- DTOs are records and dedicated mappers handle full and compact-reference conversion.
+- Spring Data repositories do not need `@Repository` annotations.
+- Filtering uses `BaseSpecification`; text LIKE values are escaped.
+- Pageable endpoints append `id` as a deterministic tie-breaker through `PageableUtils`.
+- `ReferenceDataService` uses a strict entity/field allowlist; never interpolate unapproved user-provided JPQL identifiers.
+- Unexpected API failures must remain sanitized and logged server-side.

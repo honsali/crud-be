@@ -2,13 +2,11 @@ package app.core.security;
 
 import java.time.Instant;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -23,28 +21,27 @@ import jakarta.validation.constraints.NotBlank;
 @RestController
 class AuthResource {
 
-    private static final String ISSUER = "app_core";
-
     private final AuthenticationManager authenticationManager;
     private final JwtEncoder jwtEncoder;
-    private final long tokenValiditySeconds;
+    private final SecurityProperties securityProperties;
 
-    AuthResource(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, @Value("${application.security.token-validity-seconds}") long tokenValiditySeconds) {
+    AuthResource(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, SecurityProperties securityProperties) {
         this.authenticationManager = authenticationManager;
         this.jwtEncoder = jwtEncoder;
-        this.tokenValiditySeconds = tokenValiditySeconds;
+        this.securityProperties = securityProperties;
     }
 
     @PostMapping("/api/authenticate")
     ResponseEntity<TokenResponse> authenticate(@Valid @RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         Instant now = Instant.now();
-        List<String> authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        List<String> authorities = SecurityConfiguration.applicationRoles(authentication.getAuthorities());
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer(ISSUER)
+                .issuer(securityProperties.issuer())
+                .audience(List.of(securityProperties.audience()))
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(tokenValiditySeconds))
+                .expiresAt(now.plusSeconds(securityProperties.tokenValiditySeconds()))
                 .subject(authentication.getName())
                 .claim(SecurityConfiguration.AUTHORITIES_CLAIM, authorities)
                 .build();
@@ -56,7 +53,7 @@ class AuthResource {
                 .body(new TokenResponse(token));
     }
 
-    record LoginRequest(@NotBlank String username, @NotBlank String password, Boolean rememberMe) {
+    record LoginRequest(@NotBlank String username, @NotBlank String password) {
     }
 
     record TokenResponse(@JsonProperty("id_token") String idToken) {

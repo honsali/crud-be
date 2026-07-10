@@ -3,12 +3,11 @@ package app.domain.rh.employe;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import app.core.ConflictException;
+import app.core.PageableUtils;
 
 @Service
 @Transactional
@@ -33,7 +32,7 @@ public class EmployeService {
 
     @Transactional(readOnly = true)
     public Page<EmployeDto> filtrer(EmployeFiltre filtre, Pageable pageable) {
-        return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), avecTriStable(pageable)).map(employeMapper::toDto);
+        return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), PageableUtils.avecTriStable(pageable)).map(employeMapper::toDto);
     }
 
     public EmployeDto maj(Long id, EmployeDto dto) {
@@ -53,15 +52,5 @@ public class EmployeService {
     public void supprimer(Long id) {
         Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
         employeRepository.delete(employe);
-    }
-
-    private Pageable avecTriStable(Pageable pageable) {
-        Sort sort = pageable.getSort();
-        if (sort.isUnsorted()) {
-            sort = Sort.by("id");
-        } else if (sort.getOrderFor("id") == null) {
-            sort = sort.and(Sort.by("id"));
-        }
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 }

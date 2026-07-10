@@ -36,4 +36,6 @@ application:
   security:
     jwt-base64-secret: ${APP_SECURITY_JWT_BASE64_SECRET:}
     allow-unsafe-dev-secret: ${APP_SECURITY_ALLOW_UNSAFE_DEV_SECRET:false}
+    issuer: ${APP_SECURITY_JWT_ISSUER:app_core}
+    audience: ${APP_SECURITY_JWT_AUDIENCE:app_core}
     token-validity-seconds: ${APP_SECURITY_TOKEN_VALIDITY_SECONDS:86400}
