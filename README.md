@@ -1,72 +1,190 @@
 # CRUD RH Backend
 
-Minimal Spring Boot REST API for a small HR (`ressources humaines`) CRUD showcase.
+Minimal Spring Boot REST API used as a complete HR (`ressources humaines`) CRUD showcase and as a reusable foundation for small, tailor-made business applications.
 
-Personal/solo-developer project: favor simple, direct, maintainable choices over enterprise or team-oriented process.
+## Project philosophy
 
-## Purpose and tailoring workflow
+This repository is designed for projects developed and maintained by a solo developer for very small businesses.
 
-This repository is a tailor-style executable template, not an application intended to be deployed unchanged. The RH domain and data provide a complete example that proves the generated backend, the tied `../crud-fe` frontend, PostgreSQL, Liquibase, authentication, and CRUD flows work together.
+The main priorities are:
 
-For a new client:
+* simplicity;
+* explicit and readable code;
+* low operational complexity;
+* fast customization;
+* easy maintenance by both humans and AI agents.
 
-1. copy this backend and the tied frontend;
-2. launch the RH showcase to verify the complete environment;
-3. remove the RH backend and frontend domain artifacts;
-4. remove the RH Liquibase changelogs, constraints, CSV files, and `master.xml` includes;
-5. generate the real client domain and client data with `../engine`;
-6. recreate a fresh database and verify the tailored client application.
+Prefer direct, project-specific implementations over enterprise abstractions, unnecessary genericity, or team-oriented processes.
 
-The disposable RH database must not be promoted into a client environment. A tailored output should contain no residual RH package, table, changelog, CSV, route, or frontend module.
+Do not introduce additional architectural layers, frameworks, profiles, modules, or infrastructure unless they solve a concrete requirement of the current client project.
 
-## Generated code and data
+## Purpose
 
-The domain CRUD code is generated from a Java DSL, but the generated output is intended to be a clean, explicit, hand-editable foundation for future AI/manual tweaks. Genericity belongs in the generator/templates, not in the generated runtime code.
+This repository is an executable project template. It is not intended to be deployed unchanged for a client.
 
-The unconditional RH CSV loads are intentional showcase fixtures so this template starts in a functional state. Generated client data may also load unconditionally when it is genuine client bootstrap/reference data intended for deployment. A baseline/demo distinction is needed only when a client project contains both production seed data and temporary fake verification records.
+The included HR domain provides a complete working example demonstrating that the following components operate correctly together:
 
-Once client migrations have run in a persistent environment, preserve Liquibase history and add new corrective change sets rather than rewriting executed migrations.
+* this Spring Boot backend;
+* the associated `../crud-fe` frontend;
+* PostgreSQL;
+* Liquibase migrations;
+* authentication and authorization;
+* generated CRUD operations;
+* initial CSV data.
 
-## JWT secret
+The HR application is therefore both a showcase and a verification environment for the complete project stack.
 
-Every launch, on the laptop or server, requires `APP_SECURITY_JWT_BASE64_SECRET`. It must be strict Base64 decoding to at least 64 bytes. There is no committed fallback, temporary local JWT key, or laptop-specific Spring profile; `run.bat` stops with an explanation when the variable is missing.
+## Client customization workflow
 
-## Initial administrator
+For each new client project:
 
-Liquibase loads `liquibase/data/app_user.csv` automatically during the initial database migration. The showcase credential is `admin/admin`.
+1. Copy this backend repository and the associated `../crud-fe` frontend.
+2. Start the existing HR showcase and verify that the full environment works correctly.
+3. Remove all HR-specific backend and frontend artifacts.
+4. Remove all HR-specific Liquibase changelogs, database constraints, CSV files, tables, and `master.xml` includes.
+5. Generate the actual client domain, migrations, CRUD code, and initial data using `../engine`.
+6. Create a fresh database.
+7. Start the customized application and verify the complete client workflow.
 
-Before the first migration of the tailored client/server database:
+The disposable HR showcase database must never be reused or promoted into a client environment.
 
-1. choose a unique administrator username and strong password;
-2. generate a BCrypt cost-12 hash, for example with `docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 <username>`;
-3. put the username and hash—not the clear password—in `app_user.csv`;
-4. start the server normally and let Liquibase create the account.
+A completed client project must not contain any remaining HR-specific package, class, table, route, migration, CSV file, constraint, or frontend module.
 
-Liquibase records the change set, so later startups do not insert the account again. Never deploy the showcase `admin/admin` credential. If the database was already migrated, editing the CSV is too late; add a new migration or insert the account deliberately.
+## Generated code
 
-## Resetting the local database
+Domain CRUD code is generated from a Java DSL.
 
-For generator testing, run `reset-local-db.sql` manually against the disposable local PostgreSQL database. It drops and recreates the complete `public` schema. Normal application startup does not reset the database, so always verify the target before running the script.
+Generated code is not treated as an untouchable build artifact. It is intended to be a clean, explicit, and hand-editable foundation that can later be adapted manually or by an AI agent.
 
-## Database integrity
+Generic behavior belongs in the generator and its templates, not in the generated runtime application.
 
-Generated foreign keys are indexed, explicit-ID CSV loads synchronize their sequences, usernames are unique ignoring case, and the RH leave dates have an explicit ordering check. Hibernate validates the generated schema after Liquibase at startup. Optimistic locking is intentionally omitted for the current small-client, low-concurrency scope.
+Generated runtime code should remain:
 
-## Pagination contract
+* explicit;
+* easy to understand;
+* easy to debug;
+* easy to modify;
+* specific to the client project.
 
-Paginated API endpoints return the application-owned flat `PageResponse<T>` contract expected by the frontend. Spring Data `Page` is kept inside repositories and services and is never serialized directly.
+Avoid replacing straightforward generated code with generic runtime frameworks or abstract reusable layers unless the client project has a concrete need for them.
 
-## Stack
+## Initial data
 
-- Java 25 (`C:\Logiciels\jdk-25.0.3+9` locally)
-- Spring Boot 4.0.6
-- Spring WebMVC
-- Spring Security JWT resource server
-- CORS configuration for frontend apps
-- Spring Data JPA / Hibernate 7
-- Bean Validation
-- Liquibase
-- PostgreSQL
-- Maven Wrapper
+The RH CSV files in this executable template are intentional showcase fixtures. They make the copied backend and frontend immediately usable, but they are not client production data and must be removed during client customization.
 
-No auditing, cache, actuator, OpenAPI, devtools, notification module, or old JHipster user/authority schema is kept.
+After customization, backend initialization data should contain only:
+
+* reference data required by the application;
+* genuine client bootstrap or production data intended to exist in the deployed system.
+
+During development, the database is considered disposable and may be dropped and recreated at any time. Liquibase migrations and CSV imports must therefore be sufficient to rebuild a complete, valid, and usable database from scratch.
+
+E2E tests must start from a normally initialized database and create and remove any temporary records they require. Do not add test or demonstration records to a tailored client's CSV files, Liquibase change sets, or application initialization mechanisms.
+
+## Testing strategy
+
+This project relies exclusively on end-to-end tests.
+
+For this type of application, an E2E test is considered the strongest proof that a feature works correctly because it validates the complete system as it is actually used: frontend, backend, authentication, database, Liquibase migrations, initialization data, and business workflows.
+
+Unit tests are intentionally not added by default. In the context of small applications maintained by a solo developer, they would often duplicate implementation details without providing enough additional confidence to justify their maintenance cost.
+
+Reliability is also built progressively through two complementary mechanisms:
+
+* the same project foundation is reused and improved through successive client projects;
+* most CRUD code is produced by a generator whose templates have already been exercised and validated across previous projects.
+
+A defect found in repeated generated code should preferably be corrected in the generator or its templates so that all future generated projects benefit from the fix.
+
+Client-specific behavior and complete user workflows must be validated through E2E tests against a freshly initialized database.
+
+Do not introduce unit tests, mocked tests, or isolated backend test suites automatically. Add another type of test only when it addresses a concrete risk that cannot be adequately covered by the E2E test suite.
+
+### Current verification gap
+
+No executable E2E test harness or test files are currently committed in this backend or the tied frontend. `./mvnw test` succeeds but currently proves compilation only because there are no test sources. The next testing priority is a repeatable E2E workflow that recreates PostgreSQL from Liquibase, starts both applications, and covers authentication, representative CRUD and validation workflows.
+
+## Development and production environments
+
+This project does not use separate Spring profiles or separate Spring application configurations for development and production.
+
+The environments are defined by where the application runs:
+
+* **development** means the application is running locally on the developer's machine;
+* **production** means the same application is running on the deployment server.
+
+Development is intentionally kept as close as possible to production.
+
+Application behavior, Liquibase migrations, database structure, and CSV initialization data are therefore the same in both environments.
+
+Only external runtime values should normally differ, such as:
+
+* database URLs;
+* credentials and secrets;
+* ports;
+* hostnames;
+* allowed frontend origins;
+* other machine-specific connection settings.
+
+Do not introduce `dev`, `prod`, or similar Spring profiles, profile-specific business behavior, or development-only initialization data unless the project explicitly requires them.
+
+This approach is intentional. The applications are small, maintained by one developer, and deployed for very small businesses. Maintaining multiple application behaviors would add complexity without providing enough value.
+
+## Runtime security
+
+Every launch requires `APP_SECURITY_JWT_BASE64_SECRET`. It must be strict Base64 that decodes to at least 64 bytes; there is no committed fallback or local-only key. `POST /api/authenticate` is the only public application endpoint, and every other `/api/**` endpoint requires `ROLE_USER` or `ROLE_ADMIN`.
+
+Runtime security values are supplied externally:
+
+* `APP_SECURITY_JWT_BASE64_SECRET`;
+* `APP_SECURITY_JWT_ISSUER` (default `app_core`);
+* `APP_SECURITY_JWT_AUDIENCE` (default `app_core`);
+* `APP_SECURITY_TOKEN_VALIDITY_SECONDS` (default `86400`, allowed `1..604800`);
+* `APP_CORS_ALLOWED_ORIGINS`;
+* `SERVER_ADDRESS` when an explicit bind address is required.
+
+Liquibase loads `liquibase/data/app_user.csv` once during the initial migration. The showcase credential is `admin/admin`. Before the first migration of a tailored client database, replace it with a unique administrator username and BCrypt hash. Never deploy the showcase credential. If the change set has already run, add a corrective change set or provision the account deliberately instead of rewriting the executed migration.
+
+## Database migrations
+
+Liquibase manages the database schema and initial data.
+
+Before delivering a customized client project, it is acceptable to recreate the database and replace the disposable HR migration history with a clean client-specific migration history.
+
+After client migrations have been executed in a persistent environment, preserve the existing Liquibase history.
+
+Do not modify or rewrite already executed change sets. Add new corrective or incremental change sets instead.
+
+For generator testing, `reset-local-db.sql` is the explicit destructive reset. Run it manually only against the disposable local database; normal application startup does not drop the schema.
+
+Current reconstruction safeguards include ordered changelog includes, indexed foreign keys, explicit-ID sequence synchronization, case-insensitive username uniqueness, an RH leave-date ordering check, and Hibernate schema validation after Liquibase. Services own transaction boundaries, JPA relationships are lazy, collection queries use entity graphs where needed, text filters escape SQL LIKE wildcards, and paginated APIs use the stable application-owned `PageResponse<T>` contract.
+
+## Technology stack
+
+* Java 25
+* Spring Boot 4.0.6
+* Spring Web MVC
+* Spring Security
+* JWT resource server authentication
+* CORS configuration for frontend applications
+* Spring Data JPA
+* Hibernate 7
+* Bean Validation
+* Liquibase
+* PostgreSQL
+* Maven Wrapper
+
+## Intentionally excluded
+
+The following features are intentionally not included:
+
+* auditing;
+* caching;
+* Spring Boot Actuator;
+* OpenAPI or Swagger configuration;
+* Spring Boot DevTools;
+* notification modules;
+
+Their absence is intentional, not an oversight.
+
+Do not add them automatically. Introduce one of these features only when it is required by a concrete client need.
