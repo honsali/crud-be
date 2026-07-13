@@ -1,7 +1,6 @@
 package app.domain.rh.departement;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,14 +24,8 @@ public class DepartementResource {
 
     @PostMapping("/api/departement")
     public ResponseEntity<DepartementDto> creer(@Valid @RequestBody DepartementDto departementDto) {
-        try {
-            DepartementDto result = departementService.creer(departementDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        DepartementDto result = departementService.creer(departementDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/api/departement")
@@ -46,14 +39,7 @@ public class DepartementResource {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
         }
 
-        try {
-            DepartementDto result = departementService.maj(id, departementDto);
-            return result;
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return departementService.maj(id, departementDto);
     }
 
     @GetMapping("/api/departement/{id}")
@@ -63,11 +49,7 @@ public class DepartementResource {
 
     @DeleteMapping("/api/departement/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        try {
-            departementService.supprimer(id);
-            return ResponseEntity.noContent().build();
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        departementService.supprimer(id);
+        return ResponseEntity.noContent().build();
     }
 }

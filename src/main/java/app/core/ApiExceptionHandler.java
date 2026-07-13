@@ -7,27 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
-
-    @ExceptionHandler(ResponseStatusException.class)
-    ProblemDetail handleResponseStatus(ResponseStatusException exception) {
-        String detail = exception.getReason() == null ? defaultDetail(exception.getStatusCode()) : exception.getReason();
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(exception.getStatusCode(), detail);
-        problem.setTitle(defaultTitle(exception.getStatusCode()));
-        return problem;
-    }
 
     @ExceptionHandler(NoSuchElementException.class)
     ProblemDetail handleNotFound(NoSuchElementException exception) {
@@ -52,11 +41,6 @@ public class ApiExceptionHandler {
                 .toList();
         problem.setProperty("fields", fields);
         return problem;
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    ProblemDetail handleNotReadable() {
-        return problem(HttpStatus.BAD_REQUEST, "Malformed request", "The request body is missing or invalid.");
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
@@ -86,15 +70,6 @@ public class ApiExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
         return problem;
-    }
-
-    private static String defaultTitle(HttpStatusCode statusCode) {
-        HttpStatus status = HttpStatus.resolve(statusCode.value());
-        return status == null ? "HTTP " + statusCode.value() : status.getReasonPhrase();
-    }
-
-    private static String defaultDetail(HttpStatusCode statusCode) {
-        return "HTTP " + statusCode.value();
     }
 
     private record FieldViolation(String field, String message) {

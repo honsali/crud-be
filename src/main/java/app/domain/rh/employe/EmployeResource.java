@@ -1,6 +1,5 @@
 package app.domain.rh.employe;
 
-import java.util.NoSuchElementException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +25,12 @@ public class EmployeResource {
 
     @PostMapping("/api/employe")
     public ResponseEntity<EmployeDto> creer(@Valid @RequestBody EmployeDto employeDto) {
-        try {
-            EmployeDto result = employeService.creer(employeDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        EmployeDto result = employeService.creer(employeDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PostMapping("/api/employe/filtrer")
-    public PageResponse<EmployeDto> filtrer(@RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
+    public PageResponse<EmployeDto> filtrer(@Valid @RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
         return PageResponse.from(employeService.filtrer(filtre, pageable));
     }
 
@@ -47,14 +40,7 @@ public class EmployeResource {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
         }
 
-        try {
-            EmployeDto result = employeService.maj(id, employeDto);
-            return result;
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return employeService.maj(id, employeDto);
     }
 
     @GetMapping("/api/employe/{id}")
@@ -64,11 +50,7 @@ public class EmployeResource {
 
     @DeleteMapping("/api/employe/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        try {
-            employeService.supprimer(id);
-            return ResponseEntity.noContent().build();
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        employeService.supprimer(id);
+        return ResponseEntity.noContent().build();
     }
 }

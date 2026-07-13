@@ -1,7 +1,6 @@
 package app.domain.rh.conge;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,23 +24,13 @@ public class CongeResource {
 
     @PostMapping("/api/employe/{idEmploye}/conge")
     public ResponseEntity<CongeDto> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeDto congeDto) {
-        try {
-            CongeDto result = congeService.creer(idEmploye, congeDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        CongeDto result = congeService.creer(idEmploye, congeDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/api/conge/employe/{idEmploye}")
     public List<CongeDto> listerParIdEmploye(@PathVariable Long idEmploye) {
-        try {
-            return congeService.listerParIdEmploye(idEmploye);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        return congeService.listerParIdEmploye(idEmploye);
     }
 
     @PutMapping("/api/conge/{id}")
@@ -50,14 +39,7 @@ public class CongeResource {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path ID and body ID mismatch");
         }
 
-        try {
-            CongeDto result = congeService.maj(id, congeDto);
-            return result;
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return congeService.maj(id, congeDto);
     }
 
     @GetMapping("/api/conge/{id}")
@@ -67,11 +49,7 @@ public class CongeResource {
 
     @DeleteMapping("/api/conge/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        try {
-            congeService.supprimer(id);
-            return ResponseEntity.noContent().build();
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        congeService.supprimer(id);
+        return ResponseEntity.noContent().build();
     }
 }

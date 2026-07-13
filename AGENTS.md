@@ -1,8 +1,12 @@
 # Backend agent notes
 
 - This repository is the runnable Spring Boot backend. Liquibase is authoritative for the physical database schema; do not rewrite executed change sets.
-- Bounded SQL strings such as `nvarchar(250)` keep their physical size in Liquibase. Mirror that limit with `@Size(max = 250)` only on independently writable request DTO fields; do not duplicate it with entity-level `@Size` or generated-domain `@Column(length = 250)` metadata.
+- Bounded SQL strings such as `nvarchar(250)` keep their physical size in Liquibase. Mirror that limit with `@Size(max = 250)` only on independently writable request DTO fields, except `description` fields, which intentionally remain without `@Size`; do not duplicate the limit with entity-level `@Size` or generated-domain `@Column(length = 250)` metadata.
+- Employee filter search text has a deliberate request limit of 250 characters except for `description`; keep the optional filter body `@Valid` while allowing a null body and one-sided date ranges.
+- Entity-specific DTO ID aliases (`idEmploye`, `idDepartement`, and similar) remain writable and must not be marked `JsonProperty.Access.READ_ONLY`; canonical `id` owns path/body consistency.
+- Login requests limit usernames to 50 characters and passwords to 256 characters; these are request bounds, not persistence metadata.
 - Service-level cross-field and business validation uses typed private static `validate(...)` entry points. Bean Validation annotations remain responsible for request-field shape validation.
 - Shared reference-data query and route mechanics live in `app.core.referenceData`. Client-specific entity names, labels, and allowed filters belong in a domain-owned `ReferenceDataCatalog` implementation such as `app.domain.rh.referenceData.RhReferenceDataCatalog`.
 - Spring Boot's default Problem Details advice can run before an unordered application advice. Field-level request validation is therefore handled by the validation-only, highest-precedence `ValidationExceptionHandler`; do not raise the precedence of the broad `ApiExceptionHandler`, because normal framework 404/405 handling and response headers must remain intact.
+- Resources rely on core advice for application exceptions (`NoSuchElementException` and `IllegalArgumentException`) and on Spring Boot for ordinary built-in MVC errors; keep resource-owned path/body mismatch checks and optional lookup 404s explicit.
 - Full-stack E2E orchestration belongs to a separate project that coordinates PostgreSQL, this backend, and the frontend. In this repository, `./mvnw test` currently validates compilation only because there are no test sources.

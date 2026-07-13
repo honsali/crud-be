@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @RestController
 class AuthResource {
@@ -53,7 +54,7 @@ class AuthResource {
                 .body(new TokenResponse(token));
     }
 
-    record LoginRequest(@NotBlank String username, @NotBlank String password) {
+    record LoginRequest(@NotBlank @Size(max = 50) String username, @NotBlank @Size(max = 256) String password) {
     }
 
     record TokenResponse(@JsonProperty("id_token") String idToken) {

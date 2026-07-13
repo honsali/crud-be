@@ -9,20 +9,20 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record EmployeDto(
-        Long id,
-        Long idEmploye,
-        @NotBlank @Size(max = 250) String matricule,
-        @NotBlank @Size(max = 250) String nom,
-        @NotBlank @Size(max = 250) String prenom,
-        @NotNull LocalDate dateNaissance,
-        SexeDto sexe,
-        SituationFamilialeDto situationFamiliale,
-        LocalDate dateEntree,
-        @Size(max = 250) String email,
-        @Size(max = 250) String telephone,
-        @Size(max = 250) String ville,
-        @Size(max = 250) String adresse,
-        @Size(max = 250) String fonction,
-        String description,
-        DepartementDto departement) {
+                Long id,
+                Long idEmploye,
+                @NotBlank @Size(max = 250) String matricule,
+                @NotBlank @Size(max = 250) String nom,
+                @NotBlank @Size(max = 250) String prenom,
+                @NotNull LocalDate dateNaissance,
+                SexeDto sexe,
+                SituationFamilialeDto situationFamiliale,
+                LocalDate dateEntree,
+                @Size(max = 250) String email,
+                @Size(max = 250) String telephone,
+                @Size(max = 250) String ville,
+                @Size(max = 250) String adresse,
+                @Size(max = 250) String fonction,
+                String description,
+                DepartementDto departement) {
 }
