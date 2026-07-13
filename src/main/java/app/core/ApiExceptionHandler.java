@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,16 +42,6 @@ public class ApiExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail handleDataIntegrityViolation() {
         return problem(HttpStatus.CONFLICT, "Data integrity violation", "The operation conflicts with existing data.");
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed", "The request contains invalid fields.");
-        List<FieldViolation> fields = exception.getBindingResult().getFieldErrors().stream()
-                .map(ApiExceptionHandler::toFieldViolation)
-                .toList();
-        problem.setProperty("fields", fields);
-        return problem;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -98,10 +86,6 @@ public class ApiExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
         return problem;
-    }
-
-    private static FieldViolation toFieldViolation(FieldError fieldError) {
-        return new FieldViolation(fieldError.getField(), fieldError.getDefaultMessage());
     }
 
     private static String defaultTitle(HttpStatusCode statusCode) {

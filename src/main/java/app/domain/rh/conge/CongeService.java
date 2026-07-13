@@ -24,6 +24,7 @@ public class CongeService {
     }
 
     public CongeDto creer(Long idEmploye, CongeDto dto) {
+        validate(dto);
         if (congeRepository.existsByCode(dto.code())) {
             throw new ConflictException("Code already exists");
         }
@@ -43,6 +44,7 @@ public class CongeService {
     }
 
     public CongeDto maj(Long id, CongeDto dto) {
+        validate(dto);
         Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
         if (congeRepository.existsByCodeAndIdNot(dto.code(), id)) {
             throw new ConflictException("Code already exists");
@@ -59,5 +61,12 @@ public class CongeService {
     public void supprimer(Long id) {
         Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
         congeRepository.delete(conge);
+    }
+
+    private static void validate(CongeDto dto) {
+        if (dto.dateDebutConge() != null && dto.dateFinConge() != null
+                && dto.dateFinConge().isBefore(dto.dateDebutConge())) {
+            throw new IllegalArgumentException("dateFinConge must not be before dateDebutConge");
+        }
     }
 }

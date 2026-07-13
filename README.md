@@ -100,9 +100,9 @@ Client-specific behavior and complete user workflows must be validated through E
 
 Do not introduce unit tests, mocked tests, or isolated backend test suites automatically. Add another type of test only when it addresses a concrete risk that cannot be adequately covered by the E2E test suite.
 
-### Current verification gap
+### E2E ownership
 
-No executable E2E test harness or test files are currently committed in this backend or the tied frontend. `./mvnw test` succeeds but currently proves compilation only because there are no test sources. The next testing priority is a repeatable E2E workflow that recreates PostgreSQL from Liquibase, starts both applications, and covers authentication, representative CRUD and validation workflows.
+Full-stack E2E orchestration is intentionally owned by a separate project because it coordinates PostgreSQL, the backend, and the frontend. This repository contains no E2E files. `./mvnw test` currently proves compilation only because there are no test sources. When the separate E2E project is created or available, it should document its exact execution command.
 
 ## Development and production environments
 
@@ -157,7 +157,7 @@ Do not modify or rewrite already executed change sets. Add new corrective or inc
 
 For generator testing, `reset-local-db.sql` is the explicit destructive reset. Run it manually only against the disposable local database; normal application startup does not drop the schema.
 
-Current reconstruction safeguards include ordered changelog includes, indexed foreign keys, explicit-ID sequence synchronization, case-insensitive username uniqueness, an RH leave-date ordering check, and Hibernate schema validation after Liquibase. Services own transaction boundaries, JPA relationships are lazy, collection queries use entity graphs where needed, text filters escape SQL LIKE wildcards, and paginated APIs use the stable application-owned `PageResponse<T>` contract.
+Current reconstruction safeguards include ordered changelog includes, indexed foreign keys, explicit-ID sequence synchronization, case-insensitive username uniqueness, an RH leave-date ordering check, request-level bounded-text and date-range validation, and Hibernate schema validation after Liquibase. Services own transaction boundaries, JPA relationships are lazy, collection queries use entity graphs where needed, text filters escape SQL LIKE wildcards, and paginated APIs use the stable application-owned `PageResponse<T>` contract.
 
 ## Technology stack
 

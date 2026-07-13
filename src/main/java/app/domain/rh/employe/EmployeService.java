@@ -32,6 +32,7 @@ public class EmployeService {
 
     @Transactional(readOnly = true)
     public Page<EmployeDto> filtrer(EmployeFiltre filtre, Pageable pageable) {
+        validate(filtre);
         return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), PageableUtils.avecTriStable(pageable)).map(employeMapper::toDto);
     }
 
@@ -52,5 +53,19 @@ public class EmployeService {
     public void supprimer(Long id) {
         Employe employe = employeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Employe not found"));
         employeRepository.delete(employe);
+    }
+
+    private static void validate(EmployeFiltre filtre) {
+        if (filtre == null) {
+            return;
+        }
+        if (filtre.debutDateNaissance() != null && filtre.finDateNaissance() != null
+                && filtre.finDateNaissance().isBefore(filtre.debutDateNaissance())) {
+            throw new IllegalArgumentException("finDateNaissance must not be before debutDateNaissance");
+        }
+        if (filtre.debutDateEntree() != null && filtre.finDateEntree() != null
+                && filtre.finDateEntree().isBefore(filtre.debutDateEntree())) {
+            throw new IllegalArgumentException("finDateEntree must not be before debutDateEntree");
+        }
     }
 }
