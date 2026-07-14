@@ -1,6 +1,7 @@
 package app.domain.rh.conge;
 
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -44,7 +46,8 @@ public class CongeResource {
 
     @GetMapping("/api/conge/{id}")
     public CongeDto recupererParId(@PathVariable Long id) {
-        return congeService.recupererParId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conge not found"));
+        return congeService.recupererParId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conge not found"));
     }
 
     @DeleteMapping("/api/conge/{id}")

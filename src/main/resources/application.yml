@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: app_core
+  jackson:
+    date-format: dd/MM/yyyy
+    deserialization:
+      fail-on-unknown-properties: false
   data:
     web:
       pageable:

@@ -2,7 +2,7 @@
 
 Runnable Spring Boot REST API for the HR (`ressources humaines`) showcase. It provides the backend foundation used with the sibling `../crud-fe` frontend and generated with support from `../engine`.
 
-The shared purpose, development philosophy, generation workflow, and client-customization rules for all three projects are documented in [`../Context.md`](../Context.md).
+The shared premise and decision principles are documented in [`../Context.md`](../Context.md). Cross-project ownership, generation workflow, and client-customization rules are documented in [`../WORKSPACE.md`](../WORKSPACE.md).
 
 ## Responsibilities
 
@@ -165,6 +165,8 @@ All routes use the `/api` prefix.
 
 Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
 
+JSON request members that are not present in the target DTO are ignored. API date values are accepted and returned as `dd/MM/yyyy`; the shared pattern is configured through `spring.jackson.date-format` in `application.yml` and applied globally to `LocalDate` values by `JsonConfiguration`.
+
 ## Persistence and implementation conventions
 
 Current backend safeguards include:
@@ -213,7 +215,7 @@ On Windows:
 .\mvnw.cmd test
 ```
 
-There are currently no test sources, so this command validates dependency resolution and compilation. Full-stack E2E orchestration belongs to a separate project that starts PostgreSQL, this backend, and the frontend. See [`../Context.md`](../Context.md) for the shared testing strategy.
+There are currently no test sources, so this command validates dependency resolution and compilation. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
 
 ## Backend customization
 

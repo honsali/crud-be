@@ -1,6 +1,6 @@
 # Backend agent notes
 
-- Workspace-wide philosophy, cross-project ownership, generation workflow, and client-customization rules live in `../Context.md`; keep this repository's `README.md` focused on backend setup and behavior.
+- Workspace-wide premise and decision principles live in `../Context.md`; cross-project ownership, generation workflow, and client-customization rules live in `../WORKSPACE.md`. Keep this repository's `README.md` focused on backend setup and behavior.
 - This repository is the runnable Spring Boot backend. Liquibase is authoritative for the physical database schema; do not rewrite executed change sets.
 - This is a showcase application whose local database may be deliberately dropped and recreated. If the Liquibase baseline or change-set IDs are intentionally regenerated, use a fresh database; retained databases still require immutable executed change sets.
 - Reference lookup entities `Sexe`, `SituationFamiliale`, and `TypeConge` use database `id` as identity and `libelle` as the display value; add a separate `code` only when a stable cross-system business key is required.
@@ -8,8 +8,9 @@
 - Employee filter search text has a deliberate request limit of 250 characters except for `description`; keep the optional filter body `@Valid` while allowing a null body and one-sided date ranges.
 - Entity-specific DTO ID aliases (`idEmploye`, `idDepartement`, and similar) remain writable and must not be marked `JsonProperty.Access.READ_ONLY`; canonical `id` owns path/body consistency.
 - Login requests limit usernames to 50 characters and passwords to 256 characters; these are request bounds, not persistence metadata.
+- JSON request members that are absent from the target DTO are ignored globally. API `LocalDate` values use the `spring.jackson.date-format` pattern (`dd/MM/yyyy`); Spring Boot 4's standard date-format setting does not apply it to `LocalDate`, so keep the `JsonConfiguration` type override synchronized with that property.
 - Service-level cross-field and business validation uses typed private static `validate(...)` entry points. Bean Validation annotations remain responsible for request-field shape validation.
 - Shared reference-data query and route mechanics live in `app.core.referenceData`. Client-specific entity names, labels, and allowed filters belong in a domain-owned `ReferenceDataCatalog` implementation such as `app.domain.rh.referenceData.RhReferenceDataCatalog`.
 - Spring Boot's default Problem Details advice can run before an unordered application advice. Field-level request validation is therefore handled by the validation-only, highest-precedence `ValidationExceptionHandler`; do not raise the precedence of the broad `ApiExceptionHandler`, because normal framework 404/405 handling and response headers must remain intact.
 - Resources rely on core advice for application exceptions (`NoSuchElementException` and `IllegalArgumentException`) and on Spring Boot for ordinary built-in MVC errors; keep resource-owned path/body mismatch checks and optional lookup 404s explicit.
-- Full-stack E2E orchestration belongs to a separate project that coordinates PostgreSQL, this backend, and the frontend. In this repository, `./mvnw test` currently validates compilation only because there are no test sources.
+- Full-stack E2E orchestration belongs in the sibling `../crud-e2e` project, which is currently only a planning scaffold. In this repository, `./mvnw test` currently validates compilation only because there are no test sources.
