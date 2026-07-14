@@ -1,5 +1,6 @@
 # Backend agent notes
 
+- Workspace-wide philosophy, cross-project ownership, generation workflow, and client-customization rules live in `../Context.md`; keep this repository's `README.md` focused on backend setup and behavior.
 - This repository is the runnable Spring Boot backend. Liquibase is authoritative for the physical database schema; do not rewrite executed change sets.
 - This is a showcase application whose local database may be deliberately dropped and recreated. If the Liquibase baseline or change-set IDs are intentionally regenerated, use a fresh database; retained databases still require immutable executed change sets.
 - Reference lookup entities `Sexe`, `SituationFamiliale`, and `TypeConge` use database `id` as identity and `libelle` as the display value; add a separate `code` only when a stable cross-system business key is required.

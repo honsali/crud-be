@@ -1,190 +1,243 @@
 # CRUD RH Backend
 
-Minimal Spring Boot REST API used as a complete HR (`ressources humaines`) CRUD showcase and as a reusable foundation for small, tailor-made business applications.
+Runnable Spring Boot REST API for the HR (`ressources humaines`) showcase. It provides the backend foundation used with the sibling `../crud-fe` frontend and generated with support from `../engine`.
 
-## Project philosophy
+The shared purpose, development philosophy, generation workflow, and client-customization rules for all three projects are documented in [`../Context.md`](../Context.md).
 
-This repository is designed for projects developed and maintained by a solo developer for very small businesses.
+## Responsibilities
 
-The main priorities are:
+This project owns:
 
-* simplicity;
-* explicit and readable code;
-* low operational complexity;
-* fast customization;
-* easy maintenance by both humans and AI agents.
+- the executable REST API;
+- authentication and authorization;
+- request and business validation;
+- transaction boundaries;
+- PostgreSQL persistence;
+- Liquibase schema migrations;
+- backend initialization data;
+- the runtime implementation of generated and hand-adapted backend code.
 
-Prefer direct, project-specific implementations over enterprise abstractions, unnecessary genericity, or team-oriented processes.
+Liquibase is authoritative for the physical database schema. Hibernate validates that the mapped entities agree with that schema at startup.
 
-Do not introduce additional architectural layers, frameworks, profiles, modules, or infrastructure unless they solve a concrete requirement of the current client project.
+## Showcase domain
 
-## Purpose
+The included HR domain contains:
 
-This repository is an executable project template. It is not intended to be deployed unchanged for a client.
+- `Employe`;
+- `Departement`;
+- `Conge`;
+- reference entities `Sexe`, `SituationFamiliale`, and `TypeConge`.
 
-The included HR domain provides a complete working example demonstrating that the following components operate correctly together:
+It demonstrates generated CRUD operations, filtered and paginated employee search, parent/child leave operations, generic reference-data lookup, validation, security, and database reconstruction from migrations and CSV data.
 
-* this Spring Boot backend;
-* the associated `../crud-fe` frontend;
-* PostgreSQL;
-* Liquibase migrations;
-* authentication and authorization;
-* generated CRUD operations;
-* initial CSV data.
-
-The HR application is therefore both a showcase and a verification environment for the complete project stack.
-
-## Client customization workflow
-
-For each new client project:
-
-1. Copy this backend repository and the associated `../crud-fe` frontend.
-2. Start the existing HR showcase and verify that the full environment works correctly.
-3. Remove all HR-specific backend and frontend artifacts.
-4. Remove all HR-specific Liquibase changelogs, database constraints, CSV files, tables, and `master.xml` includes.
-5. Generate the actual client domain, migrations, CRUD code, and initial data using `../engine`.
-6. Create a fresh database.
-7. Start the customized application and verify the complete client workflow.
-
-The disposable HR showcase database must never be reused or promoted into a client environment.
-
-A completed client project must not contain any remaining HR-specific package, class, table, route, migration, CSV file, constraint, or frontend module.
-
-## Generated code
-
-Domain CRUD code is generated from a Java DSL.
-
-Generated code is not treated as an untouchable build artifact. It is intended to be a clean, explicit, and hand-editable foundation that can later be adapted manually or by an AI agent.
-
-Generic behavior belongs in the generator and its templates, not in the generated runtime application.
-
-Generated runtime code should remain:
-
-* explicit;
-* easy to understand;
-* easy to debug;
-* easy to modify;
-* specific to the client project.
-
-Avoid replacing straightforward generated code with generic runtime frameworks or abstract reusable layers unless the client project has a concrete need for them.
-
-## Initial data
-
-The RH CSV files in this executable template are intentional showcase fixtures. They make the copied backend and frontend immediately usable, but they are not client production data and must be removed during client customization.
-
-After customization, backend initialization data should contain only:
-
-* reference data required by the application;
-* genuine client bootstrap or production data intended to exist in the deployed system.
-
-During development, the database is considered disposable and may be dropped and recreated at any time. Liquibase migrations and CSV imports must therefore be sufficient to rebuild a complete, valid, and usable database from scratch.
-
-E2E tests must start from a normally initialized database and create and remove any temporary records they require. Do not add test or demonstration records to a tailored client's CSV files, Liquibase change sets, or application initialization mechanisms.
-
-## Testing strategy
-
-This project relies exclusively on end-to-end tests.
-
-For this type of application, an E2E test is considered the strongest proof that a feature works correctly because it validates the complete system as it is actually used: frontend, backend, authentication, database, Liquibase migrations, initialization data, and business workflows.
-
-Unit tests are intentionally not added by default. In the context of small applications maintained by a solo developer, they would often duplicate implementation details without providing enough additional confidence to justify their maintenance cost.
-
-Reliability is also built progressively through two complementary mechanisms:
-
-* the same project foundation is reused and improved through successive client projects;
-* most CRUD code is produced by a generator whose templates have already been exercised and validated across previous projects.
-
-A defect found in repeated generated code should preferably be corrected in the generator or its templates so that all future generated projects benefit from the fix.
-
-Client-specific behavior and complete user workflows must be validated through E2E tests against a freshly initialized database.
-
-Do not introduce unit tests, mocked tests, or isolated backend test suites automatically. Add another type of test only when it addresses a concrete risk that cannot be adequately covered by the E2E test suite.
-
-### E2E ownership
-
-Full-stack E2E orchestration is intentionally owned by a separate project because it coordinates PostgreSQL, the backend, and the frontend. This repository contains no E2E files. `./mvnw test` currently proves compilation only because there are no test sources. When the separate E2E project is created or available, it should document its exact execution command.
-
-## Development and production environments
-
-This project does not use separate Spring profiles or separate Spring application configurations for development and production.
-
-The environments are defined by where the application runs:
-
-* **development** means the application is running locally on the developer's machine;
-* **production** means the same application is running on the deployment server.
-
-Development is intentionally kept as close as possible to production.
-
-Application behavior, Liquibase migrations, database structure, and CSV initialization data are therefore the same in both environments.
-
-Only external runtime values should normally differ, such as:
-
-* database URLs;
-* credentials and secrets;
-* ports;
-* hostnames;
-* allowed frontend origins;
-* other machine-specific connection settings.
-
-Do not introduce `dev`, `prod`, or similar Spring profiles, profile-specific business behavior, or development-only initialization data unless the project explicitly requires them.
-
-This approach is intentional. The applications are small, maintained by one developer, and deployed for very small businesses. Maintaining multiple application behaviors would add complexity without providing enough value.
-
-## Runtime security
-
-Every launch requires `APP_SECURITY_JWT_BASE64_SECRET`. It must be strict Base64 that decodes to at least 64 bytes; there is no committed fallback or local-only key. `POST /api/authenticate` is the only public application endpoint, and every other `/api/**` endpoint requires `ROLE_USER` or `ROLE_ADMIN`.
-
-Runtime security values are supplied externally:
-
-* `APP_SECURITY_JWT_BASE64_SECRET`;
-* `APP_SECURITY_JWT_ISSUER` (default `app_core`);
-* `APP_SECURITY_JWT_AUDIENCE` (default `app_core`);
-* `APP_SECURITY_TOKEN_VALIDITY_SECONDS` (default `86400`, allowed `1..604800`);
-* `APP_CORS_ALLOWED_ORIGINS`;
-* `SERVER_ADDRESS` when an explicit bind address is required.
-
-Liquibase loads `liquibase/data/app_user.csv` once during the initial migration. The showcase credential is `admin/admin`. Before the first migration of a tailored client database, replace it with a unique administrator username and BCrypt hash. Never deploy the showcase credential. If the change set has already run, add a corrective change set or provision the account deliberately instead of rewriting the executed migration.
-
-## Database migrations
-
-Liquibase manages the database schema and initial data.
-
-Before delivering a customized client project, it is acceptable to recreate the database and replace the disposable HR migration history with a clean client-specific migration history.
-
-After client migrations have been executed in a persistent environment, preserve the existing Liquibase history.
-
-Do not modify or rewrite already executed change sets. Add new corrective or incremental change sets instead.
-
-For generator testing, `reset-local-db.sql` is the explicit destructive reset. Run it manually only against the disposable local database; normal application startup does not drop the schema.
-
-Current reconstruction safeguards include ordered changelog includes, indexed foreign keys, explicit-ID sequence synchronization, case-insensitive username uniqueness, an RH leave-date ordering check, request-level bounded-text and date-range validation, and Hibernate schema validation after Liquibase. Services own transaction boundaries, JPA relationships are lazy, collection queries use entity graphs where needed, text filters escape SQL LIKE wildcards, and paginated APIs use the stable application-owned `PageResponse<T>` contract.
+The showcase is a reusable example and verification environment. It is not intended to be deployed unchanged for a client.
 
 ## Technology stack
 
-* Java 25
-* Spring Boot 4.0.6
-* Spring Web MVC
-* Spring Security
-* JWT resource server authentication
-* CORS configuration for frontend applications
-* Spring Data JPA
-* Hibernate 7
-* Bean Validation
-* Liquibase
-* PostgreSQL
-* Maven Wrapper
+- Java 25
+- Spring Boot 4.0.6
+- Spring Web MVC
+- Spring Security
+- JWT resource server authentication
+- Spring Data JPA
+- Hibernate 7
+- Bean Validation
+- Liquibase
+- PostgreSQL
+- Maven Wrapper
+
+## Project structure
+
+```text
+src/main/java/app/
+├── CoreApplication.java
+├── core/
+│   ├── security/          authentication, JWT, CORS, and current-user API
+│   ├── referenceData/     shared reference-data query mechanics
+│   └── ...                pagination and API exception handling
+└── domain/rh/
+    ├── employe/
+    ├── departement/
+    ├── conge/
+    ├── sexe/
+    ├── situationFamiliale/
+    ├── typeConge/
+    └── referenceData/     HR-owned reference-data catalog
+
+src/main/resources/
+├── application.yml
+└── liquibase/
+    ├── master.xml
+    ├── changelog/
+    └── data/
+```
+
+Each writable HR feature keeps its entity, DTO, mapper, repository, service, and REST resource together. Shared runtime mechanics belong under `app.core`; client-specific names, labels, filters, and business behavior remain under `app.domain`.
+
+## Requirements
+
+- JDK 25
+- PostgreSQL
+- a strict Base64 JWT secret that decodes to at least 64 bytes
+
+The default local database connection is:
+
+```text
+URL:      jdbc:postgresql://localhost:5432/crud_db
+Username: crud
+Password: crud
+```
+
+Override those values with environment variables when the local PostgreSQL installation differs.
+
+## Running locally
+
+Set the required JWT secret, then start Spring Boot.
+
+### PowerShell
+
+```powershell
+$env:APP_SECURITY_JWT_BASE64_SECRET = "<base64-secret>"
+.\mvnw.cmd spring-boot:run
+```
+
+### Bash
+
+```bash
+export APP_SECURITY_JWT_BASE64_SECRET='<base64-secret>'
+./mvnw spring-boot:run
+```
+
+The API listens on `http://localhost:8080` by default. Liquibase applies the schema and showcase data automatically before Hibernate validates the mappings.
+
+`run.bat` performs the same startup for the original local Windows installation. It contains a machine-specific `JAVA_HOME` and should be adjusted before being used elsewhere.
+
+## Runtime configuration
+
+Configuration is externalized through standard Spring Boot environment variables.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `APP_SECURITY_JWT_BASE64_SECRET` | none | Required HS512 secret; strict Base64 decoding to at least 64 bytes. |
+| `APP_SECURITY_JWT_ISSUER` | `app_core` | Required JWT issuer. |
+| `APP_SECURITY_JWT_AUDIENCE` | `app_core` | Required JWT audience. |
+| `APP_SECURITY_TOKEN_VALIDITY_SECONDS` | `86400` | Token lifetime; allowed range `1..604800`. |
+| `APP_CORS_ALLOWED_ORIGINS` | local ports `3000,4200,5173,9000` | Comma-separated frontend origins. |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/crud_db` | PostgreSQL JDBC URL. |
+| `SPRING_DATASOURCE_USERNAME` | `crud` | Database username. |
+| `SPRING_DATASOURCE_PASSWORD` | `crud` | Database password. |
+| `SERVER_PORT` | `8080` | HTTP port. |
+| `SERVER_ADDRESS` | Spring Boot default | Optional explicit bind address. |
+| `SPRING_DATA_WEB_PAGEABLE_DEFAULT_PAGE_SIZE` | `20` | Default employee page size. |
+| `SPRING_DATA_WEB_PAGEABLE_MAX_PAGE_SIZE` | `100` | Maximum accepted page size. |
+| `SPRING_JPA_SHOW_SQL` | `false` | SQL logging. |
+| `SPRING_LIQUIBASE_ENABLED` | `true` | Liquibase execution. |
+
+This project deliberately has no `dev` or `prod` Spring profile. The same application runs in both environments; only external runtime values differ.
+
+## Security
+
+Every launch requires `APP_SECURITY_JWT_BASE64_SECRET`; there is no committed fallback key.
+
+`POST /api/authenticate` is the only public application endpoint. Every other `/api/**` endpoint requires `ROLE_USER` or `ROLE_ADMIN`.
+
+Liquibase imports `liquibase/data/app_user.csv` during the initial migration. The showcase credential is:
+
+```text
+admin / admin
+```
+
+Before the first migration of a tailored client database, replace it with a unique administrator username and BCrypt password hash. Never deploy the showcase credential.
+
+If the security changeset has already run in a persistent database, do not rewrite it. Add a corrective changeset or provision the account deliberately.
+
+## API overview
+
+All routes use the `/api` prefix.
+
+| Area | Routes |
+|---|---|
+| Authentication | `POST /authenticate`, `GET /user` |
+| Reference data | `GET /reference/{entity}`, with optional ID or allowed-field filtering routes |
+| Departments | CRUD under `/departement` |
+| Employees | CRUD under `/employe`; filtered pagination through `POST /employe/filtrer` |
+| Leave | Create under `/employe/{idEmploye}/conge`; list under `/conge/employe/{idEmploye}`; item CRUD under `/conge/{id}` |
+
+Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
+
+## Persistence and implementation conventions
+
+Current backend safeguards include:
+
+- ordered Liquibase changelog includes;
+- indexed foreign keys;
+- explicit-ID sequence synchronization after CSV imports;
+- case-insensitive username uniqueness;
+- database constraints for uniqueness, relationships, and leave-date ordering;
+- bounded request text and date-range validation;
+- Hibernate schema validation after Liquibase;
+- service-owned transaction boundaries;
+- disabled Open Session in View;
+- lazy JPA relationships;
+- entity graphs for collection queries that require related display data;
+- escaped SQL `LIKE` wildcard input;
+- stable pagination sorting.
+
+Database uniqueness constraints remain the final protection against concurrent duplicate creation. Service-level prechecks provide clearer normal-case conflict responses, while database integrity failures are also mapped to HTTP `409`.
+
+Do not duplicate physical schema limits indiscriminately in generated entity metadata. Writable request DTOs own request-shape validation; Liquibase owns the database definition.
+
+## Database reconstruction and migration rules
+
+A disposable local database can be rebuilt from `liquibase/master.xml` and the CSV files under `liquibase/data`.
+
+`reset-local-db.sql` drops and recreates the PostgreSQL `public` schema. It is intentionally destructive and must be run manually only against the disposable local database. Normal application startup never drops the schema.
+
+Before delivering a new client project, it is acceptable to recreate the database and replace the disposable HR migration history with a clean client baseline. Once changesets have executed in a persistent environment:
+
+- preserve their IDs and contents;
+- do not rewrite them;
+- add corrective or incremental changesets instead.
+
+## Validation
+
+Run the backend validation command with:
+
+```bash
+./mvnw test
+```
+
+On Windows:
+
+```powershell
+.\mvnw.cmd test
+```
+
+There are currently no test sources, so this command validates dependency resolution and compilation. Full-stack E2E orchestration belongs to a separate project that starts PostgreSQL, this backend, and the frontend. See [`../Context.md`](../Context.md) for the shared testing strategy.
+
+## Backend customization
+
+When adapting this repository for a client:
+
+1. verify the complete HR showcase first;
+2. remove `app.domain.rh` and replace it with the client domain;
+3. remove HR-specific changelogs, constraints, CSV files, tables, and `master.xml` includes;
+4. adapt the domain-owned `ReferenceDataCatalog` implementation;
+5. review and transfer the desired backend overlay generated by `../engine`;
+6. create a fresh database;
+7. start the customized backend and verify it with the corresponding frontend.
+
+A completed client backend must not retain HR-specific packages, classes, tables, routes, migrations, constraints, or initialization data.
 
 ## Intentionally excluded
 
-The following features are intentionally not included:
+The backend intentionally does not include:
 
-* auditing;
-* caching;
-* Spring Boot Actuator;
-* OpenAPI or Swagger configuration;
-* Spring Boot DevTools;
-* notification modules;
+- auditing;
+- caching;
+- Spring Boot Actuator;
+- OpenAPI or Swagger configuration;
+- Spring Boot DevTools;
+- notification modules.
 
-Their absence is intentional, not an oversight.
-
-Do not add them automatically. Introduce one of these features only when it is required by a concrete client need.
+Their absence is deliberate. Add one only when a concrete client requirement justifies its implementation and maintenance cost.
