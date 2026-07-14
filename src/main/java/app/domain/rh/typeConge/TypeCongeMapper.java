@@ -17,8 +17,7 @@ public class TypeCongeMapper {
                 : new TypeCongeDto(
                         entity.getId(),
                         entity.getId(),
-                        entity.getLibelle(),
-                        null);
+                        entity.getLibelle());
     }
 
     public TypeConge toEntityAsRef(TypeCongeDto dto) {

@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-0" author="app_core">
+    <changeSet id="33dd515d-cf0d-359a-bedb-6071a1894120-0" author="app_core">
         <createSequence sequenceName="seq_departement" startValue="100" incrementBy="1" />
     </changeSet>
-    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-1" author="app_core">
+    <changeSet id="33dd515d-cf0d-359a-bedb-6071a1894120-1" author="app_core">
         <createTable tableName="departement">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -23,7 +23,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-data" author="app_core">
+    <changeSet id="33dd515d-cf0d-359a-bedb-6071a1894120-data" author="app_core">
         <loadData
             file="liquibase/data/departement.csv"
             separator=";"
@@ -35,7 +35,7 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="a4e37a04-db32-398a-9e1c-264409134898-sequence-sync" author="app_core">
+    <changeSet id="33dd515d-cf0d-359a-bedb-6071a1894120-sequence-sync" author="app_core">
         <sql dbms="postgresql">SELECT setval('seq_departement', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM departement;</sql>
     </changeSet>
 </databaseChangeLog>

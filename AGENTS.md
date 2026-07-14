@@ -1,6 +1,8 @@
 # Backend agent notes
 
 - This repository is the runnable Spring Boot backend. Liquibase is authoritative for the physical database schema; do not rewrite executed change sets.
+- This is a showcase application whose local database may be deliberately dropped and recreated. If the Liquibase baseline or change-set IDs are intentionally regenerated, use a fresh database; retained databases still require immutable executed change sets.
+- Reference lookup entities `Sexe`, `SituationFamiliale`, and `TypeConge` use database `id` as identity and `libelle` as the display value; add a separate `code` only when a stable cross-system business key is required.
 - Bounded SQL strings such as `nvarchar(250)` keep their physical size in Liquibase. Mirror that limit with `@Size(max = 250)` only on independently writable request DTO fields, except `description` fields, which intentionally remain without `@Size`; do not duplicate the limit with entity-level `@Size` or generated-domain `@Column(length = 250)` metadata.
 - Employee filter search text has a deliberate request limit of 250 characters except for `description`; keep the optional filter body `@Valid` while allowing a null body and one-sided date ranges.
 - Entity-specific DTO ID aliases (`idEmploye`, `idDepartement`, and similar) remain writable and must not be marked `JsonProperty.Access.READ_ONLY`; canonical `id` owns path/body consistency.

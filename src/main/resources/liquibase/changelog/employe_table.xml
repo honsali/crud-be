@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-0" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-0" author="app_core">
         <createSequence sequenceName="seq_employe" startValue="100" incrementBy="1" />
     </changeSet>
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-1" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-1" author="app_core">
         <createTable tableName="employe">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -59,7 +59,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-data" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-data" author="app_core">
         <loadData
             file="liquibase/data/employe.csv"
             separator=";"
@@ -83,7 +83,7 @@
         </loadData>
     </changeSet>
 
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-sequence-sync" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-sequence-sync" author="app_core">
         <sql dbms="postgresql">SELECT setval('seq_employe', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM employe;</sql>
     </changeSet>
 </databaseChangeLog>

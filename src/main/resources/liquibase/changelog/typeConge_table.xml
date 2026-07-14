@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-0" author="app_core">
+    <changeSet id="4e186cfd-5bbe-3e39-b5e0-9851f9e31261-0" author="app_core">
         <createSequence sequenceName="seq_type_conge" startValue="100" incrementBy="1" />
     </changeSet>
-    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-1" author="app_core">
+    <changeSet id="4e186cfd-5bbe-3e39-b5e0-9851f9e31261-1" author="app_core">
         <createTable tableName="type_conge">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -17,13 +17,10 @@
             <column name="libelle" type="nvarchar(250)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="ux_type_conge_libelle" />
             </column>
-            <column name="code" type="nvarchar(250)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_type_conge_code" />
-            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-data" author="app_core">
+    <changeSet id="4e186cfd-5bbe-3e39-b5e0-9851f9e31261-data" author="app_core">
         <loadData
             file="liquibase/data/typeConge.csv"
             separator=";"
@@ -31,11 +28,10 @@
             usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="libelle" type="nvarchar(250)" />
-            <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
 
-    <changeSet id="a0ee9a9c-841d-32c2-ac12-c89c6f8e5543-sequence-sync" author="app_core">
+    <changeSet id="4e186cfd-5bbe-3e39-b5e0-9851f9e31261-sequence-sync" author="app_core">
         <sql dbms="postgresql">SELECT setval('seq_type_conge', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM type_conge;</sql>
     </changeSet>
 </databaseChangeLog>

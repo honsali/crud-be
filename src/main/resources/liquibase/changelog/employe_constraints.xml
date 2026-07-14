@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-2" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-2" author="app_core">
         <addForeignKeyConstraint
             baseColumnNames="sexe_id"
             baseTableName="employe"
@@ -27,7 +27,7 @@
             referencedTableName="departement" />
     </changeSet>
 
-    <changeSet id="611ade6a-c83b-3814-a354-cb98cd942a5f-3" author="app_core">
+    <changeSet id="fd91f112-4bb6-3961-959d-aa2cc7d3e394-3" author="app_core">
         <createIndex indexName="ix_employe_sexe_id" tableName="employe">
             <column name="sexe_id" />
         </createIndex>

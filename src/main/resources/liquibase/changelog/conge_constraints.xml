@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-2" author="app_core">
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-2" author="app_core">
         <addForeignKeyConstraint
             baseColumnNames="employe_id"
             baseTableName="conge"
@@ -21,7 +21,7 @@
             referencedTableName="type_conge" />
     </changeSet>
 
-    <changeSet id="51e333d3-0dce-3219-82a5-3fdb47fcd383-3" author="app_core">
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-3" author="app_core">
         <createIndex indexName="ix_conge_employe_code" tableName="conge">
             <column name="employe_id" />
             <column name="code" />

@@ -17,8 +17,7 @@ public class SituationFamilialeMapper {
                 : new SituationFamilialeDto(
                         entity.getId(),
                         entity.getId(),
-                        entity.getLibelle(),
-                        null);
+                        entity.getLibelle());
     }
 
     public SituationFamiliale toEntityAsRef(SituationFamilialeDto dto) {

@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-0" author="app_core">
+    <changeSet id="0c57b5da-646d-333c-88a3-b2f5f770374b-0" author="app_core">
         <createSequence sequenceName="seq_sexe" startValue="100" incrementBy="1" />
     </changeSet>
-    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-1" author="app_core">
+    <changeSet id="0c57b5da-646d-333c-88a3-b2f5f770374b-1" author="app_core">
         <createTable tableName="sexe">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -17,13 +17,10 @@
             <column name="libelle" type="nvarchar(250)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="ux_sexe_libelle" />
             </column>
-            <column name="code" type="nvarchar(250)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_sexe_code" />
-            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-data" author="app_core">
+    <changeSet id="0c57b5da-646d-333c-88a3-b2f5f770374b-data" author="app_core">
         <loadData
             file="liquibase/data/sexe.csv"
             separator=";"
@@ -31,11 +28,10 @@
             usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="libelle" type="nvarchar(250)" />
-            <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
 
-    <changeSet id="aff53f46-8084-3179-8df5-22472e3a745a-sequence-sync" author="app_core">
+    <changeSet id="0c57b5da-646d-333c-88a3-b2f5f770374b-sequence-sync" author="app_core">
         <sql dbms="postgresql">SELECT setval('seq_sexe', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM sexe;</sql>
     </changeSet>
 </databaseChangeLog>

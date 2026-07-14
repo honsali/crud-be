@@ -1,5 +1,5 @@
-id;libelle;code
-1;Célibataire;CEL
-2;Marié;MAR
-3;Divorcé;DIV
-4;Veuf;VEU
+id;libelle
+1;Célibataire
+2;Marié
+3;Divorcé
+4;Veuf

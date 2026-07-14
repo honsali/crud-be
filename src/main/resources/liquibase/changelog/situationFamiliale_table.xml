@@ -6,10 +6,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="27343301-2298-31ee-b080-93ee99f429dd-0" author="app_core">
+    <changeSet id="e6b226da-8dea-3049-a4ee-5cc7d0091040-0" author="app_core">
         <createSequence sequenceName="seq_situation_familiale" startValue="100" incrementBy="1" />
     </changeSet>
-    <changeSet id="27343301-2298-31ee-b080-93ee99f429dd-1" author="app_core">
+    <changeSet id="e6b226da-8dea-3049-a4ee-5cc7d0091040-1" author="app_core">
         <createTable tableName="situation_familiale">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
@@ -17,13 +17,10 @@
             <column name="libelle" type="nvarchar(250)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="ux_situation_familiale_libelle" />
             </column>
-            <column name="code" type="nvarchar(250)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_situation_familiale_code" />
-            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="27343301-2298-31ee-b080-93ee99f429dd-data" author="app_core">
+    <changeSet id="e6b226da-8dea-3049-a4ee-5cc7d0091040-data" author="app_core">
         <loadData
             file="liquibase/data/situationFamiliale.csv"
             separator=";"
@@ -31,11 +28,10 @@
             usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="libelle" type="nvarchar(250)" />
-            <column name="code" type="nvarchar(250)" />
         </loadData>
     </changeSet>
 
-    <changeSet id="27343301-2298-31ee-b080-93ee99f429dd-sequence-sync" author="app_core">
+    <changeSet id="e6b226da-8dea-3049-a4ee-5cc7d0091040-sequence-sync" author="app_core">
         <sql dbms="postgresql">SELECT setval('seq_situation_familiale', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM situation_familiale;</sql>
     </changeSet>
 </databaseChangeLog>

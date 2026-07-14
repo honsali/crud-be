@@ -23,10 +23,6 @@ public class SituationFamiliale {
     @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
 
-    @NotBlank
-    @Column(name = "code", nullable = false, unique = true)
-    private String code;
-
     public Long getId() {
         return this.id;
     }
@@ -41,14 +37,6 @@ public class SituationFamiliale {
 
     public void setLibelle(String libelle) {
         this.libelle = libelle;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     @Override

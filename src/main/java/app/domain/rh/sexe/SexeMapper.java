@@ -17,8 +17,7 @@ public class SexeMapper {
                 : new SexeDto(
                         entity.getId(),
                         entity.getId(),
-                        entity.getLibelle(),
-                        null);
+                        entity.getLibelle());
     }
 
     public Sexe toEntityAsRef(SexeDto dto) {
