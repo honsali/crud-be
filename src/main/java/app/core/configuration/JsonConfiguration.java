@@ -1,4 +1,4 @@
-package app.core;
+package app.core.configuration;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

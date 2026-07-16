@@ -6,42 +6,47 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="security-app-user-sequence" author="app_core">
-        <createSequence sequenceName="seq_app_user" startValue="100" incrementBy="1" />
+    <changeSet id="security-account-sequence" author="app_core">
+        <createSequence sequenceName="seq_account" startValue="100" incrementBy="1" />
     </changeSet>
 
-    <changeSet id="security-app-user-table" author="app_core">
-        <createTable tableName="app_user">
+    <changeSet id="security-account-table" author="app_core">
+        <createTable tableName="account">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="username" type="varchar(50)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_user_username" />
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_account_username" />
             </column>
             <column name="password_hash" type="varchar(100)">
                 <constraints nullable="false" />
             </column>
-            <column name="roles" type="varchar(250)">
+            <column name="role" type="varchar(50)">
                 <constraints nullable="false" />
             </column>
             <column name="activated" type="boolean" defaultValueBoolean="true">
                 <constraints nullable="false" />
             </column>
+            <column name="token_version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="security-app-user-data" author="app_core">
-        <loadData file="liquibase/data/app_user.csv" separator=";" tableName="app_user" usePreparedStatements="true">
+    <changeSet id="security-account-data" author="app_core">
+        <loadData file="liquibase/data/account.csv" separator=";" tableName="account" usePreparedStatements="true">
             <column name="id" type="numeric" />
             <column name="username" type="string" />
             <column name="password_hash" type="string" />
-            <column name="roles" type="string" />
+            <column name="role" type="string" />
             <column name="activated" type="boolean" />
+            <column name="token_version" type="numeric" />
         </loadData>
     </changeSet>
 
-    <changeSet id="security-app-user-integrity" author="app_core">
-        <sql dbms="postgresql">CREATE UNIQUE INDEX ux_app_user_username_lower ON app_user (lower(username));</sql>
-        <sql dbms="postgresql">SELECT setval('seq_app_user', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM app_user;</sql>
+    <changeSet id="security-account-integrity" author="app_core">
+        <sql dbms="postgresql">CREATE UNIQUE INDEX ux_account_username_lower ON account (lower(username));</sql>
+        <sql dbms="postgresql">ALTER TABLE account ADD CONSTRAINT ck_account_role CHECK (role IN ('ROLE_ADMIN', 'ROLE_GESTIONNAIRE_RH'));</sql>
+        <sql dbms="postgresql">SELECT setval('seq_account', GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM account;</sql>
     </changeSet>
 </databaseChangeLog>

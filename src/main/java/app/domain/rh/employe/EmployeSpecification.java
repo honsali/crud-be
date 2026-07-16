@@ -3,7 +3,7 @@ package app.domain.rh.employe;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
-import app.core.BaseSpecification;
+import app.core.persistence.BaseSpecification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;

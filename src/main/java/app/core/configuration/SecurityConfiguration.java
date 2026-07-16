@@ -1,4 +1,4 @@
-package app.core.security;
+package app.core.configuration;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -24,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtClaimValidator;
@@ -38,33 +37,49 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import app.core.exception.ApiSecurityExceptionHandler;
+import app.core.security.account.AppRole;
+import app.core.security.login.JwtProperties;
+import app.core.security.login.JwtToken;
+import app.core.security.login.LoginTokenValidator;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties(JwtProperties.class)
 class SecurityConfiguration {
 
-    static final String AUTHORITIES_CLAIM = "auth";
-    static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
+    private static Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
+        return JwtToken.role(jwt).<Collection<GrantedAuthority>>map(role -> List.of(new SimpleGrantedAuthority(role.name()))).orElseGet(List::of);
+    }
+
+    private static List<String> splitCsv(String value) {
+        return Arrays.stream(value.split(",")).map(String::trim).filter(item -> !item.isBlank()).toList();
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityExceptionHandler securityExceptionHandler) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
-                        .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
-                        .anyRequest().denyAll())
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(securityExceptionHandler)
-                        .accessDeniedHandler(securityExceptionHandler))
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .authenticationEntryPoint(securityExceptionHandler)
-                        .accessDeniedHandler(securityExceptionHandler)
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        http//
+                .csrf(AbstractHttpConfigurer::disable)//
+                .cors(Customizer.withDefaults())//
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//
+                .authorizeHttpRequests(//
+                        auth -> auth//
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()//
+                                .requestMatchers(HttpMethod.POST, "/api/login").permitAll()//
+                                .requestMatchers("/api/admin/accounts", "/api/admin/accounts/**").hasAuthority(AppRole.ROLE_ADMIN.name())//
+                                .requestMatchers("/api/admin/**").denyAll()//
+                                .requestMatchers("/api/rh/**").hasAuthority(AppRole.ROLE_GESTIONNAIRE_RH.name())//
+                                .requestMatchers("/api/**").denyAll()//
+                                .anyRequest().denyAll())
+                .exceptionHandling(//
+                        exceptions -> exceptions//
+                                .authenticationEntryPoint(securityExceptionHandler)//
+                                .accessDeniedHandler(securityExceptionHandler))
+                .oauth2ResourceServer(//
+                        oauth2 -> oauth2//
+                                .authenticationEntryPoint(securityExceptionHandler)//
+                                .accessDeniedHandler(securityExceptionHandler)//
+                                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
@@ -75,7 +90,6 @@ class SecurityConfiguration {
         configuration.setAllowedOrigins(splitCsv(allowedOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
-        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(1800L);
 
@@ -95,8 +109,7 @@ class SecurityConfiguration {
     }
 
     @Bean
-    SecretKey jwtSecretKey(SecurityProperties properties) {
-        String encodedSecret = properties.jwtBase64Secret();
+    SecretKey jwtSecretKey(@Value("${application.security.jwt-base64-secret}") String encodedSecret) {
         if (encodedSecret == null || encodedSecret.isBlank()) {
             throw new IllegalStateException("APP_SECURITY_JWT_BASE64_SECRET must be configured.");
         }
@@ -119,12 +132,10 @@ class SecurityConfiguration {
     }
 
     @Bean
-    JwtDecoder jwtDecoder(SecretKey jwtSecretKey, SecurityProperties properties) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKey).macAlgorithm(JWT_ALGORITHM).build();
-        OAuth2TokenValidator<Jwt> audienceValidator = new JwtClaimValidator<List<String>>(
-                JwtClaimNames.AUD, audience -> audience != null && audience.contains(properties.audience()));
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
-                JwtValidators.createDefaultWithIssuer(properties.issuer()), audienceValidator));
+    JwtDecoder jwtDecoder(SecretKey jwtSecretKey, JwtProperties properties, LoginTokenValidator loginTokenValidator) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKey).macAlgorithm(JwtToken.ALGORITHM).build();
+        OAuth2TokenValidator<Jwt> audienceValidator = new JwtClaimValidator<List<String>>(JwtClaimNames.AUD, audience -> audience != null && audience.contains(properties.audience()));
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefaultWithIssuer(properties.issuer()), audienceValidator, loginTokenValidator));
         return decoder;
     }
 
@@ -132,35 +143,5 @@ class SecurityConfiguration {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(SecurityConfiguration::extractAuthorities);
         return converter;
-    }
-
-    private static Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-        List<String> authorities = jwt.getClaimAsStringList(AUTHORITIES_CLAIM);
-        if (authorities == null) {
-            return List.of();
-        }
-        return authorities.stream()
-                .filter(SecurityConfiguration::isApplicationRole)
-                .distinct()
-                .map(SimpleGrantedAuthority::new)
-                .map(GrantedAuthority.class::cast)
-                .toList();
-    }
-
-    static List<String> applicationRoles(Collection<? extends GrantedAuthority> authorities) {
-        return authorities.stream()
-                .filter(authority -> authority != null)
-                .map(GrantedAuthority::getAuthority)
-                .filter(SecurityConfiguration::isApplicationRole)
-                .distinct()
-                .toList();
-    }
-
-    private static boolean isApplicationRole(String authority) {
-        return authority != null && authority.startsWith("ROLE_");
-    }
-
-    private static List<String> splitCsv(String value) {
-        return Arrays.stream(value.split(",")).map(String::trim).filter(item -> !item.isBlank()).toList();
     }
 }

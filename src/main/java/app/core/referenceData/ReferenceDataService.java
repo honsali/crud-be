@@ -20,8 +20,7 @@ public class ReferenceDataService {
 
     public List<ReferenceDataDto> getReferenceData(String entityName) {
         ReferenceDataDefinition metadata = metadata(entityName);
-        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e ORDER BY e.%s"
-                .formatted(metadata.labelField(), metadata.entityName(), metadata.labelField());
+        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e ORDER BY e.%s".formatted(metadata.labelField(), metadata.entityName(), metadata.labelField());
         return entityManager.createQuery(query, ReferenceDataDto.class).getResultList();
     }
 
@@ -31,24 +30,17 @@ public class ReferenceDataService {
             throw new IllegalArgumentException("Unsupported reference filter: " + field);
         }
 
-        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e WHERE e.%s = :value ORDER BY e.%s"
-                .formatted(metadata.labelField(), metadata.entityName(), field, metadata.labelField());
+        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e WHERE e.%s = :value ORDER BY e.%s".formatted(metadata.labelField(), metadata.entityName(), field, metadata.labelField());
         return entityManager.createQuery(query, ReferenceDataDto.class).setParameter("value", value).getResultList();
     }
 
     public ReferenceDataDto getReferenceData(String entityName, Long entityId) {
         ReferenceDataDefinition metadata = metadata(entityName);
-        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e WHERE e.id = :id"
-                .formatted(metadata.labelField(), metadata.entityName());
-        return entityManager.createQuery(query, ReferenceDataDto.class)
-                .setParameter("id", entityId)
-                .getResultStream()
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Reference data not found"));
+        String query = "SELECT new app.core.referenceData.ReferenceDataDto(e.id, e.%s) FROM %s e WHERE e.id = :id".formatted(metadata.labelField(), metadata.entityName());
+        return entityManager.createQuery(query, ReferenceDataDto.class).setParameter("id", entityId).getResultStream().findFirst().orElseThrow(() -> new NoSuchElementException("Reference data not found"));
     }
 
     private ReferenceDataDefinition metadata(String entityName) {
-        return referenceDataCatalog.find(entityName)
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported reference entity: " + entityName));
+        return referenceDataCatalog.find(entityName).orElseThrow(() -> new IllegalArgumentException("Unsupported reference entity: " + entityName));
     }
 }

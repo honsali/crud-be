@@ -1,4 +1,4 @@
-package app.core;
+package app.core.exception;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -18,29 +18,11 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 @RestControllerAdvice
 public class ValidationExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
-        ProblemDetail problem = validationProblem();
-        List<FieldViolation> fields = exception.getBindingResult().getFieldErrors().stream()
-                .map(ValidationExceptionHandler::toFieldViolation)
-                .toList();
-        problem.setProperty("fields", fields);
-        return problem;
-    }
-
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    ProblemDetail handleMethodValidation(HandlerMethodValidationException exception) {
-        ProblemDetail problem = validationProblem();
-        List<FieldViolation> fields = exception.getParameterValidationResults().stream()
-                .flatMap(ValidationExceptionHandler::toFieldViolations)
-                .toList();
-        problem.setProperty("fields", fields);
-        return problem;
+    private record FieldViolation(String field, String message) {
     }
 
     private static ProblemDetail validationProblem() {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST, "The request contains invalid fields.");
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request contains invalid fields.");
         problem.setTitle("Validation failed");
         return problem;
     }
@@ -54,13 +36,23 @@ public class ValidationExceptionHandler {
             return errors.getFieldErrors().stream().map(ValidationExceptionHandler::toFieldViolation);
         }
         String parameterName = result.getMethodParameter().getParameterName();
-        String field = parameterName == null
-                ? "arg" + result.getMethodParameter().getParameterIndex()
-                : parameterName;
-        return result.getResolvableErrors().stream()
-                .map(error -> new FieldViolation(field, error.getDefaultMessage()));
+        String field = parameterName == null ? "arg" + result.getMethodParameter().getParameterIndex() : parameterName;
+        return result.getResolvableErrors().stream().map(error -> new FieldViolation(field, error.getDefaultMessage()));
     }
 
-    private record FieldViolation(String field, String message) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
+        ProblemDetail problem = validationProblem();
+        List<FieldViolation> fields = exception.getBindingResult().getFieldErrors().stream().map(ValidationExceptionHandler::toFieldViolation).toList();
+        problem.setProperty("fields", fields);
+        return problem;
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    ProblemDetail handleMethodValidation(HandlerMethodValidationException exception) {
+        ProblemDetail problem = validationProblem();
+        List<FieldViolation> fields = exception.getParameterValidationResults().stream().flatMap(ValidationExceptionHandler::toFieldViolations).toList();
+        problem.setProperty("fields", fields);
+        return problem;
     }
 }

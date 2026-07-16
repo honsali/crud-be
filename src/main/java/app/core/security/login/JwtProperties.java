@@ -1,4 +1,4 @@
-package app.core.security;
+package app.core.security.login;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -8,9 +8,5 @@ import jakarta.validation.constraints.NotBlank;
 
 @Validated
 @ConfigurationProperties("application.security")
-record SecurityProperties(
-        String jwtBase64Secret,
-        @NotBlank String issuer,
-        @NotBlank String audience,
-        @Min(1) @Max(604800) long tokenValiditySeconds) {
+public record JwtProperties(@NotBlank String issuer, @NotBlank String audience, @Min(1) @Max(604800) long tokenValiditySeconds) {
 }

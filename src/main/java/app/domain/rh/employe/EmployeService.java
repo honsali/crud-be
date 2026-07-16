@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import app.core.ConflictException;
-import app.core.PageableUtils;
+import app.core.exception.ConflictException;
+import app.core.pagination.PageableUtils;
 
 @Service
 @Transactional

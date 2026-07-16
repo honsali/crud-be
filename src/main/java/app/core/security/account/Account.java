@@ -1,22 +1,25 @@
-package app.core.security;
+package app.core.security.account;
 
 import java.util.Locale;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "app_user")
-public class AppUser {
+@Table(name = "account")
+public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_app_user")
-    @SequenceGenerator(name = "seq_app_user", sequenceName = "seq_app_user", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_account")
+    @SequenceGenerator(name = "seq_account", sequenceName = "seq_account", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
@@ -28,12 +31,16 @@ public class AppUser {
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
 
-    @NotBlank
-    @Column(name = "roles", nullable = false, length = 250)
-    private String roles;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 50)
+    private AppRole role;
 
     @Column(name = "activated", nullable = false)
     private boolean activated = true;
+
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion;
 
     public Long getId() {
         return this.id;
@@ -48,7 +55,7 @@ public class AppUser {
     }
 
     public void setUsername(String username) {
-        this.username = username == null ? null : username.toLowerCase(Locale.ROOT);
+        this.username = username == null ? null : username.trim().toLowerCase(Locale.ROOT);
     }
 
     public String getPasswordHash() {
@@ -59,12 +66,12 @@ public class AppUser {
         this.passwordHash = passwordHash;
     }
 
-    public String getRoles() {
-        return this.roles;
+    public AppRole getRole() {
+        return this.role;
     }
 
-    public void setRoles(String roles) {
-        this.roles = roles;
+    public void setRole(AppRole role) {
+        this.role = role;
     }
 
     public boolean isActivated() {
@@ -73,5 +80,13 @@ public class AppUser {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public long getTokenVersion() {
+        return this.tokenVersion;
+    }
+
+    public void incrementTokenVersion() {
+        this.tokenVersion++;
     }
 }

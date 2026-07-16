@@ -1,4 +1,4 @@
-package app.core;
+package app.core.exception;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,7 +16,16 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    private record FieldViolation(String field, String message) {
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    private static ProblemDetail problem(HttpStatus status, String title, String detail) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
+        problem.setTitle(title);
+        return problem;
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     ProblemDetail handleNotFound(NoSuchElementException exception) {
@@ -36,9 +45,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     ProblemDetail handleConstraintViolation(ConstraintViolationException exception) {
         ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed", "The request contains invalid fields.");
-        List<FieldViolation> fields = exception.getConstraintViolations().stream()
-                .map(violation -> new FieldViolation(violation.getPropertyPath().toString(), violation.getMessage()))
-                .toList();
+        List<FieldViolation> fields = exception.getConstraintViolations().stream().map(violation -> new FieldViolation(violation.getPropertyPath().toString(), violation.getMessage())).toList();
         problem.setProperty("fields", fields);
         return problem;
     }
@@ -64,14 +71,5 @@ public class ApiExceptionHandler {
     ProblemDetail handleUnexpected(Exception exception) {
         LOGGER.error("Unhandled API exception", exception);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "An unexpected error occurred.");
-    }
-
-    private static ProblemDetail problem(HttpStatus status, String title, String detail) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setTitle(title);
-        return problem;
-    }
-
-    private record FieldViolation(String field, String message) {
     }
 }

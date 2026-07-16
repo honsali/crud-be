@@ -52,9 +52,14 @@ The showcase is a reusable example and verification environment. It is not inten
 src/main/java/app/
 ├── CoreApplication.java
 ├── core/
-│   ├── security/          authentication, JWT, CORS, and current-user API
+│   ├── configuration/     shared runtime and HTTP security configuration
+│   ├── exception/         API, validation, and security exception handling
+│   ├── pagination/        stable pageable handling and page responses
+│   ├── persistence/       shared persistence query helpers
 │   ├── referenceData/     shared reference-data query mechanics
-│   └── ...                pagination and API exception handling
+│   └── security/
+│       ├── account/       account persistence and administration
+│       └── login/         password login and JWT authentication
 └── domain/rh/
     ├── employe/
     ├── departement/
@@ -62,7 +67,7 @@ src/main/java/app/
     ├── sexe/
     ├── situationFamiliale/
     ├── typeConge/
-    └── referenceData/     HR-owned reference-data catalog
+    └── referenceData/     HR-owned reference-data route and catalog
 
 src/main/resources/
 ├── application.yml
@@ -139,29 +144,44 @@ This project deliberately has no `dev` or `prod` Spring profile. The same applic
 
 Every launch requires `APP_SECURITY_JWT_BASE64_SECRET`; there is no committed fallback key.
 
-`POST /api/authenticate` is the only public application endpoint. Every other `/api/**` endpoint requires `ROLE_USER` or `ROLE_ADMIN`.
+Each account has exactly one role:
 
-Liquibase imports `liquibase/data/app_user.csv` during the initial migration. The showcase credential is:
+| Role | Access |
+|---|---|
+| `ROLE_GESTIONNAIRE_RH` | Current reference-data, department, employee, and leave APIs. |
+| `ROLE_ADMIN` | Account administration only. It cannot access HR business APIs. |
+
+Roles are mutually exclusive. A person who performs both business and account-administration work uses two separate accounts. The backend enforces this in the database, JWT validation, route authorization, and account-management service; frontend role display is not a security boundary.
+
+`POST /api/login` is public and returns the signed bearer token as `accessToken`. `/api/admin/accounts/**` requires `ROLE_ADMIN`, while the complete `/api/rh/**` namespace requires `ROLE_GESTIONNAIRE_RH`. Other `/api/**` routes are denied until assigned explicitly.
+
+JWT `sub` and scalar `role` claims identify the authenticated account; `aid` and `ver` support account validation and token invalidation. Every authenticated request verifies the current database account, activation state, role, and token version. Changing a role, changing activation, or resetting a password therefore invalidates previously issued tokens immediately.
+
+The consolidated `security_table.xml` baseline creates the singular constrained `role` column and token version directly. It seeds two separate showcase accounts:
 
 ```text
 admin / admin
+gestionnaire-rh / gestionnaire-rh
 ```
 
-Before the first migration of a tailored client database, replace it with a unique administrator username and BCrypt password hash. Never deploy the showcase credential.
+This security baseline requires a fresh disposable database. Do not reuse a database created from a different baseline.
 
-If the security changeset has already run in a persistent database, do not rewrite it. Add a corrective changeset or provision the account deliberately.
+Before the first migration of a tailored client database, replace both showcase accounts with deliberate client accounts and unique BCrypt password hashes. Never deploy showcase credentials.
 
 ## API overview
 
-All routes use the `/api` prefix.
+All routes use the `/api` prefix. HR routes share the `/api/rh` namespace so authorization does not depend on enumerating entities.
 
 | Area | Routes |
 |---|---|
-| Authentication | `POST /authenticate`, `GET /user` |
-| Reference data | `GET /reference/{entity}`, with optional ID or allowed-field filtering routes |
-| Departments | CRUD under `/departement` |
-| Employees | CRUD under `/employe`; filtered pagination through `POST /employe/filtrer` |
-| Leave | Create under `/employe/{idEmploye}/conge`; list under `/conge/employe/{idEmploye}`; item CRUD under `/conge/{id}` |
+| Authentication | `POST /login` |
+| Account administration | `GET` and `POST /admin/accounts`; `PUT /admin/accounts/{id}`; `PUT /admin/accounts/{id}/password` |
+| Reference data | `GET /rh/reference/{entity}`, with optional ID or allowed-field filtering routes |
+| Departments | CRUD under `/rh/departement` |
+| Employees | CRUD under `/rh/employe`; filtered pagination through `POST /rh/employe/filtrer` |
+| Leave | Create under `/rh/employe/{idEmploye}/conge`; list under `/rh/conge/employe/{idEmploye}`; item CRUD under `/rh/conge/{id}` |
+
+Account creation accepts `username`, `password`, and one canonical string `role`; numeric enum ordinals are rejected. New accounts are activated initially. Account update accepts `role` and `activated`. Passwords supplied to create/reset operations must contain 8 to 256 characters and fit BCrypt's 72-byte UTF-8 limit. Accounts are deactivated rather than deleted. The service prevents self-demotion/self-deactivation and preserves at least one active administrator.
 
 Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
 
@@ -195,6 +215,8 @@ A disposable local database can be rebuilt from `liquibase/master.xml` and the C
 
 `reset-local-db.sql` drops and recreates the PostgreSQL `public` schema. It is intentionally destructive and must be run manually only against the disposable local database. Normal application startup never drops the schema.
 
+Recreate the disposable local database before running the current security baseline.
+
 Before delivering a new client project, it is acceptable to recreate the database and replace the disposable HR migration history with a clean client baseline. Once changesets have executed in a persistent environment:
 
 - preserve their IDs and contents;
@@ -215,7 +237,7 @@ On Windows:
 .\mvnw.cmd test
 ```
 
-There are currently no test sources, so this command validates dependency resolution and compilation. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
+This command compiles the backend and runs focused account-policy, JWT-invalidation, role-JSON, signed-token route-matrix, and changelog-validation tests. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
 
 ## Backend customization
 

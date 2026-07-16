@@ -1,4 +1,4 @@
-package app.core;
+package app.core.exception;
 
 public class ConflictException extends RuntimeException {
 

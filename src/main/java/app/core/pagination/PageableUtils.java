@@ -1,13 +1,10 @@
-package app.core;
+package app.core.pagination;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public final class PageableUtils {
-
-    private PageableUtils() {
-    }
 
     public static Pageable avecTriStable(Pageable pageable) {
         Sort sort = pageable.getSort();
@@ -18,4 +15,6 @@ public final class PageableUtils {
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
+
+    private PageableUtils() {}
 }

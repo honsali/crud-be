@@ -1,4 +1,4 @@
-package app.core.security;
+package app.core.exception;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
-final class ApiSecurityExceptionHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
+public final class ApiSecurityExceptionHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
 
     private static final BearerTokenAuthenticationEntryPoint BEARER_AUTHENTICATION_ENTRY_POINT = new BearerTokenAuthenticationEntryPoint();
     private static final BearerTokenAccessDeniedHandler BEARER_ACCESS_DENIED_HANDLER = new BearerTokenAccessDeniedHandler();
@@ -27,41 +27,23 @@ final class ApiSecurityExceptionHandler implements AuthenticationEntryPoint, Acc
 
     private final ObjectMapper objectMapper;
 
-    ApiSecurityExceptionHandler(ObjectMapper objectMapper) {
+    public ApiSecurityExceptionHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         BEARER_AUTHENTICATION_ENTRY_POINT.commence(request, response, exception);
-        writeProblem(
-                request,
-                response,
-                HttpStatus.UNAUTHORIZED,
-                "Authentication required",
-                "Authentication is required to access this resource.",
-                AUTHENTICATION_REQUIRED_CODE);
+        writeProblem(request, response, HttpStatus.UNAUTHORIZED, "Authentication required", "Authentication is required to access this resource.", AUTHENTICATION_REQUIRED_CODE);
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException, ServletException {
         BEARER_ACCESS_DENIED_HANDLER.handle(request, response, exception);
-        writeProblem(
-                request,
-                response,
-                HttpStatus.FORBIDDEN,
-                "Access denied",
-                "You do not have permission to access this resource.",
-                ACCESS_DENIED_CODE);
+        writeProblem(request, response, HttpStatus.FORBIDDEN, "Access denied", "You do not have permission to access this resource.", ACCESS_DENIED_CODE);
     }
 
-    private void writeProblem(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            HttpStatus status,
-            String title,
-            String detail,
-            String code) throws IOException {
+    private void writeProblem(HttpServletRequest request, HttpServletResponse response, HttpStatus status, String title, String detail, String code) throws IOException {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
         problem.setInstance(URI.create(request.getRequestURI()));
