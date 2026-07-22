@@ -1,4 +1,6 @@
 package app.core.referenceData;
 
-public record ReferenceDataDto(Long id, String libelle) {
+import app.core.configuration.JsonId;
+
+public record ReferenceDataDto(@JsonId Long id, String libelle) {
 }

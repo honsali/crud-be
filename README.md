@@ -185,7 +185,9 @@ Account creation accepts `username`, `password`, and one canonical string `role`
 
 Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
 
-JSON request members that are not present in the target DTO are ignored. API date values are accepted and returned as `dd/MM/yyyy`; the shared pattern is configured through `spring.jackson.date-format` in `application.yml` and applied globally to `LocalDate` values by `JsonConfiguration`.
+JSON request members that are not present in the target DTO are ignored. API-facing identifiers remain `Long` in Java but are marked with the host-owned `@JsonId` annotation and serialized as JSON strings. This keeps JPA and repository types numeric while giving browser clients stable string IDs; unannotated `Long` values remain JSON numbers, and null IDs remain null. Jackson accepts the corresponding string IDs when DTOs are sent back.
+
+API date values are accepted and returned as `dd/MM/yyyy`; the shared pattern is configured through `spring.jackson.date-format` in `application.yml` and applied globally to `LocalDate` values by `JsonConfiguration`.
 
 ## Persistence and implementation conventions
 
@@ -237,7 +239,7 @@ On Windows:
 .\mvnw.cmd test
 ```
 
-This command compiles the backend and runs focused account-policy, JWT-invalidation, role-JSON, signed-token route-matrix, and changelog-validation tests. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
+This command compiles the backend and runs focused account-policy, JWT-invalidation, role-JSON, JSON-ID, signed-token route-matrix, and changelog-validation tests. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
 
 ## Backend customization
 
