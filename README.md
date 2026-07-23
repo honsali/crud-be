@@ -185,9 +185,24 @@ Account creation accepts `username`, `password`, and one canonical string `role`
 
 Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
 
-JSON request members that are not present in the target DTO are ignored. API-facing identifiers remain `Long` in Java but are marked with the host-owned `@JsonId` annotation and serialized as JSON strings. This keeps JPA and repository types numeric while giving browser clients stable string IDs; unannotated `Long` values remain JSON numbers, and null IDs remain null. Jackson accepts the corresponding string IDs when DTOs are sent back.
+JSON request members that are not present in the target DTO are ignored. API-facing identifiers remain `Long` in Java but are marked with the host-owned `@JsonId` annotation and serialized as JSON strings:
+
+```json
+{
+  "id": "42",
+  "idEmploye": "42"
+}
+```
+
+This keeps entities, path variables, repositories, and PostgreSQL `BIGINT` columns numeric while giving browser clients stable string IDs. Unannotated `Long` values remain JSON numbers, null IDs remain null, and Jackson accepts the corresponding string IDs when DTOs are sent back. `@JsonId` is the boundary adapter; do not replace `Long` with `BigInteger` or duplicate this conversion in DTO mappers.
 
 API date values are accepted and returned as `dd/MM/yyyy`; the shared pattern is configured through `spring.jackson.date-format` in `application.yml` and applied globally to `LocalDate` values by `JsonConfiguration`.
+
+## Source formatting and generated overlays
+
+Generated DTOs and other domain overlays are compared with `../engine/result/be` before selective transfer. The engine emits Java imports in the same groups used by VS Code's Java organizer: `java`, `javax`, `org`, `com`, then all remaining packages alphabetically. Keeping generator and IDE ordering identical prevents save-time import churn.
+
+For intentionally wrapped record components, configure the Eclipse JDT formatter with `org.eclipse.jdt.core.formatter.join_wrapped_lines=false`. To force every record component onto its own line, use `org.eclipse.jdt.core.formatter.alignment_for_record_components=49`. Prefer these settings to trailing `//` markers whose only purpose is to stop formatting.
 
 ## Persistence and implementation conventions
 
