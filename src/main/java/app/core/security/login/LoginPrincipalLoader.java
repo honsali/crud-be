@@ -5,8 +5,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import app.core.security.account.Account;
-import app.core.security.account.AccountRepository;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountRepository;
 
 @Service
 public class LoginPrincipalLoader implements UserDetailsService {

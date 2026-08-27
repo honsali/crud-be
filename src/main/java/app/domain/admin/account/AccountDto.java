@@ -1,4 +1,4 @@
-package app.core.security.account;
+package app.domain.admin.account;
 
 import app.core.configuration.JsonId;
 

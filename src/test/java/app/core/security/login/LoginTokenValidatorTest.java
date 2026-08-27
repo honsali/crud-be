@@ -2,13 +2,9 @@ package app.core.security.login;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
-import app.core.security.account.Account;
-import app.core.security.account.AccountRepository;
-import app.core.security.account.AppRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +12,36 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountRepository;
+import app.domain.admin.account.AppRole;
 
 @ExtendWith(MockitoExtension.class)
 class LoginTokenValidatorTest {
+
+    private static Jwt token(Object role, Object tokenVersion) {
+        return token(7L, tokenVersion, role);
+    }
+
+    private static Jwt token(Object accountId, Object tokenVersion, Object role) {
+        return Jwt.withTokenValue("token")
+                .header("alg", "HS512")
+                .subject("manager")
+                .claim(JwtToken.ACCOUNT_ID_CLAIM, accountId)
+                .claim(JwtToken.TOKEN_VERSION_CLAIM, tokenVersion)
+                .claim(JwtToken.ROLE_CLAIM, role)
+                .build();
+    }
+
+    private static Account account() {
+        Account account = new Account();
+        account.setId(7L);
+        account.setUsername("manager");
+        account.setPasswordHash("hash");
+        account.setRole(AppRole.ROLE_GESTIONNAIRE_RH);
+        account.setActivated(true);
+        return account;
+    }
 
     @Mock
     private AccountRepository accountRepository;
@@ -117,29 +140,5 @@ class LoginTokenValidatorTest {
                 AppRole.ROLE_GESTIONNAIRE_RH.name(), 0L));
 
         assertThat(result.getErrors()).isNotEmpty();
-    }
-
-    private static Jwt token(Object role, Object tokenVersion) {
-        return token(7L, tokenVersion, role);
-    }
-
-    private static Jwt token(Object accountId, Object tokenVersion, Object role) {
-        return Jwt.withTokenValue("token")
-                .header("alg", "HS512")
-                .subject("manager")
-                .claim(JwtToken.ACCOUNT_ID_CLAIM, accountId)
-                .claim(JwtToken.TOKEN_VERSION_CLAIM, tokenVersion)
-                .claim(JwtToken.ROLE_CLAIM, role)
-                .build();
-    }
-
-    private static Account account() {
-        Account account = new Account();
-        account.setId(7L);
-        account.setUsername("manager");
-        account.setPasswordHash("hash");
-        account.setRole(AppRole.ROLE_GESTIONNAIRE_RH);
-        account.setActivated(true);
-        return account;
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import app.core.security.account.AppRole;
+import app.domain.admin.account.AppRole;
 
 record LoginPrincipal(//
         Long id, //

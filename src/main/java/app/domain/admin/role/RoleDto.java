@@ -1,10 +1,10 @@
-package app.domain.rh.situationFamiliale;
+package app.domain.admin.role;
 
 import app.core.configuration.JsonId;
 import jakarta.validation.constraints.NotBlank;
 
-public record SituationFamilialeDto(
+public record RoleDto(
         @JsonId Long id,
-        @JsonId Long idSituationFamiliale,
+        @JsonId Long idRole,
         @NotBlank String libelle) {
 }

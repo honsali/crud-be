@@ -1,4 +1,4 @@
-package app.core.security.account;
+package app.domain.admin.account;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -43,6 +43,13 @@ public class AccountService {
     @Transactional(readOnly = true)
     public List<AccountDto> list() {
         return accountRepository.findAllByOrderByUsernameAsc().stream().map(AccountDto::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AccountDto get(Long id) {
+        return accountRepository.findById(id)
+                .map(AccountDto::from)
+                .orElseThrow(() -> new NoSuchElementException("Account not found: " + id));
     }
 
     @Transactional

@@ -19,6 +19,14 @@ This project owns:
 
 Liquibase is authoritative for the physical database schema. Hibernate validates that the mapped entities agree with that schema at startup.
 
+## Backend/frontend boundary
+
+The backend and frontend are designed and delivered as one application. The REST API is an explicit internal transport and security boundary, not an independently evolving product unless a concrete external integration requires it.
+
+The browser remains untrusted. This backend therefore owns every business decision, authoritative validation, authorization rule, transaction, and integrity guarantee. Those rules must hold when a request is sent without the frontend. Frontend form checks exist only to provide immediate inline feedback and must never be required for correctness.
+
+Application failures and validation failures are returned as canonical Problem Details. The frontend presents their `detail` and `fields`; it does not maintain a second implementation of backend business validation. Frontend page contracts may require service identifiers while their hooks accept `Partial<Req*>` and merge URL parameters before dispatch; this is only TypeScript orchestration and never reduces backend route, DTO, or business validation. Shared transport types remain coordinated across the repositories, but compatibility layers and alternate representations are not added for hypothetical independently deployed clients.
+
 ## Showcase domain
 
 The included HR domain contains:
@@ -175,13 +183,13 @@ All routes use the `/api` prefix. HR routes share the `/api/rh` namespace so aut
 | Area | Routes |
 |---|---|
 | Authentication | `POST /login` |
-| Account administration | `GET` and `POST /admin/accounts`; `PUT /admin/accounts/{id}`; `PUT /admin/accounts/{id}/password` |
+| Account administration | `GET` and `POST /admin/accounts`; `GET` and `PUT /admin/accounts/{id}`; `PUT /admin/accounts/{id}/password` |
 | Reference data | `GET /rh/reference/{entity}`, with optional ID or allowed-field filtering routes |
 | Departments | CRUD under `/rh/departement` |
 | Employees | CRUD under `/rh/employe`; filtered pagination through `POST /rh/employe/filtrer` |
 | Leave | Create under `/rh/employe/{idEmploye}/conge`; list under `/rh/conge/employe/{idEmploye}`; item CRUD under `/rh/conge/{id}` |
 
-Account creation accepts `username`, `password`, and one canonical string `role`; numeric enum ordinals are rejected. New accounts are activated initially. Account update accepts `role` and `activated`. Passwords supplied to create/reset operations must contain 8 to 256 characters and fit BCrypt's 72-byte UTF-8 limit. Accounts are deactivated rather than deleted. The service prevents self-demotion/self-deactivation and preserves at least one active administrator.
+Account list and detail responses expose only `id`, `username`, `role`, and `activated`; password hashes and token versions never cross the API boundary. Account creation accepts `username`, `password`, and one canonical string `role`; numeric enum ordinals are rejected. New accounts are activated initially. Account update accepts `role` and `activated`. Passwords supplied to create/reset operations must contain 8 to 256 characters and fit BCrypt's 72-byte UTF-8 limit. Accounts are deactivated rather than deleted. The service prevents self-demotion/self-deactivation and preserves at least one active administrator.
 
 Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
 
@@ -224,7 +232,7 @@ Current backend safeguards include:
 
 Database uniqueness constraints remain the final protection against concurrent duplicate creation. Service-level prechecks provide clearer normal-case conflict responses, while database integrity failures are also mapped to HTTP `409`.
 
-Do not duplicate physical schema limits indiscriminately in generated entity metadata. Writable request DTOs own request-shape validation; Liquibase owns the database definition.
+Do not duplicate physical schema limits indiscriminately in generated entity metadata. Writable request DTOs own authoritative request-shape validation; Liquibase owns the database definition. A generated frontend form may mirror selected constraints for inline feedback, but backend validation remains mandatory and canonical.
 
 ## Database reconstruction and migration rules
 

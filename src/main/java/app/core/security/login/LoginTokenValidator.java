@@ -6,9 +6,9 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
-import app.core.security.account.Account;
-import app.core.security.account.AccountRepository;
-import app.core.security.account.AppRole;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountRepository;
+import app.domain.admin.account.AppRole;
 
 @Component
 public class LoginTokenValidator implements OAuth2TokenValidator<Jwt> {

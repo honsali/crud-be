@@ -2,8 +2,8 @@ package app.core.security.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.Test;
+import app.domain.admin.account.AppRole;
 import tools.jackson.databind.json.JsonMapper;
 
 class AppRoleJsonTest {

@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.util.Optional;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
-import app.core.security.account.AppRole;
+import app.domain.admin.account.AppRole;
 
 public final class JwtToken {
 

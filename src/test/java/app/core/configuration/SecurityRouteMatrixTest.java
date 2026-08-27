@@ -5,21 +5,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import app.core.exception.ApiSecurityExceptionHandler;
-import app.core.security.account.Account;
-import app.core.security.account.AccountRepository;
-import app.core.security.account.AccountResource;
-import app.core.security.account.AccountService;
-import app.core.security.account.AppRole;
-import app.core.security.login.JwtToken;
-import app.core.security.login.LoginPrincipalLoader;
-import app.core.security.login.LoginTokenValidator;
-import app.domain.rh.departement.DepartementResource;
-import app.domain.rh.departement.DepartementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +19,33 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import app.core.exception.ApiSecurityExceptionHandler;
+import app.core.security.login.JwtToken;
+import app.core.security.login.LoginPrincipalLoader;
+import app.core.security.login.LoginTokenValidator;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountRepository;
+import app.domain.admin.account.AccountResource;
+import app.domain.admin.account.AccountService;
+import app.domain.admin.account.AppRole;
+import app.domain.rh.departement.DepartementResource;
+import app.domain.rh.departement.DepartementService;
 
 @WebMvcTest(
-        controllers = { AccountResource.class, DepartementResource.class, SecurityProbeController.class },
+        controllers = {AccountResource.class, DepartementResource.class, SecurityProbeController.class},
         properties = {
-            "application.security.jwt-base64-secret=dGVzdC1zZWNyZXQteHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHg=",
-            "application.security.issuer=test-issuer",
-            "application.security.audience=test-audience"
+                "application.security.jwt-base64-secret=dGVzdC1zZWNyZXQteHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHg=",
+                "application.security.issuer=test-issuer",
+                "application.security.audience=test-audience"
         })
 @Import({
         SecurityConfiguration.class,
@@ -60,6 +59,16 @@ import org.springframework.web.bind.annotation.RestController;
         SecurityFilterAutoConfiguration.class
 })
 class SecurityRouteMatrixTest {
+
+    private static Account account(Long id, String username, AppRole role) {
+        Account account = new Account();
+        account.setId(id);
+        account.setUsername(username);
+        account.setPasswordHash("hash");
+        account.setRole(role);
+        account.setActivated(true);
+        return account;
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -97,6 +106,7 @@ class SecurityRouteMatrixTest {
         String token = token(1L, "admin", AppRole.ROLE_ADMIN.name());
 
         mockMvc.perform(authenticatedGet("/api/admin/accounts", token)).andExpect(status().isOk());
+        mockMvc.perform(authenticatedGet("/api/admin/accounts/1", token)).andExpect(status().isOk());
         mockMvc.perform(authenticatedGet("/api/rh/departement", token)).andExpect(status().isForbidden());
     }
 
@@ -107,6 +117,7 @@ class SecurityRouteMatrixTest {
         mockMvc.perform(authenticatedGet("/api/rh/departement", token)).andExpect(status().isOk());
         mockMvc.perform(authenticatedGet("/api/rh/future-entity", token)).andExpect(status().isOk());
         mockMvc.perform(authenticatedGet("/api/admin/accounts", token)).andExpect(status().isForbidden());
+        mockMvc.perform(authenticatedGet("/api/admin/accounts/1", token)).andExpect(status().isForbidden());
         mockMvc.perform(authenticatedGet("/api/unassigned/probe", token)).andExpect(status().isForbidden());
     }
 
@@ -135,11 +146,11 @@ class SecurityRouteMatrixTest {
         String token = token(1L, "admin", AppRole.ROLE_ADMIN.name());
 
         mockMvc.perform(post("/api/admin/accounts")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"username":"manager","password":"secure-password","role":0}
-                                """))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"username":"manager","password":"secure-password","role":0}
+                        """))
                 .andExpect(status().isBadRequest());
     }
 
@@ -173,17 +184,8 @@ class SecurityRouteMatrixTest {
         return jwtEncoder.encode(JwtEncoderParameters.from(
                 JwsHeader.with(JwtToken.ALGORITHM).build(), claims)).getTokenValue();
     }
-
-    private static Account account(Long id, String username, AppRole role) {
-        Account account = new Account();
-        account.setId(id);
-        account.setUsername(username);
-        account.setPasswordHash("hash");
-        account.setRole(role);
-        account.setActivated(true);
-        return account;
-    }
 }
+
 
 @RestController
 class SecurityProbeController {

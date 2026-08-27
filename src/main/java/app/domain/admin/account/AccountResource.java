@@ -1,4 +1,4 @@
-package app.core.security.account;
+package app.domain.admin.account;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -38,6 +38,11 @@ public class AccountResource {
     @GetMapping("/api/admin/accounts")
     public List<AccountDto> list() {
         return accountService.list();
+    }
+
+    @GetMapping("/api/admin/accounts/{id}")
+    public AccountDto get(@PathVariable Long id) {
+        return accountService.get(id);
     }
 
     @PostMapping("/api/admin/accounts")

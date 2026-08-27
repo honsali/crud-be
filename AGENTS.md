@@ -1,7 +1,8 @@
 # Backend agent notes
 
-- Workspace-wide premise and decision principles live in `../Context.md`; cross-project ownership, generation workflow, and client-customization rules live in `../WORKSPACE.md`. Keep this repository's `README.md` focused on backend setup and behavior.
+- Workspace-wide premise and decision principles live in `../Context.md`; cross-project ownership, generation workflow, and client-customization rules live in `../WORKSPACE.md`. While the July frontend review follow-up remains open, its cross-project handoff is [`../crud-fe/update_plan.md`](../crud-fe/update_plan.md). Keep this repository's `README.md` focused on backend setup and behavior.
 - This repository is the runnable Spring Boot backend. Liquibase is authoritative for the physical database schema; do not rewrite executed change sets.
+- Treat the backend and frontend as one co-delivered application while preserving the browser as an untrusted boundary. Every business rule and authoritative validation belongs here and must work without the frontend. Never rely on frontend form checks for correctness; return canonical Problem Details for the frontend to present. Frontend `Req*`/`Partial<Req*>` typing only coordinates UI values and URL parameters and has no validation authority. Do not add API compatibility machinery for hypothetical independently versioned clients.
 - Keep `app.core` free of concrete classes. Shared infrastructure belongs in responsibility-owned subpackages: `configuration`, `exception`, `pagination`, `persistence`, `referenceData`, and `security`.
 - Model only current contracts. Do not add compatibility aliases, duplicate legacy fields, fallback mappings, or transitional runtime layers.
 - This is a showcase application whose local database may be deliberately dropped and recreated. If the Liquibase baseline or change-set IDs are intentionally regenerated, use a fresh database; retained databases still require immutable executed change sets.

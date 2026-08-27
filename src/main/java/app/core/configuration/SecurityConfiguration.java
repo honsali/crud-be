@@ -38,10 +38,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import app.core.exception.ApiSecurityExceptionHandler;
-import app.core.security.account.AppRole;
 import app.core.security.login.JwtProperties;
 import app.core.security.login.JwtToken;
 import app.core.security.login.LoginTokenValidator;
+import app.domain.admin.account.AppRole;
 
 @Configuration
 @EnableMethodSecurity

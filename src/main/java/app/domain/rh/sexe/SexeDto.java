@@ -4,7 +4,7 @@ import app.core.configuration.JsonId;
 import jakarta.validation.constraints.NotBlank;
 
 public record SexeDto(
-                @JsonId Long id,
-                @JsonId Long idSexe,
-                @NotBlank String libelle) {
+        @JsonId Long id,
+        @JsonId Long idSexe,
+        @NotBlank String libelle) {
 }

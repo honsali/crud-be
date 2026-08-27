@@ -5,10 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import app.core.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +15,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import app.core.exception.ConflictException;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountDto;
+import app.domain.admin.account.AccountRepository;
+import app.domain.admin.account.AccountService;
+import app.domain.admin.account.AppRole;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
+
+    private static Account account(Long id, String username, AppRole role, boolean activated) {
+        Account account = new Account();
+        account.setId(id);
+        account.setUsername(username);
+        account.setPasswordHash("hash");
+        account.setRole(role);
+        account.setActivated(activated);
+        return account;
+    }
 
     @Mock
     private AccountRepository accountRepository;
@@ -55,11 +70,30 @@ class AccountServiceTest {
     }
 
     @Test
+    void getsOneAccountById() {
+        Account target = account(3L, "manager", AppRole.ROLE_GESTIONNAIRE_RH, true);
+        when(accountRepository.findById(3L)).thenReturn(Optional.of(target));
+
+        AccountDto result = accountService.get(3L);
+
+        assertThat(result).isEqualTo(new AccountDto(3L, "manager", AppRole.ROLE_GESTIONNAIRE_RH, true));
+    }
+
+    @Test
+    void rejectsAnUnknownAccountId() {
+        when(accountRepository.findById(404L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> accountService.get(404L))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("Account not found: 404");
+    }
+
+    @Test
     void rejectsPasswordsThatBcryptCannotRepresentWithoutTruncation() {
         assertThatThrownBy(() -> accountService.create(
                 "manager", "é".repeat(37), AppRole.ROLE_GESTIONNAIRE_RH))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Password must not exceed 72 UTF-8 bytes for BCrypt.");
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("Password must not exceed 72 UTF-8 bytes for BCrypt.");
     }
 
     @Test
@@ -69,8 +103,8 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.update(
                 1L, AppRole.ROLE_GESTIONNAIRE_RH, true, "admin"))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("An administrator cannot change or deactivate their own role.");
+                        .isInstanceOf(ConflictException.class)
+                        .hasMessage("An administrator cannot change or deactivate their own role.");
     }
 
     @Test
@@ -80,8 +114,8 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.update(
                 1L, AppRole.ROLE_ADMIN, false, "other-admin"))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("The last active administrator cannot be changed or deactivated.");
+                        .isInstanceOf(ConflictException.class)
+                        .hasMessage("The last active administrator cannot be changed or deactivated.");
     }
 
     @Test
@@ -108,15 +142,5 @@ class AccountServiceTest {
 
         assertThat(target.getPasswordHash()).isEqualTo("new-hash");
         assertThat(target.getTokenVersion()).isEqualTo(1);
-    }
-
-    private static Account account(Long id, String username, AppRole role, boolean activated) {
-        Account account = new Account();
-        account.setId(id);
-        account.setUsername(username);
-        account.setPasswordHash("hash");
-        account.setRole(role);
-        account.setActivated(activated);
-        return account;
     }
 }

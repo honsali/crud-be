@@ -1,4 +1,4 @@
-package app.core.security.account;
+package app.domain.admin.account;
 
 import java.util.Locale;
 import jakarta.persistence.Column;
