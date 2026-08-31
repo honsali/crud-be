@@ -1,71 +1,47 @@
 package app.domain.rh.conge;
 
-import java.util.NoSuchElementException;
-import org.springframework.stereotype.Component;
+import app.core.reference.Reference;
+import app.domain.rh.employe.Employe;
 import app.domain.rh.employe.EmployeMapper;
+import app.domain.rh.typeConge.TypeConge;
 import app.domain.rh.typeConge.TypeCongeMapper;
 
-@Component
-public class CongeMapper {
+public final class CongeMapper {
 
-    private final CongeRepository congeRepository;
-    private final EmployeMapper employeMapper;
-    private final TypeCongeMapper typeCongeMapper;
-
-    public CongeMapper(CongeRepository congeRepository, EmployeMapper employeMapper, TypeCongeMapper typeCongeMapper) {
-        this.congeRepository = congeRepository;
-        this.employeMapper = employeMapper;
-        this.typeCongeMapper = typeCongeMapper;
+    public static CongeResponse toResponse(Conge conge) {
+        return new CongeResponse(
+                conge.getId(),
+                conge.getCode(),
+                conge.getTypeConge() == null ? null : TypeCongeMapper.toReference(conge.getTypeConge()),
+                conge.getDateDebutConge(),
+                conge.getDateFinConge(),
+                conge.getCommentaire(),
+                conge.getEmploye() == null ? null : EmployeMapper.toReference(conge.getEmploye()),
+                conge.getVersion());
     }
 
-    public CongeDto toDto(Conge entity) {
-        return entity == null ? null
-                : new CongeDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getCode(),
-                        typeCongeMapper.toDtoAsRef(entity.getTypeConge()),
-                        entity.getDateDebutConge(),
-                        entity.getDateFinConge(),
-                        entity.getCommentaire(),
-                        employeMapper.toDtoAsRef(entity.getEmploye()));
+    public static Conge toEntity(CongeCreateRequest request, TypeConge typeConge, Employe employe) {
+        return new Conge(
+                request.code(),
+                typeConge,
+                request.dateDebutConge(),
+                request.dateFinConge(),
+                request.commentaire(),
+                employe);
     }
 
-    public CongeDto toDtoAsRef(Conge entity) {
-        return entity == null ? null
-                : new CongeDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getCode(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
+    public static void toEntity(Conge conge, CongeUpdateRequest request, TypeConge typeConge) {
+        conge.update(
+                request.code(),
+                typeConge,
+                request.dateDebutConge(),
+                request.dateFinConge(),
+                request.commentaire());
     }
 
-    public Conge toEntity(CongeDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Conge entity = new Conge();
-        copyToEntity(dto, entity);
-        return entity;
+    public static Reference toReference(Conge conge) {
+        return new Reference(conge.getId(), conge.getCode());
     }
 
-    public Conge toEntityAsRef(CongeDto dto) {
-        if (dto == null || dto.id() == null) {
-            return null;
-        }
-        return congeRepository.findById(dto.id()).orElseThrow(() -> new NoSuchElementException("Conge not found"));
-    }
-
-    public void copyToEntity(CongeDto dto, Conge entity) {
-        entity.setCode(dto.code());
-        entity.setTypeConge(typeCongeMapper.toEntityAsRef(dto.typeConge()));
-        entity.setDateDebutConge(dto.dateDebutConge());
-        entity.setDateFinConge(dto.dateFinConge());
-        entity.setCommentaire(dto.commentaire());
-    }
+    private CongeMapper() {}
 }

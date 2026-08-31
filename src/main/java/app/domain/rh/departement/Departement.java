@@ -1,68 +1,33 @@
 package app.domain.rh.departement;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import app.core.persistence.BaseEntity;
 
 @Entity
 @Table(name = "departement")
-public class Departement {
+public class Departement extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_departement")
-    @SequenceGenerator(name = "seq_departement", sequenceName = "seq_departement", allocationSize = 1)
-    @Column(name = "id")
-    private Long id;
-
-    @NotBlank
-    @Column(name = "nom", nullable = false, unique = true)
     private String nom;
-
-    @Column(name = "description", columnDefinition = "text")
     private String description;
 
-    public Long getId() {
-        return this.id;
-    }
+    protected Departement() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNom() {
-        return this.nom;
-    }
-
-    public void setNom(String nom) {
+    Departement(String nom, String description) {
         this.nom = nom;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Departement other)) {
-            return false;
-        }
-        return id != null && id.equals(other.id);
+    public String getNom() {
+        return nom;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public String getDescription() {
+        return description;
+    }
+
+    public void update(String nom, String description) {
+        this.nom = nom;
+        this.description = description;
     }
 }

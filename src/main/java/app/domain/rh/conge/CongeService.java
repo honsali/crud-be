@@ -1,72 +1,92 @@
 package app.domain.rh.conge;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import app.core.exception.ConflictException;
+import app.core.exception.FieldConflictException;
+import app.core.exception.ResourceNotFoundException;
+import app.core.exception.StaleVersionException;
+import app.core.reference.Reference;
 import app.domain.rh.employe.Employe;
 import app.domain.rh.employe.EmployeRepository;
+import app.domain.rh.typeConge.TypeConge;
+import app.domain.rh.typeConge.TypeCongeRepository;
 
 @Service
-@Transactional
 public class CongeService {
 
     private final CongeRepository congeRepository;
+    private final TypeCongeRepository typeCongeRepository;
     private final EmployeRepository employeRepository;
-    private final CongeMapper congeMapper;
 
-    public CongeService(CongeRepository congeRepository, EmployeRepository employeRepository, CongeMapper congeMapper) {
+    public CongeService(CongeRepository congeRepository, TypeCongeRepository typeCongeRepository, EmployeRepository employeRepository) {
         this.congeRepository = congeRepository;
+        this.typeCongeRepository = typeCongeRepository;
         this.employeRepository = employeRepository;
-        this.congeMapper = congeMapper;
     }
 
-    public CongeDto creer(Long idEmploye, CongeDto dto) {
-        validate(dto);
-        if (congeRepository.existsByCode(dto.code())) {
-            throw new ConflictException("Code already exists");
+    @Transactional
+    public CongeResponse creer(Long idEmploye, CongeCreateRequest request) {
+        if (congeRepository.existsByCode(request.code())) {
+            throw new FieldConflictException("Conge", "code", request.code());
         }
-        Employe employe = employeRepository.findById(idEmploye).orElseThrow(() -> new NoSuchElementException("Employe not found"));
-        Conge conge = congeMapper.toEntity(dto);
-        conge.setEmploye(employe);
-        Conge saved = congeRepository.save(conge);
-        return congeMapper.toDto(saved);
+
+        TypeConge typeConge = recupererTypeConge(request.typeConge());
+        Employe employe = recupererEmploye(idEmploye);
+        Conge conge = CongeMapper.toEntity(request, typeConge, employe);
+        Conge saved = congeRepository.saveAndFlush(conge);
+        return CongeMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<CongeDto> listerParIdEmploye(Long idEmploye) {
+    public List<CongeResponse> listerParIdEmploye(Long idEmploye) {
         if (!employeRepository.existsById(idEmploye)) {
-            throw new NoSuchElementException("Employe not found");
+            throw new ResourceNotFoundException("Employe", idEmploye);
         }
-        return congeRepository.findAllByEmploye_IdOrderByCode(idEmploye).stream().map(congeMapper::toDto).toList();
+        return congeRepository.findAllByEmployeIdOrderByCode(idEmploye).stream().map(CongeMapper::toResponse).toList();
     }
 
-    public CongeDto maj(Long id, CongeDto dto) {
-        validate(dto);
-        Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
-        if (congeRepository.existsByCodeAndIdNot(dto.code(), id)) {
-            throw new ConflictException("Code already exists");
+    @Transactional
+    public CongeResponse maj(Long id, CongeUpdateRequest request) {
+        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        if (conge.getVersion() != request.version()) {
+            throw new StaleVersionException("Conge", id);
         }
-        congeMapper.copyToEntity(dto, conge);
-        return congeMapper.toDto(conge);
+        if (congeRepository.existsByCodeAndIdNot(request.code(), id)) {
+            throw new FieldConflictException("Conge", "code", request.code());
+        }
+
+        TypeConge typeConge = recupererTypeConge(request.typeConge());
+        CongeMapper.toEntity(conge, request, typeConge);
+        congeRepository.flush();
+        return CongeMapper.toResponse(conge);
     }
 
     @Transactional(readOnly = true)
-    public Optional<CongeDto> recupererParId(Long id) {
-        return congeRepository.findById(id).map(congeMapper::toDto);
+    public CongeResponse recupererParId(Long id) {
+        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        return CongeMapper.toResponse(conge);
     }
 
+    @Transactional
     public void supprimer(Long id) {
-        Conge conge = congeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Conge not found"));
+        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
         congeRepository.delete(conge);
+        congeRepository.flush();
     }
 
-    private static void validate(CongeDto dto) {
-        if (dto.dateDebutConge() != null && dto.dateFinConge() != null
-                && dto.dateFinConge().isBefore(dto.dateDebutConge())) {
-            throw new IllegalArgumentException("dateFinConge must not be before dateDebutConge");
+    private TypeConge recupererTypeConge(Reference reference) {
+        if (reference == null) {
+            return null;
         }
+        Long id = reference.id();
+        return typeCongeRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TypeConge", id));
     }
+
+    private Employe recupererEmploye(Long idEmploye) {
+        return employeRepository.findById(idEmploye).orElseThrow(() -> new ResourceNotFoundException("Employe", idEmploye));
+    }
+
 }

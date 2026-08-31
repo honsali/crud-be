@@ -1,10 +1,9 @@
 package app.domain.rh.employe;
 
 import java.time.LocalDate;
-import app.domain.rh.departement.DepartementDto;
-import app.domain.rh.sexe.SexeDto;
-import app.domain.rh.situationFamiliale.SituationFamilialeDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
+import app.core.reference.Reference;
 
 public record EmployeFiltre(
         @Size(max = 250) String matricule,
@@ -12,8 +11,8 @@ public record EmployeFiltre(
         @Size(max = 250) String prenom,
         LocalDate debutDateNaissance,
         LocalDate finDateNaissance,
-        SexeDto sexe,
-        SituationFamilialeDto situationFamiliale,
+        @Valid Reference sexe,
+        @Valid Reference situationFamiliale,
         LocalDate debutDateEntree,
         LocalDate finDateEntree,
         @Size(max = 250) String email,
@@ -22,5 +21,5 @@ public record EmployeFiltre(
         @Size(max = 250) String adresse,
         @Size(max = 250) String fonction,
         String description,
-        DepartementDto departement) {
+        @Valid Reference departement) {
 }

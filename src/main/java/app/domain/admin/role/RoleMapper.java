@@ -1,29 +1,20 @@
 package app.domain.admin.role;
 
-import java.util.NoSuchElementException;
-import org.springframework.stereotype.Component;
+public final class RoleMapper {
 
-@Component
-public class RoleMapper {
-
-    private final RoleRepository roleRepository;
-
-    public RoleMapper(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
+    private RoleMapper() {
     }
 
-    public RoleDto toDtoAsRef(Role entity) {
-        return entity == null ? null
-                : new RoleDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getLibelle());
+    public static RoleResponse toResponse(Role role) {
+        return new RoleResponse(
+                role.getId(),
+                role.getCode(),
+                role.getLibelle(),
+                role.getDescription(),
+                role.getVersion());
     }
 
-    public Role toEntityAsRef(RoleDto dto) {
-        if (dto == null || dto.id() == null) {
-            return null;
-        }
-        return roleRepository.findById(dto.id()).orElseThrow(() -> new NoSuchElementException("Role not found"));
+    public static RoleReference toReference(Role role) {
+        return new RoleReference(role.getId(), role.getCode(), role.getLibelle());
     }
 }

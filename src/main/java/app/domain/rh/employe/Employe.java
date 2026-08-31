@@ -1,214 +1,130 @@
 package app.domain.rh.employe;
 
 import java.time.LocalDate;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import app.core.persistence.BaseEntity;
 import app.domain.rh.departement.Departement;
 import app.domain.rh.sexe.Sexe;
 import app.domain.rh.situationFamiliale.SituationFamiliale;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "employe")
-public class Employe {
+public class Employe extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_employe")
-    @SequenceGenerator(name = "seq_employe", sequenceName = "seq_employe", allocationSize = 1)
-    @Column(name = "id")
-    private Long id;
-
-    @NotBlank
-    @Column(name = "matricule", nullable = false, unique = true)
     private String matricule;
-
-    @NotBlank
-    @Column(name = "nom", nullable = false)
     private String nom;
-
-    @NotBlank
-    @Column(name = "prenom", nullable = false)
     private String prenom;
-
-    @NotNull
-    @Column(name = "date_naissance", nullable = false)
     private LocalDate dateNaissance;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sexe_id")
     private Sexe sexe;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "situation_familiale_id")
     private SituationFamiliale situationFamiliale;
-
-    @Column(name = "date_entree")
     private LocalDate dateEntree;
-
-    @Column(name = "email")
     private String email;
-
-    @Column(name = "telephone")
     private String telephone;
-
-    @Column(name = "ville")
     private String ville;
-
-    @Column(name = "adresse")
     private String adresse;
-
-    @Column(name = "fonction")
     private String fonction;
-
-    @Column(name = "description", columnDefinition = "text")
     private String description;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departement_id")
     private Departement departement;
 
-    public Long getId() {
-        return this.id;
-    }
+    protected Employe() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getMatricule() {
-        return this.matricule;
-    }
-
-    public void setMatricule(String matricule) {
+    Employe(String matricule, String nom, String prenom, LocalDate dateNaissance, Sexe sexe, SituationFamiliale situationFamiliale, LocalDate dateEntree, String email, String telephone, String ville, String adresse, String fonction, String description, Departement departement) {
         this.matricule = matricule;
-    }
-
-    public String getNom() {
-        return this.nom;
-    }
-
-    public void setNom(String nom) {
         this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return this.prenom;
-    }
-
-    public void setPrenom(String prenom) {
         this.prenom = prenom;
-    }
-
-    public LocalDate getDateNaissance() {
-        return this.dateNaissance;
-    }
-
-    public void setDateNaissance(LocalDate dateNaissance) {
         this.dateNaissance = dateNaissance;
-    }
-
-    public Sexe getSexe() {
-        return this.sexe;
-    }
-
-    public void setSexe(Sexe sexe) {
         this.sexe = sexe;
-    }
-
-    public SituationFamiliale getSituationFamiliale() {
-        return this.situationFamiliale;
-    }
-
-    public void setSituationFamiliale(SituationFamiliale situationFamiliale) {
         this.situationFamiliale = situationFamiliale;
-    }
-
-    public LocalDate getDateEntree() {
-        return this.dateEntree;
-    }
-
-    public void setDateEntree(LocalDate dateEntree) {
         this.dateEntree = dateEntree;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getTelephone() {
-        return this.telephone;
-    }
-
-    public void setTelephone(String telephone) {
         this.telephone = telephone;
-    }
-
-    public String getVille() {
-        return this.ville;
-    }
-
-    public void setVille(String ville) {
         this.ville = ville;
-    }
-
-    public String getAdresse() {
-        return this.adresse;
-    }
-
-    public void setAdresse(String adresse) {
         this.adresse = adresse;
-    }
-
-    public String getFonction() {
-        return this.fonction;
-    }
-
-    public void setFonction(String fonction) {
         this.fonction = fonction;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Departement getDepartement() {
-        return this.departement;
-    }
-
-    public void setDepartement(Departement departement) {
         this.departement = departement;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Employe other)) {
-            return false;
-        }
-        return id != null && id.equals(other.id);
+    public String getMatricule() {
+        return matricule;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public String getNom() {
+        return nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public LocalDate getDateNaissance() {
+        return dateNaissance;
+    }
+
+    public Sexe getSexe() {
+        return sexe;
+    }
+
+    public SituationFamiliale getSituationFamiliale() {
+        return situationFamiliale;
+    }
+
+    public LocalDate getDateEntree() {
+        return dateEntree;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public String getVille() {
+        return ville;
+    }
+
+    public String getAdresse() {
+        return adresse;
+    }
+
+    public String getFonction() {
+        return fonction;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Departement getDepartement() {
+        return departement;
+    }
+
+    public void update(String matricule, String nom, String prenom, LocalDate dateNaissance, Sexe sexe, SituationFamiliale situationFamiliale, LocalDate dateEntree, String email, String telephone, String ville, String adresse, String fonction, String description, Departement departement) {
+        this.matricule = matricule;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.dateNaissance = dateNaissance;
+        this.sexe = sexe;
+        this.situationFamiliale = situationFamiliale;
+        this.dateEntree = dateEntree;
+        this.email = email;
+        this.telephone = telephone;
+        this.ville = ville;
+        this.adresse = adresse;
+        this.fonction = fonction;
+        this.description = description;
+        this.departement = departement;
     }
 }

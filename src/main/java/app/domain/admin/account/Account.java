@@ -1,92 +1,84 @@
 package app.domain.admin.account;
 
 import java.util.Locale;
+
+import app.core.persistence.BaseEntity;
+import app.domain.admin.role.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "account")
-public class Account {
+public class Account extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_account")
-    @SequenceGenerator(name = "seq_account", sequenceName = "seq_account", allocationSize = 1)
-    @Column(name = "id")
-    private Long id;
-
-    @NotBlank
-    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
-    @NotBlank
-    @Column(name = "password_hash", nullable = false, length = 100)
-    private String passwordHash;
+    @Column(name = "display_name")
+    private String displayName;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 50)
-    private AppRole role;
+    private String email;
 
-    @Column(name = "activated", nullable = false)
-    private boolean activated = true;
+    private boolean active;
 
-    @Column(name = "token_version", nullable = false)
-    private long tokenVersion;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
-    public Long getId() {
-        return this.id;
+    protected Account() {
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username == null ? null : username.trim().toLowerCase(Locale.ROOT);
-    }
-
-    public String getPasswordHash() {
-        return this.passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public AppRole getRole() {
-        return this.role;
-    }
-
-    public void setRole(AppRole role) {
+    Account(String username, String displayName, String email, boolean active, Role role) {
+        this.username = normalizeUsername(username);
+        this.displayName = normalizeDisplayName(displayName);
+        this.email = normalizeEmail(email);
+        this.active = active;
         this.role = role;
     }
 
-    public boolean isActivated() {
-        return this.activated;
+    void update(String username, String displayName, String email, boolean active, Role role) {
+        this.username = normalizeUsername(username);
+        this.displayName = normalizeDisplayName(displayName);
+        this.email = normalizeEmail(email);
+        this.active = active;
+        this.role = role;
     }
 
-    public void setActivated(boolean activated) {
-        this.activated = activated;
+    static String normalizeUsername(String value) {
+        return value == null ? null : value.strip().toLowerCase(Locale.ROOT);
     }
 
-    public long getTokenVersion() {
-        return this.tokenVersion;
+    static String normalizeDisplayName(String value) {
+        return value == null ? null : value.strip();
     }
 
-    public void incrementTokenVersion() {
-        this.tokenVersion++;
+    static String normalizeEmail(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.strip().toLowerCase(Locale.ROOT);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }

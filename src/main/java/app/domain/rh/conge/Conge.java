@@ -1,122 +1,70 @@
 package app.domain.rh.conge;
 
 import java.time.LocalDate;
-import app.domain.rh.employe.Employe;
-import app.domain.rh.typeConge.TypeConge;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import app.core.persistence.BaseEntity;
+import app.domain.rh.employe.Employe;
+import app.domain.rh.typeConge.TypeConge;
 
 @Entity
 @Table(name = "conge")
-public class Conge {
+public class Conge extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_conge")
-    @SequenceGenerator(name = "seq_conge", sequenceName = "seq_conge", allocationSize = 1)
-    @Column(name = "id")
-    private Long id;
-
-    @NotBlank
-    @Column(name = "code", nullable = false, unique = true)
     private String code;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_conge_id")
     private TypeConge typeConge;
-
-    @Column(name = "date_debut_conge")
     private LocalDate dateDebutConge;
-
-    @Column(name = "date_fin_conge")
     private LocalDate dateFinConge;
-
-    @Column(name = "commentaire", columnDefinition = "text")
     private String commentaire;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "employe_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employe_id")
     private Employe employe;
 
-    public Long getId() {
-        return this.id;
-    }
+    protected Conge() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public void setCode(String code) {
+    Conge(String code, TypeConge typeConge, LocalDate dateDebutConge, LocalDate dateFinConge, String commentaire, Employe employe) {
         this.code = code;
-    }
-
-    public TypeConge getTypeConge() {
-        return this.typeConge;
-    }
-
-    public void setTypeConge(TypeConge typeConge) {
         this.typeConge = typeConge;
-    }
-
-    public LocalDate getDateDebutConge() {
-        return this.dateDebutConge;
-    }
-
-    public void setDateDebutConge(LocalDate dateDebutConge) {
         this.dateDebutConge = dateDebutConge;
-    }
-
-    public LocalDate getDateFinConge() {
-        return this.dateFinConge;
-    }
-
-    public void setDateFinConge(LocalDate dateFinConge) {
         this.dateFinConge = dateFinConge;
-    }
-
-    public String getCommentaire() {
-        return this.commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
         this.commentaire = commentaire;
-    }
-
-    public Employe getEmploye() {
-        return this.employe;
-    }
-
-    public void setEmploye(Employe employe) {
         this.employe = employe;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Conge other)) {
-            return false;
-        }
-        return id != null && id.equals(other.id);
+    public String getCode() {
+        return code;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public TypeConge getTypeConge() {
+        return typeConge;
+    }
+
+    public LocalDate getDateDebutConge() {
+        return dateDebutConge;
+    }
+
+    public LocalDate getDateFinConge() {
+        return dateFinConge;
+    }
+
+    public String getCommentaire() {
+        return commentaire;
+    }
+
+    public Employe getEmploye() {
+        return employe;
+    }
+
+    public void update(String code, TypeConge typeConge, LocalDate dateDebutConge, LocalDate dateFinConge, String commentaire) {
+        this.code = code;
+        this.typeConge = typeConge;
+        this.dateDebutConge = dateDebutConge;
+        this.dateFinConge = dateFinConge;
+        this.commentaire = commentaire;
     }
 }

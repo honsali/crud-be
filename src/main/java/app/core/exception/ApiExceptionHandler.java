@@ -1,75 +1,203 @@
 package app.core.exception;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+
+import app.core.security.authentication.InvalidCredentialsException;
+import app.core.security.credential.InvalidCurrentPasswordException;
+import app.core.security.ratelimit.TooManyLoginAttemptsException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.core.PropertyReferenceException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.validation.ConstraintViolationException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    private record FieldViolation(String field, String message) {
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-    private static ProblemDetail problem(HttpStatus status, String title, String detail) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setTitle(title);
-        return problem;
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiError> handleInvalidCredentials(
+            InvalidCredentialsException exception, HttpServletRequest request) {
+        return response(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Identifiants invalides", request, List.of());
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ProblemDetail handleNotFound(NoSuchElementException exception) {
-        return problem(HttpStatus.NOT_FOUND, "Resource not found", exception.getMessage());
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    ResponseEntity<ApiError> handleInvalidCurrentPassword(
+            InvalidCurrentPasswordException exception, HttpServletRequest request) {
+        return response(
+                HttpStatus.BAD_REQUEST,
+                "INVALID_CURRENT_PASSWORD",
+                "Le mot de passe actuel est incorrect",
+                request,
+                List.of());
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    ResponseEntity<ApiError> handleUnknownRoute(Exception exception, HttpServletRequest request) {
+        return response(
+                HttpStatus.NOT_FOUND,
+                "RESOURCE_NOT_FOUND",
+                "La ressource demandée n'existe pas",
+                request,
+                List.of());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    ResponseEntity<ApiError> handleMethodNotAllowed(
+            HttpRequestMethodNotSupportedException exception,
+            HttpServletRequest request) {
+        return response(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                exception.getHeaders(),
+                "METHOD_NOT_ALLOWED",
+                "La méthode HTTP n'est pas autorisée",
+                request,
+                List.of());
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<ApiError> handleUnsupportedMediaType(
+            HttpMediaTypeNotSupportedException exception,
+            HttpServletRequest request) {
+        return response(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                exception.getHeaders(),
+                "UNSUPPORTED_MEDIA_TYPE",
+                "Le type de contenu n'est pas pris en charge",
+                request,
+                List.of());
+    }
+
+    @ExceptionHandler(TooManyLoginAttemptsException.class)
+    ResponseEntity<ApiError> handleTooManyLoginAttempts(
+            TooManyLoginAttemptsException exception, HttpServletRequest request) {
+        return response(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "TOO_MANY_LOGIN_ATTEMPTS",
+                "Trop de tentatives de connexion",
+                request,
+                List.of());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException exception, HttpServletRequest request) {
+        return response(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(ConflictException.class)
-    ProblemDetail handleConflict(ConflictException exception) {
-        return problem(HttpStatus.CONFLICT, "Conflict", exception.getMessage());
+    ResponseEntity<ApiError> handleConflict(ConflictException exception, HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT, "CONFLICT", exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    ResponseEntity<ApiError> handleOptimisticLockingConflict(
+            ObjectOptimisticLockingFailureException exception,
+            HttpServletRequest request) {
+        return response(
+                HttpStatus.CONFLICT,
+                "CONFLICT",
+                "La ressource a été modifiée par une autre transaction",
+                request,
+                List.of());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    ProblemDetail handleDataIntegrityViolation() {
-        return problem(HttpStatus.CONFLICT, "Data integrity violation", "The operation conflicts with existing data.");
+    ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception, HttpServletRequest request) {
+        return response(
+                HttpStatus.CONFLICT,
+                "DATA_INTEGRITY_VIOLATION",
+                "L'opération viole une contrainte d'intégrité",
+                request,
+                List.of());
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    ProblemDetail handleConstraintViolation(ConstraintViolationException exception) {
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Validation failed", "The request contains invalid fields.");
-        List<FieldViolation> fields = exception.getConstraintViolations().stream().map(violation -> new FieldViolation(violation.getPropertyPath().toString(), violation.getMessage())).toList();
-        problem.setProperty("fields", fields);
-        return problem;
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ApiError> handleInvalidBody(MethodArgumentNotValidException exception, HttpServletRequest request) {
+        List<FieldViolation> violations = exception.getBindingResult().getFieldErrors().stream()
+                .map(this::toViolation)
+                .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::code))
+                .toList();
+        return response(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "La requête n'est pas valide", request, violations);
     }
 
-    @ExceptionHandler(PropertyReferenceException.class)
-    ProblemDetail handleBadSort(PropertyReferenceException exception) {
-        return problem(HttpStatus.BAD_REQUEST, "Invalid sort property", "Unknown sort property: " + exception.getPropertyName());
+    @ExceptionHandler(BindException.class)
+    ResponseEntity<ApiError> handleBinding(BindException exception, HttpServletRequest request) {
+        List<FieldViolation> violations = exception.getFieldErrors().stream()
+                .map(this::toViolation)
+                .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::code))
+                .toList();
+        return response(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "La requête n'est pas valide", request, violations);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    ProblemDetail handleAuthentication() {
-        ProblemDetail problem = problem(HttpStatus.UNAUTHORIZED, "Authentication failed", "Invalid username or password.");
-        problem.setProperty("code", "INVALID_CREDENTIALS");
-        return problem;
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    ProblemDetail handleBadRequest(IllegalArgumentException exception) {
-        return problem(HttpStatus.BAD_REQUEST, "Bad request", exception.getMessage());
+    @ExceptionHandler({
+            InvalidRequestException.class,
+            ConstraintViolationException.class,
+            HandlerMethodValidationException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class,
+            HttpMessageNotReadableException.class
+    })
+    ResponseEntity<ApiError> handleBadRequest(Exception exception, HttpServletRequest request) {
+        return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "La requête n'est pas valide", request, List.of());
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail handleUnexpected(Exception exception) {
-        LOGGER.error("Unhandled API exception", exception);
-        return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "An unexpected error occurred.");
+    ResponseEntity<ApiError> handleUnexpected(Exception exception, HttpServletRequest request) {
+        LOGGER.error("Erreur interne inattendue sur {}", request.getRequestURI(), exception);
+        return response(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "INTERNAL_ERROR",
+                "Une erreur interne est survenue",
+                request,
+                List.of());
+    }
+
+    private FieldViolation toViolation(FieldError error) {
+        return new FieldViolation(
+                error.getField(),
+                error.getCode() == null ? "Invalid" : error.getCode(),
+                error.getDefaultMessage() == null ? "Valeur invalide" : error.getDefaultMessage());
+    }
+
+    private ResponseEntity<ApiError> response(
+            HttpStatus status,
+            String code,
+            String message,
+            HttpServletRequest request,
+            List<FieldViolation> fieldErrors) {
+        return response(status, HttpHeaders.EMPTY, code, message, request, fieldErrors);
+    }
+
+    private ResponseEntity<ApiError> response(
+            HttpStatus status,
+            HttpHeaders headers,
+            String code,
+            String message,
+            HttpServletRequest request,
+            List<FieldViolation> fieldErrors) {
+        return ResponseEntity.status(status)
+                .headers(headers)
+                .body(new ApiError(code, message, request.getRequestURI(), fieldErrors));
     }
 }

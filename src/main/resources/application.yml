@@ -1,43 +1,45 @@
-server:
-  port: ${SERVER_PORT:8080}
-
 spring:
   application:
-    name: app_core
-  jackson:
-    date-format: dd/MM/yyyy
-    deserialization:
-      fail-on-unknown-properties: false
+    name: rh-reference-backend
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   data:
     web:
       pageable:
-        default-page-size: ${SPRING_DATA_WEB_PAGEABLE_DEFAULT_PAGE_SIZE:20}
-        max-page-size: ${SPRING_DATA_WEB_PAGEABLE_MAX_PAGE_SIZE:100}
-  threads:
-    virtual:
-      enabled: true
-  mvc:
-    problemdetails:
-      enabled: true
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/crud_db}
-    username: ${SPRING_DATASOURCE_USERNAME:crud}
-    password: ${SPRING_DATASOURCE_PASSWORD:crud}
-    driver-class-name: org.postgresql.Driver
+        default-page-size: 20
+        max-page-size: 100
   jpa:
     open-in-view: false
-    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
       ddl-auto: validate
-  liquibase:
-    enabled: ${SPRING_LIQUIBASE_ENABLED:true}
-    change-log: classpath:liquibase/master.xml
+  flyway:
+    clean-disabled: false
+  jackson:
+    default-property-inclusion: non-null
+  web:
+    error:
+      include-message: never
 
-application:
-  cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000}
+app:
   security:
-    jwt-base64-secret: ${APP_SECURITY_JWT_BASE64_SECRET:}
-    issuer: ${APP_SECURITY_JWT_ISSUER:app_core}
-    audience: ${APP_SECURITY_JWT_AUDIENCE:app_core}
-    token-validity-seconds: ${APP_SECURITY_TOKEN_VALIDITY_SECONDS:86400}
+    jwt:
+      secret-base64: ${APP_SECURITY_JWT_SECRET_BASE64:}
+      issuer: ${APP_SECURITY_JWT_ISSUER:crud-reference}
+      audience: ${APP_SECURITY_JWT_AUDIENCE:crud-api}
+      ttl: ${APP_SECURITY_JWT_TTL:PT15M}
+      clock-skew: ${APP_SECURITY_JWT_CLOCK_SKEW:PT30S}
+    cors:
+      allowed-origins: ${APP_SECURITY_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000}
+    login-rate-limit:
+      username-max-attempts: ${APP_SECURITY_LOGIN_USERNAME_MAX_ATTEMPTS:5}
+      username-window: ${APP_SECURITY_LOGIN_USERNAME_WINDOW:PT15M}
+      address-max-attempts: ${APP_SECURITY_LOGIN_ADDRESS_MAX_ATTEMPTS:20}
+      address-window: ${APP_SECURITY_LOGIN_ADDRESS_WINDOW:PT15M}
+      maximum-size: ${APP_SECURITY_LOGIN_MAXIMUM_SIZE:10000}
+    bootstrap:
+      enabled: ${APP_SECURITY_BOOTSTRAP_ENABLED:false}
+      username: ${APP_SECURITY_BOOTSTRAP_USERNAME:}
+      display-name: ${APP_SECURITY_BOOTSTRAP_DISPLAY_NAME:}
+      password: ${APP_SECURITY_BOOTSTRAP_PASSWORD:}

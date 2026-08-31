@@ -1,57 +1,22 @@
 package app.domain.rh.typeConge;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import app.core.persistence.BaseEntity;
 
 @Entity
 @Table(name = "type_conge")
-public class TypeConge {
+public class TypeConge extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_type_conge")
-    @SequenceGenerator(name = "seq_type_conge", sequenceName = "seq_type_conge", allocationSize = 1)
-    @Column(name = "id")
-    private Long id;
-
-    @NotBlank
-    @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
 
-    public Long getId() {
-        return this.id;
-    }
+    protected TypeConge() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLibelle() {
-        return this.libelle;
-    }
-
-    public void setLibelle(String libelle) {
+    TypeConge(String libelle) {
         this.libelle = libelle;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TypeConge other)) {
-            return false;
-        }
-        return id != null && id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public String getLibelle() {
+        return libelle;
     }
 }

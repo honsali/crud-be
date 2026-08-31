@@ -1,292 +1,279 @@
-# CRUD RH Backend
+# Backend CRUD de référence
 
-Runnable Spring Boot REST API for the HR (`ressources humaines`) showcase. It provides the backend foundation used with the sibling `../crud-fe` frontend and generated with support from `../engine`.
+Application Spring Boot autonome illustrant trois patrons de génération dans deux domaines fonctionnels :
 
-The shared premise and decision principles are documented in [`../Context.md`](../Context.md). Cross-project ownership, generation workflow, and client-customization rules are documented in [`../WORKSPACE.md`](../WORKSPACE.md).
+- liste simple : `Departement` et `Role`, avec CRUD et liste complète ordonnée ;
+- entité recherchable : `Employe` et `Account`, avec références et recherche paginée ;
+- enfant agrégé : `Conge`, créé et listé sous son employé, sans possibilité de transfert.
 
-## Responsibilities
+Le projet utilise Java 25 LTS, Spring Boot 4.1.0, PostgreSQL, Flyway, Spring Security Resource Server et Maven Wrapper. Il contient une authentification locale JWT stateless adaptée à un petit déploiement mono-instance. Docker n'est utilisé que par Testcontainers pour les tests PostgreSQL autonomes.
 
-This project owns:
+## Démarrage
 
-- the executable REST API;
-- authentication and authorization;
-- request and business validation;
-- transaction boundaries;
-- PostgreSQL persistence;
-- Liquibase schema migrations;
-- backend initialization data;
-- the runtime implementation of generated and hand-adapted backend code.
+Prérequis : un JDK 25 et une base PostgreSQL vide dédiée à l'application.
 
-Liquibase is authoritative for the physical database schema. Hibernate validates that the mapped entities agree with that schema at startup.
-
-## Backend/frontend boundary
-
-The backend and frontend are designed and delivered as one application. The REST API is an explicit internal transport and security boundary, not an independently evolving product unless a concrete external integration requires it.
-
-The browser remains untrusted. This backend therefore owns every business decision, authoritative validation, authorization rule, transaction, and integrity guarantee. Those rules must hold when a request is sent without the frontend. Frontend form checks exist only to provide immediate inline feedback and must never be required for correctness.
-
-Application failures and validation failures are returned as canonical Problem Details. The frontend presents their `detail` and `fields`; it does not maintain a second implementation of backend business validation. Frontend page contracts may require service identifiers while their hooks accept `Partial<Req*>` and merge URL parameters before dispatch; this is only TypeScript orchestration and never reduces backend route, DTO, or business validation. Shared transport types remain coordinated across the repositories, but compatibility layers and alternate representations are not added for hypothetical independently deployed clients.
-
-## Showcase domain
-
-The included HR domain contains:
-
-- `Employe`;
-- `Departement`;
-- `Conge`;
-- reference entities `Sexe`, `SituationFamiliale`, and `TypeConge`.
-
-It demonstrates generated CRUD operations, filtered and paginated employee search, parent/child leave operations, generic reference-data lookup, validation, security, and database reconstruction from migrations and CSV data.
-
-The showcase is a reusable example and verification environment. It is not intended to be deployed unchanged for a client.
-
-## Technology stack
-
-- Java 25
-- Spring Boot 4.0.6
-- Spring Web MVC
-- Spring Security
-- JWT resource server authentication
-- Spring Data JPA
-- Hibernate 7
-- Bean Validation
-- Liquibase
-- PostgreSQL
-- Maven Wrapper
-
-## Project structure
-
-```text
-src/main/java/app/
-├── CoreApplication.java
-├── core/
-│   ├── configuration/     shared runtime and HTTP security configuration
-│   ├── exception/         API, validation, and security exception handling
-│   ├── pagination/        stable pageable handling and page responses
-│   ├── persistence/       shared persistence query helpers
-│   ├── referenceData/     shared reference-data query mechanics
-│   └── security/
-│       ├── account/       account persistence and administration
-│       └── login/         password login and JWT authentication
-└── domain/rh/
-    ├── employe/
-    ├── departement/
-    ├── conge/
-    ├── sexe/
-    ├── situationFamiliale/
-    ├── typeConge/
-    └── referenceData/     HR-owned reference-data route and catalog
-
-src/main/resources/
-├── application.yml
-└── liquibase/
-    ├── master.xml
-    ├── changelog/
-    └── data/
-```
-
-Each writable HR feature keeps its entity, DTO, mapper, repository, service, and REST resource together. Shared runtime mechanics belong under `app.core`; client-specific names, labels, filters, and business behavior remain under `app.domain`.
-
-## Requirements
-
-- JDK 25
-- PostgreSQL
-- a strict Base64 JWT secret that decodes to at least 64 bytes
-
-The default local database connection is:
-
-```text
-URL:      jdbc:postgresql://localhost:5432/crud_db
-Username: crud
-Password: crud
-```
-
-Override those values with environment variables when the local PostgreSQL installation differs.
-
-## Running locally
-
-Set the required JWT secret, then start Spring Boot.
-
-### PowerShell
+Sous PowerShell :
 
 ```powershell
-$env:APP_SECURITY_JWT_BASE64_SECRET = "<base64-secret>"
-.\mvnw.cmd spring-boot:run
+$env:DB_URL = 'jdbc:postgresql://localhost:5432/rh'
+$env:DB_USERNAME = '<utilisateur>'
+$env:DB_PASSWORD = '<mot-de-passe>'
+$env:APP_SECURITY_JWT_SECRET_BASE64 = '<secret-base64-de-32-octets-minimum>'
+./mvnw.cmd spring-boot:run
 ```
 
-### Bash
+Sous un shell Unix :
 
 ```bash
-export APP_SECURITY_JWT_BASE64_SECRET='<base64-secret>'
+export DB_URL='jdbc:postgresql://localhost:5432/rh'
+export DB_USERNAME='<utilisateur>'
+export DB_PASSWORD='<mot-de-passe>'
+export APP_SECURITY_JWT_SECRET_BASE64='<secret-base64-de-32-octets-minimum>'
 ./mvnw spring-boot:run
 ```
 
-The API listens on `http://localhost:8080` by default. Liquibase applies the schema and showcase data automatically before Hibernate validates the mappings.
+Flyway applique les migrations `V1` à `V4` au démarrage. Hibernate exécute ensuite `ddl-auto=validate` et ne crée ni ne modifie le schéma. `V4__insert_demo_data.sql` fournit les deux comptes locaux documentés dans la section d'authentification.
 
-`run.bat` performs the same startup for the original local Windows installation. It contains a machine-specific `JAVA_HOME` and should be adjusted before being used elsewhere.
+Pour lancer le JAR construit :
 
-## Runtime configuration
-
-Configuration is externalized through standard Spring Boot environment variables.
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `APP_SECURITY_JWT_BASE64_SECRET` | none | Required HS512 secret; strict Base64 decoding to at least 64 bytes. |
-| `APP_SECURITY_JWT_ISSUER` | `app_core` | Required JWT issuer. |
-| `APP_SECURITY_JWT_AUDIENCE` | `app_core` | Required JWT audience. |
-| `APP_SECURITY_TOKEN_VALIDITY_SECONDS` | `86400` | Token lifetime; allowed range `1..604800`. |
-| `APP_CORS_ALLOWED_ORIGINS` | local ports `3000,4200,5173,9000` | Comma-separated frontend origins. |
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/crud_db` | PostgreSQL JDBC URL. |
-| `SPRING_DATASOURCE_USERNAME` | `crud` | Database username. |
-| `SPRING_DATASOURCE_PASSWORD` | `crud` | Database password. |
-| `SERVER_PORT` | `8080` | HTTP port. |
-| `SERVER_ADDRESS` | Spring Boot default | Optional explicit bind address. |
-| `SPRING_DATA_WEB_PAGEABLE_DEFAULT_PAGE_SIZE` | `20` | Default employee page size. |
-| `SPRING_DATA_WEB_PAGEABLE_MAX_PAGE_SIZE` | `100` | Maximum accepted page size. |
-| `SPRING_JPA_SHOW_SQL` | `false` | SQL logging. |
-| `SPRING_LIQUIBASE_ENABLED` | `true` | Liquibase execution. |
-
-This project deliberately has no `dev` or `prod` Spring profile. The same application runs in both environments; only external runtime values differ.
-
-## Security
-
-Every launch requires `APP_SECURITY_JWT_BASE64_SECRET`; there is no committed fallback key.
-
-Each account has exactly one role:
-
-| Role | Access |
-|---|---|
-| `ROLE_GESTIONNAIRE_RH` | Current reference-data, department, employee, and leave APIs. |
-| `ROLE_ADMIN` | Account administration only. It cannot access HR business APIs. |
-
-Roles are mutually exclusive. A person who performs both business and account-administration work uses two separate accounts. The backend enforces this in the database, JWT validation, route authorization, and account-management service; frontend role display is not a security boundary.
-
-`POST /api/login` is public and returns the signed bearer token as `accessToken`. `/api/admin/accounts/**` requires `ROLE_ADMIN`, while the complete `/api/rh/**` namespace requires `ROLE_GESTIONNAIRE_RH`. Other `/api/**` routes are denied until assigned explicitly.
-
-JWT `sub` and scalar `role` claims identify the authenticated account; `aid` and `ver` support account validation and token invalidation. Every authenticated request verifies the current database account, activation state, role, and token version. Changing a role, changing activation, or resetting a password therefore invalidates previously issued tokens immediately.
-
-The consolidated `security_table.xml` baseline creates the singular constrained `role` column and token version directly. It seeds two separate showcase accounts:
-
-```text
-admin / admin
-gestionnaire-rh / gestionnaire-rh
+```powershell
+./mvnw.cmd package
+java -jar target/rh-reference-backend-1.0.0.jar
 ```
 
-This security baseline requires a fresh disposable database. Do not reuse a database created from a different baseline.
+## API
 
-Before the first migration of a tailored client database, replace both showcase accounts with deliberate client accounts and unique BCrypt password hashes. Never deploy showcase credentials.
+| Méthode | Route | Usage |
+|---|---|---|
+| `POST` | `/api/rh/departement` | Créer un département (201 avec corps, sans `Location`) |
+| `GET` | `/api/rh/departement` | Liste ordonnée par nom |
+| `GET` | `/api/rh/departement/{id}` | Consulter un département |
+| `PUT` | `/api/rh/departement/{id}` | Modifier un département |
+| `DELETE` | `/api/rh/departement/{id}` | Supprimer un département |
+| `POST` | `/api/rh/employe` | Créer un employé (201 avec corps, sans `Location`) |
+| `GET` | `/api/rh/employe/{id}` | Consulter un employé |
+| `POST` | `/api/rh/employe/filtrer` | Filtrer et paginer les employés |
+| `PUT` | `/api/rh/employe/{id}` | Modifier un employé |
+| `DELETE` | `/api/rh/employe/{id}` | Supprimer un employé |
+| `POST` | `/api/employes/{employeId}/conges` | Créer un congé pour un employé |
+| `GET` | `/api/employes/{employeId}/conges` | Lister les congés de l'employé |
+| `GET` | `/api/conges/{id}` | Consulter un congé |
+| `PUT` | `/api/conges/{id}` | Modifier un congé sans changer son parent |
+| `DELETE` | `/api/conges/{id}` | Supprimer un congé |
+| `POST` | `/api/admin/roles` | Créer un rôle |
+| `GET` | `/api/admin/roles` | Liste ordonnée par code puis identifiant |
+| `GET` | `/api/admin/roles/{id}` | Consulter un rôle |
+| `PUT` | `/api/admin/roles/{id}` | Modifier le libellé ou la description d'un rôle |
+| `DELETE` | `/api/admin/roles/{id}` | Supprimer physiquement un rôle inutilisé |
+| `POST` | `/api/admin/accounts` | Créer un compte associé à un rôle |
+| `GET` | `/api/admin/accounts` | Rechercher les comptes |
+| `GET` | `/api/admin/accounts/{id}` | Consulter un compte |
+| `PUT` | `/api/admin/accounts/{id}` | Modifier un compte et son rôle unique |
+| `DELETE` | `/api/admin/accounts/{id}` | Supprimer physiquement un compte |
+| `POST` | `/api/auth/login` | Obtenir un JWT d'accès |
+| `GET` | `/api/auth/me` | Lire l'identité technique courante |
+| `PUT` | `/api/auth/password` | Changer son mot de passe et révoquer ses JWT |
+| `POST` | `/api/auth/logout-all` | Révoquer tous ses JWT |
+| `PUT` | `/api/admin/accounts/{id}/password` | Créer ou réinitialiser la credential locale |
 
-## API overview
+Le filtre des employés est envoyé comme corps JSON à `POST /api/rh/employe/filtrer`. Il couvre les champs textuels, les références `sexe`, `situationFamiliale` et `departement`, ainsi que les intervalles `debutDateNaissance`/`finDateNaissance` et `debutDateEntree`/`finDateEntree`. Les références ont la forme `{"id":"…"}` et sont comparées par identifiant. `page`, `size` et `sort` restent des paramètres de requête Spring (`sort=prenom,desc`, par exemple). L'identifiant est ajouté comme dernier critère de tri afin de stabiliser la pagination.
 
-All routes use the `/api` prefix. HR routes share the `/api/rh` namespace so authorization does not depend on enumerating entities.
+Conformément au DSL, `matricule`, `nom`, `prenom` et `dateNaissance` sont obligatoires. `sexe`, `situationFamiliale`, `dateEntree`, `departement` et les autres textes sont facultatifs. `email` est volontairement un simple `Text` de 250 caractères : le backend ne lui ajoute ni validation de format ni normalisation non exprimée par le DSL.
 
-| Area | Routes |
-|---|---|
-| Authentication | `POST /login` |
-| Account administration | `GET` and `POST /admin/accounts`; `GET` and `PUT /admin/accounts/{id}`; `PUT /admin/accounts/{id}/password` |
-| Reference data | `GET /rh/reference/{entity}`, with optional ID or allowed-field filtering routes |
-| Departments | CRUD under `/rh/departement` |
-| Employees | CRUD under `/rh/employe`; filtered pagination through `POST /rh/employe/filtrer` |
-| Leave | Create under `/rh/employe/{idEmploye}/conge`; list under `/rh/conge/employe/{idEmploye}`; item CRUD under `/rh/conge/{id}` |
+La recherche des comptes accepte `username`, `displayName`, `email`, `active`, `roleId`, `page`, `size`, `sort` et `direction`. Les filtres textuels sont partiels, insensibles à la casse et limités à 250 caractères. `active` et `roleId` sont des filtres exacts. Les tris autorisés sont `username`, `displayName`, `email`, `active` et `role`; le tri `role` utilise le code du rôle. La pagination et le départage final par `id ASC` suivent le même contrat que la recherche des employés.
 
-Account list and detail responses expose only `id`, `username`, `role`, and `activated`; password hashes and token versions never cross the API boundary. Account creation accepts `username`, `password`, and one canonical string `role`; numeric enum ordinals are rejected. New accounts are activated initially. Account update accepts `role` and `activated`. Passwords supplied to create/reset operations must contain 8 to 256 characters and fit BCrypt's 72-byte UTF-8 limit. Accounts are deactivated rather than deleted. The service prevents self-demotion/self-deactivation and preserves at least one active administrator.
-
-Paginated endpoints return the application-owned `PageResponse<T>` contract rather than exposing Spring's internal page serialization. Request and application failures use Problem Details responses.
-
-JSON request members that are not present in the target DTO are ignored. API-facing identifiers remain `Long` in Java but are marked with the host-owned `@JsonId` annotation and serialized as JSON strings:
+`EmployeService` retourne un `Page<EmployeResponse>`, utile à la logique applicative. Le contrôleur convertit ce résultat en `PageResponse`, contrat REST stable qui n'expose pas la structure interne de Spring :
 
 ```json
 {
-  "id": "42",
-  "idEmploye": "42"
+  "items": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true
 }
 ```
 
-This keeps entities, path variables, repositories, and PostgreSQL `BIGINT` columns numeric while giving browser clients stable string IDs. Unannotated `Long` values remain JSON numbers, null IDs remain null, and Jackson accepts the corresponding string IDs when DTOs are sent back. `@JsonId` is the boundary adapter; do not replace `Long` with `BigInteger` or duplicate this conversion in DTO mappers.
+Chaque fonctionnalité possède des DTO explicites : `CreateRequest`, `UpdateRequest`, `Response` et, lorsqu'une association est imbriquée, `Reference`. Les entités JPA ne font donc pas partie du contrat JSON. Les mappers associés sont purs : ils ne consultent aucun repository et ne contiennent aucune règle métier.
 
-API date values are accepted and returned as `dd/MM/yyyy`; the shared pattern is configured through `spring.jackson.date-format` in `application.yml` and applied globally to `LocalDate` values by `JsonConfiguration`.
+Chaque réponse modifiable contient un champ numérique `version`. Ce champ doit être renvoyé dans un `PUT`; une version périmée produit un HTTP 409 au lieu d'écraser silencieusement une modification concurrente. `@Version` conserve en plus la garantie atomique JPA lorsque deux transactions ont lu la même version. Aucun ETag n'est utilisé.
 
-## Source formatting and generated overlays
+`PUT` protège ainsi le snapshot lu par le client grâce à la version transmise. `DELETE` recharge l'état courant et ne protège pas contre une suppression déclenchée depuis un écran ancien. Cette asymétrie est un choix volontaire du template CRUD minimal : les routes `DELETE` n'acceptent ni version ni ETag.
 
-Generated DTOs and other domain overlays are compared with `../engine/result/be` before selective transfer. The engine emits Java imports in the same groups used by VS Code's Java organizer: `java`, `javax`, `org`, `com`, then all remaining packages alphabetically. Keeping generator and IDE ordering identical prevents save-time import churn.
+Les identifiants restent des `Long` dans Java et PostgreSQL mais sont sérialisés comme chaînes dans les réponses et références JSON, par exemple `"id":"9007199254740993"`. Cela évite toute perte de précision dans JavaScript. Les versions, compteurs et métadonnées de pagination restent numériques. Les identifiants reçus dans les corps JSON acceptent leur représentation sous forme de chaîne.
 
-For intentionally wrapped record components, configure the Eclipse JDT formatter with `org.eclipse.jdt.core.formatter.join_wrapped_lines=false`. To force every record component onto its own line, use `org.eclipse.jdt.core.formatter.alignment_for_record_components=49`. Prefer these settings to trailing `//` markers whose only purpose is to stop formatting.
+Les associations sont représentées par une référence JSON courte et explicite. Les champs facultatifs nuls sont omis.
 
-## Persistence and implementation conventions
+### Module Admin V1
 
-Current backend safeguards include:
+`Role` est un référentiel sans données initiales. Son `code`, composé de lettres ASCII, chiffres ou underscores et commençant par une lettre, contient entre 2 et 50 caractères. Il est nettoyé, stocké en majuscules et devient immuable après la création. Le libellé obligatoire est nettoyé et limité à 150 caractères; la description facultative est limitée à 1000 caractères.
 
-- ordered Liquibase changelog includes;
-- indexed foreign keys;
-- explicit-ID sequence synchronization after CSV imports;
-- case-insensitive username uniqueness;
-- database constraints for uniqueness, relationships, and leave-date ordering;
-- bounded request text and date-range validation;
-- Hibernate schema validation after Liquibase;
-- service-owned transaction boundaries;
-- disabled Open Session in View;
-- lazy JPA relationships;
-- entity graphs for collection queries that require related display data;
-- escaped SQL `LIKE` wildcard input;
-- stable pagination sorting.
+`Account` possède un `username` unique de 3 à 100 caractères, composé de lettres ASCII, chiffres, points, underscores ou tirets. Il est nettoyé et stocké en minuscules. Le `displayName` obligatoire est nettoyé et limité à 150 caractères. L'e-mail facultatif est nettoyé, stocké en minuscules, limité à 254 caractères et unique lorsqu'il est présent; une valeur vide devient `null`. Plusieurs comptes sans e-mail sont donc autorisés. `active` reste un simple booléen CRUD.
 
-Database uniqueness constraints remain the final protection against concurrent duplicate creation. Service-level prechecks provide clearer normal-case conflict responses, while database integrity failures are also mapped to HTTP `409`.
+Chaque compte référence exactement un rôle obligatoire par une clé étrangère restrictive : plusieurs comptes peuvent partager le même rôle, mais il n'existe ni collection inverse, ni table de jointure, ni cascade de suppression. Les comptes et les rôles inutilisés sont supprimés physiquement. La suppression d'un rôle encore référencé retourne HTTP 409 grâce à la contrainte PostgreSQL.
 
-Do not duplicate physical schema limits indiscriminately in generated entity metadata. Writable request DTOs own authoritative request-shape validation; Liquibase owns the database definition. A generated frontend form may mirror selected constraints for inline feedback, but backend validation remains mandatory and canonical.
+`domain.admin` reste propriétaire des données fonctionnelles administratives. L'authentification, les credentials et les JWT appartiennent exclusivement à `core.security`; aucune permission métier fine n'est introduite.
 
-## Database reconstruction and migration rules
+### Frontière Admin → sécurité
 
-A disposable local database can be rebuilt from `liquibase/master.xml` and the CSV files under `liquibase/data`.
+`domain.admin` reste propriétaire des entités `Account` et `Role`. Le package `core.security.account` définit uniquement un contrat interne de lecture, `SecurityAccountProvider`, et son snapshot technique minimal : identifiant, username canonique, état actif et code du rôle. L'implémentation `AccountSecurityAdapter` reste dans `domain.admin.account` et transforme les entités en snapshot dans une transaction en lecture seule.
 
-`reset-local-db.sql` drops and recreates the PostgreSQL `public` schema. It is intentionally destructive and must be run manually only against the disposable local database. Normal application startup never drops the schema.
+La dépendance de compilation va donc du domaine vers le cœur, jamais dans l'autre sens :
 
-Recreate the disposable local database before running the current security baseline.
-
-Before delivering a new client project, it is acceptable to recreate the database and replace the disposable HR migration history with a clean client baseline. Once changesets have executed in a persistent environment:
-
-- preserve their IDs and contents;
-- do not rewrite them;
-- add corrective or incremental changesets instead.
-
-## Validation
-
-Run the backend validation command with:
-
-```bash
-./mvnw test
+```text
+core.security.account
+        ▲
+        │ implémente
+domain.admin.account.AccountSecurityAdapter
+        │
+        └── AccountRepository ──> Account ──> Role
 ```
 
-On Windows:
+`Account` n'implémente pas `UserDetails`, `Role` n'implémente pas `GrantedAuthority` et aucun objet JPA ou DTO REST ne traverse cette frontière. Le bootstrap utilise un second port minimal, `SecurityAdminBootstrapProvider`, implémenté par `AccountBootstrapAdapter`. Ainsi, `core.security` n'importe jamais `app.domain`.
+
+## Authentification locale JWT
+
+La signature est exclusivement HS256, explicitement imposée à `NimbusJwtEncoder` et `NimbusJwtDecoder`. Le secret doit être un Base64 valide représentant au moins 32 octets réels. Il n'a aucune valeur par défaut et l'application refuse de démarrer s'il est absent, invalide ou trop court. Pour générer une valeur locale :
 
 ```powershell
-.\mvnw.cmd test
+$bytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+$env:APP_SECURITY_JWT_SECRET_BASE64 = [Convert]::ToBase64String($bytes)
 ```
 
-This command compiles the backend and runs focused account-policy, JWT-invalidation, role-JSON, JSON-ID, signed-token route-matrix, and changelog-validation tests. Full-stack E2E orchestration is intended to live in the sibling [`../crud-e2e`](../crud-e2e) project, which will start PostgreSQL, this backend, and the frontend. See [`../WORKSPACE.md`](../WORKSPACE.md#testing-and-verification) for the shared testing strategy and current status.
+```bash
+export APP_SECURITY_JWT_SECRET_BASE64="$(openssl rand -base64 32)"
+```
 
-## Backend customization
+Les réglages optionnels sont `APP_SECURITY_JWT_ISSUER`, `APP_SECURITY_JWT_AUDIENCE`, `APP_SECURITY_JWT_TTL` (PT15M par défaut, PT1H maximum) et `APP_SECURITY_JWT_CLOCK_SKEW` (PT30S par défaut, PT1M maximum). Changer le secret invalide volontairement tous les JWT existants.
 
-When adapting this repository for a client:
+Le token contient uniquement `sub` (identifiant stable du compte), `iss`, `aud`, `iat`, `nbf`, `exp`, un `jti` aléatoire et `credential_version`. Il ne contient ni rôle, ni username, ni e-mail, ni display name. À chaque requête bearer, l'application relit le compte par son identifiant, son état actif, son username et son rôle courant, puis lit uniquement `tokenVersion` depuis `account_credential`. Il n'existe ni cache de sécurité, ni blacklist, ni stockage des tokens.
 
-1. verify the complete HR showcase first;
-2. remove `app.domain.rh` and replace it with the client domain;
-3. remove HR-specific changelogs, constraints, CSV files, tables, and `master.xml` includes;
-4. adapt the domain-owned `ReferenceDataCatalog` implementation;
-5. review and transfer the desired backend overlay generated by `../engine`;
-6. create a fresh database;
-7. start the customized backend and verify it with the corresponding frontend.
+Les mots de passe sont stockés dans `account_credential`, séparée de l'entité fonctionnelle `Account`, avec un hash préfixé `{argon2id}`. Les paramètres sont 19 MiB de mémoire, 2 itérations et un parallélisme de 1. La politique accepte 15 à 128 caractères, Unicode et espaces compris; aucune transformation, normalisation ou suppression d'espaces n'est appliquée. `@Version` protège les écritures concurrentes tandis que `tokenVersion` sert exclusivement à la révocation. La FK vers `account` utilise `ON DELETE CASCADE`.
 
-A completed client backend must not retain HR-specific packages, classes, tables, routes, migrations, constraints, or initialization data.
+### Comptes de démonstration
 
-## Intentionally excluded
+`V4__insert_demo_data.sql` crée deux identités locales séparées :
 
-The backend intentionally does not include:
+| Usage | Username | Mot de passe | Rôle |
+|---|---|---|---|
+| Administration | `admin` | `Admin-local-2026!` | `ADMIN` |
+| Ressources humaines | `gestionnaire-rh` | `Gestionnaire-local-2026!` | `GESTIONNAIRE_RH` |
 
-- auditing;
-- caching;
-- Spring Boot Actuator;
-- OpenAPI or Swagger configuration;
-- Spring Boot DevTools;
-- notification modules.
+Ces identifiants sont réservés au développement et doivent être remplacés avant tout déploiement partagé. Les mots de passe ne sont pas stockés en clair dans la base : V4 insère uniquement leurs hashes Argon2id. Le bootstrap doit rester désactivé avec ces données, car il refuse volontairement de s'exécuter lorsqu'un compte existe déjà.
 
-Their absence is deliberate. Add one only when a concrete client requirement justifies its implementation and maintenance cost.
+### Appels usuels
+
+```bash
+curl -i -X POST https://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"Admin-local-2026!"}'
+
+curl https://localhost:8080/api/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -i -X PUT https://localhost:8080/api/auth/password \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"currentPassword":"mot-de-passe-local","newPassword":"nouveau-mot-de-passe-local"}'
+
+curl -i -X POST https://localhost:8080/api/auth/logout-all \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Le login répond avec `Cache-Control: no-store` et `Pragma: no-cache`. Un bearer absent, invalide, expiré ou révoqué produit `401 AUTHENTICATION_REQUIRED` et `WWW-Authenticate: Bearer`; un login incorrect produit `401 INVALID_CREDENTIALS`; un rôle insuffisant produit `403 ACCESS_DENIED`; la limitation du login produit `429 TOO_MANY_LOGIN_ATTEMPTS`.
+
+La désactivation ou suppression d'un compte et un changement de mot de passe, reset Admin ou logout-all invalident immédiatement les JWT déjà émis. Un changement de rôle est effectif dès la requête suivante et un username renommé devient aussitôt le nom du principal. Après un changement de mot de passe ou logout-all, le client doit supprimer son token local et se reconnecter.
+
+L'API est stateless : pas de session, cookie d'authentification, refresh token, formulaire Basic ou token dans une URL. Les bearer sont acceptés uniquement dans `Authorization`. CSRF est désactivé pour cette raison précise; l'introduction future d'un cookie d'authentification imposerait de revoir ce choix. Les origines CORS exactes sont configurées par `APP_SECURITY_CORS_ALLOWED_ORIGINS` (aucune par défaut, jamais `*`, credentials désactivés). HTTPS est obligatoire en production.
+
+Le limiteur d'essais utilise deux caches Caffeine bornés, par username canonique et par adresse source. Avant l'authentification, une opération atomique courte purge les tentatives expirées, vérifie les deux seuils puis réserve immédiatement une place dans les deux buckets. Le verrou est libéré avant tout accès au compte ou calcul Argon2. Chaque tentative admise, réussie ou non, reste comptée pour l'adresse; un succès réinitialise uniquement le bucket du username prouvé. Un échec n'est pas compté une seconde fois après Argon2. Les seuils, fenêtres et tailles sont configurables via `APP_SECURITY_LOGIN_*`.
+
+Les DTO de sécurité limitent le username à 100 unités UTF-16 et chaque mot de passe transporté à 256 unités UTF-16 avant le limiteur et Argon2. `PasswordPolicy` reste l'autorité pour les nouveaux mots de passe, avec 15 à 128 points de code Unicode sans transformation. Ces bornes de champs ne remplacent pas une limite globale de taille du corps HTTP, qui doit aussi être configurée sur le reverse proxy en production.
+
+Le limiteur convient à une seule instance; plusieurs instances nécessiteraient un stockage partagé ou une limitation au reverse proxy. L'application ne lit pas elle-même `X-Forwarded-For`; la confiance proxy relève de la configuration serveur.
+
+Les erreurs utilisent le contrat suivant :
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "La requête n'est pas valide",
+  "path": "/api/rh/departement",
+  "fieldErrors": [
+    {"field": "nom", "code": "NotBlank", "message": "ne doit pas être vide"}
+  ]
+}
+```
+
+Les codes principaux sont `INVALID_REQUEST`, `VALIDATION_FAILED`, `RESOURCE_NOT_FOUND`, `CONFLICT`, `DATA_INTEGRITY_VIOLATION`, `INVALID_CREDENTIALS`, `AUTHENTICATION_REQUIRED`, `ACCESS_DENIED` et `TOO_MANY_LOGIN_ATTEMPTS`.
+
+## Tests
+
+Tests unitaires et contrats HTTP :
+
+```powershell
+./mvnw.cmd test
+```
+
+Build complet, avec PostgreSQL Testcontainers :
+
+```powershell
+./mvnw.cmd clean verify
+```
+
+Par défaut, `PostgreSqlContainerIT` démarre automatiquement PostgreSQL 17.6. Chaque exécution crée un schéma aléatoire `rh_it_<identifiant>`, y applique réellement la migration Flyway et laisse Hibernate valider ce même schéma. Toutes les connexions de test utilisent ce schéma comme schéma courant. Docker doit être disponible ; son absence fait échouer clairement la validation au lieu d'ignorer silencieusement les tests.
+
+Une base PostgreSQL externe et strictement dédiée aux tests peut remplacer Testcontainers :
+
+```powershell
+$env:TEST_DB_URL = 'jdbc:postgresql://localhost:5432/rh_reference_it'
+$env:TEST_DB_USERNAME = '<utilisateur>'
+$env:TEST_DB_PASSWORD = '<mot-de-passe>'
+$env:TEST_DB_ALLOW_SCHEMA_MANAGEMENT = 'true'
+./mvnw.cmd clean verify
+```
+
+Lorsque `TEST_DB_URL` est définie, le test Testcontainers est désactivé et `PostgreSqlExternalIT` exécute exactement les mêmes scénarios. `TEST_DB_ALLOW_SCHEMA_MANAGEMENT=true` constitue le consentement obligatoire ; sans lui, le contexte échoue avant Flyway et avant toute commande DDL. L'URL doit désigner explicitement une base PostgreSQL et ne doit pas définir elle-même `currentSchema`.
+
+Le compte fourni doit pouvoir créer et supprimer des schémas dans cette base. La suite ne crée et ne supprime jamais la base elle-même : elle crée uniquement son schéma aléatoire vérifié, tronque sans `CASCADE` les tables qualifiées `account_credential`, `account`, `app_role`, `conge`, `employe`, `situation_familiale`, `sexe` et `departement` entre les scénarios, puis supprime ce seul schéma après la suite. Avant chaque nettoyage, une assertion impose que `current_schema()` corresponde exactement au nom isolé attendu ; `public` et les autres schémas ne sont jamais nettoyés.
+
+## Valeurs par défaut proposées pour le générateur
+
+- package vertical plat par fonctionnalité ;
+- entité JPA, repository Spring Data, service transactionnel et contrôleur explicites ;
+- contrats de création, modification et réponse distincts des entités ;
+- mappers statiques, explicites et purs, sans repository ni abstraction commune artificielle ;
+- spécification de recherche dédiée, avec champs et tris inscrits en liste blanche ;
+- migration Flyway comme source du schéma, validation Hibernate et Open Session in View désactivé ;
+- validation Jakarta côté API et contraintes PostgreSQL pour l'intégrité durable ;
+- erreurs HTTP communes, références imbriquées courtes et pagination indépendante de Spring ;
+- relations `LAZY`, lecture et mapping dans la transaction, sans dépendre d'Open Session in View ;
+- verrouillage optimiste avec `@Version` pour toute entité modifiable ;
+- identifiants JSON sérialisés en chaînes, sans transformer les autres valeurs `Long` ;
+- tri déterministe complété par l'identifiant ;
+- suppression physique avec clés étrangères restrictives, afin d'éviter une cascade destructive implicite ;
+- mapping écrit en Java ordinaire, sans Lombok, MapStruct, modèle métier parallèle ou couche générique CRUD.
+
+L'unicité reste exacte et sensible à la casse, conformément aux contraintes PostgreSQL ordinaires. Une unicité normalisée ou insensible à la casse devrait être une décision DSL explicite, pas une supposition du générateur.
+
+## Options pilotées par le DSL
+
+- activation de la recherche et de la pagination, champs filtrables et champs triables ;
+- taille maximale des pages ;
+- unicité d'un champ ;
+- canonicalisation configurable d'une chaîne, comme les codes en majuscules ou les identifiants fonctionnels en minuscules ;
+- immutabilité d'un champ après création, illustrée par le code du rôle ;
+- booléen CRUD obligatoire et filtrable, illustré par `Account.active` ;
+- relation obligatoire et forme de sa référence dans les réponses ;
+- propriété fonctionnelle d'un enfant, routes de création/liste imbriquées et interdiction de réaffecter le parent ;
+- contraintes inter-champs telles que l'ordre des dates ;
+- longueurs techniques des chaînes et validation de format telle que l'e-mail.
+
+Restent volontairement hors de ce socle : refresh token, JWT en cookie, MFA, récupération de mot de passe, permissions fines, multi-rôles, audit métier, Keycloak/OIDC, Authorization Server, RSA/JWKS, rotation transparente de clés, blacklist de tokens, suppression logique, historique, observabilité, notifications, événements et workflow de congé.
+
+## Références de versions
+
+- [Spring Boot 4.1 — prérequis système](https://docs.spring.io/spring-boot/system-requirements.html)
+- [Spring Boot — migrations Flyway](https://docs.spring.io/spring-boot/how-to/data-initialization.html)

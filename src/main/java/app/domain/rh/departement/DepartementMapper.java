@@ -1,54 +1,32 @@
 package app.domain.rh.departement;
 
-import java.util.NoSuchElementException;
-import org.springframework.stereotype.Component;
+import app.core.reference.Reference;
 
-@Component
-public class DepartementMapper {
+public final class DepartementMapper {
 
-    private final DepartementRepository departementRepository;
-
-    public DepartementMapper(DepartementRepository departementRepository) {
-        this.departementRepository = departementRepository;
+    public static DepartementResponse toResponse(Departement departement) {
+        return new DepartementResponse(
+                departement.getId(),
+                departement.getNom(),
+                departement.getDescription(),
+                departement.getVersion());
     }
 
-    public DepartementDto toDto(Departement entity) {
-        return entity == null ? null
-                : new DepartementDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getNom(),
-                        entity.getDescription());
+    public static Departement toEntity(DepartementCreateRequest request) {
+        return new Departement(
+                request.nom(),
+                request.description());
     }
 
-    public DepartementDto toDtoAsRef(Departement entity) {
-        return entity == null ? null
-                : new DepartementDto(
-                        entity.getId(),
-                        entity.getId(),
-                        entity.getNom(),
-                        null);
+    public static void toEntity(Departement departement, DepartementUpdateRequest request) {
+        departement.update(
+                request.nom(),
+                request.description());
     }
 
-    public Departement toEntity(DepartementDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Departement entity = new Departement();
-        copyToEntity(dto, entity);
-        return entity;
+    public static Reference toReference(Departement departement) {
+        return new Reference(departement.getId(), departement.getNom());
     }
 
-    public Departement toEntityAsRef(DepartementDto dto) {
-        if (dto == null || dto.id() == null) {
-            return null;
-        }
-        return departementRepository.findById(dto.id()).orElseThrow(() -> new NoSuchElementException("Departement not found"));
-    }
-
-    public void copyToEntity(DepartementDto dto, Departement entity) {
-        entity.setNom(dto.nom());
-        entity.setDescription(dto.description());
-    }
+    private DepartementMapper() {}
 }

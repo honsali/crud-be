@@ -1,26 +1,32 @@
 package app.domain.admin.account;
 
-import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpecificationExecutor<Account> {
 
-    Optional<Account> findOneByUsernameIgnoreCase(String username);
+    boolean existsByUsername(String username);
 
-    boolean existsByUsernameIgnoreCase(String username);
+    boolean existsByUsernameAndIdNot(String username, Long id);
 
-    List<Account> findAllByOrderByUsernameAsc();
+    boolean existsByEmail(String email);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select account from Account account where account.role = :role order by account.id")
-    List<Account> findAllByRoleForUpdate(@Param("role") AppRole role);
+    boolean existsByEmailAndIdNot(String email, Long id);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select account from Account account where account.id = :id")
-    Optional<Account> findByIdForUpdate(@Param("id") Long id);
+    @EntityGraph(attributePaths = "role")
+    Optional<Account> findByUsername(String username);
+
+    @Override
+    @EntityGraph(attributePaths = "role")
+    Optional<Account> findById(Long id);
+
+    @Override
+    @EntityGraph(attributePaths = "role")
+    Page<Account> findAll(Specification<Account> specification, Pageable pageable);
 }

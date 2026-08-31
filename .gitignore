@@ -1,4 +1,9 @@
-target
-/.settings
-/.vscode
-review.md
+target/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+*.log
+.env
