@@ -1,46 +1,38 @@
 package app.core.security.web;
 
-import app.core.security.authentication.AuthenticatedAccountPrincipal;
-import app.core.security.authentication.InvalidCredentialsException;
+import java.util.Locale;
+
 import app.core.security.jwt.JwtAccessTokenResponse;
 import app.core.security.jwt.JwtTokenService;
-import app.core.security.ratelimit.LoginAttemptLimiter;
-import app.core.security.ratelimit.TooManyLoginAttemptsException;
+import app.domain.admin.account.Account;
+import app.domain.admin.account.AccountRepository;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenService tokenService;
-    private final LoginAttemptLimiter limiter;
 
     public AuthService(
-            AuthenticationManager authenticationManager,
-            JwtTokenService tokenService,
-            LoginAttemptLimiter limiter) {
-        this.authenticationManager = authenticationManager;
+            AccountRepository accountRepository,
+            PasswordEncoder passwordEncoder,
+            JwtTokenService tokenService) {
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
-        this.limiter = limiter;
     }
 
-    public JwtAccessTokenResponse login(LoginRequest request, String sourceAddress) {
-        String username = limiter.canonicalUsername(request.username());
-        if (!limiter.tryAcquire(username, sourceAddress)) {
-            throw new TooManyLoginAttemptsException();
-        }
-        try {
-            Authentication result = authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken.unauthenticated(username, request.password()));
-            limiter.recordSuccess(username);
-            return tokenService.issue((AuthenticatedAccountPrincipal) result.getPrincipal());
-        } catch (AuthenticationException exception) {
+    public JwtAccessTokenResponse login(LoginRequest request) {
+        String username = request.username().strip().toLowerCase(Locale.ROOT);
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(InvalidCredentialsException::new);
+        if (!account.isActivated() || !passwordEncoder.matches(request.password(), account.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
+        return tokenService.issue(account);
     }
 }

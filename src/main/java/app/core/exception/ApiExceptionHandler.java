@@ -6,9 +6,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
-import app.core.security.authentication.InvalidCredentialsException;
-import app.core.security.credential.InvalidCurrentPasswordException;
-import app.core.security.ratelimit.TooManyLoginAttemptsException;
+import app.core.security.web.InvalidCredentialsException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +38,6 @@ public class ApiExceptionHandler {
     ResponseEntity<ApiError> handleInvalidCredentials(
             InvalidCredentialsException exception, HttpServletRequest request) {
         return response(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Identifiants invalides", request, List.of());
-    }
-
-    @ExceptionHandler(InvalidCurrentPasswordException.class)
-    ResponseEntity<ApiError> handleInvalidCurrentPassword(
-            InvalidCurrentPasswordException exception, HttpServletRequest request) {
-        return response(
-                HttpStatus.BAD_REQUEST,
-                "INVALID_CURRENT_PASSWORD",
-                "Le mot de passe actuel est incorrect",
-                request,
-                List.of());
     }
 
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
@@ -85,17 +72,6 @@ public class ApiExceptionHandler {
                 exception.getHeaders(),
                 "UNSUPPORTED_MEDIA_TYPE",
                 "Le type de contenu n'est pas pris en charge",
-                request,
-                List.of());
-    }
-
-    @ExceptionHandler(TooManyLoginAttemptsException.class)
-    ResponseEntity<ApiError> handleTooManyLoginAttempts(
-            TooManyLoginAttemptsException exception, HttpServletRequest request) {
-        return response(
-                HttpStatus.TOO_MANY_REQUESTS,
-                "TOO_MANY_LOGIN_ATTEMPTS",
-                "Trop de tentatives de connexion",
                 request,
                 List.of());
     }

@@ -17,12 +17,10 @@ public class Account extends BaseEntity {
 
     private String username;
 
-    @Column(name = "display_name")
-    private String displayName;
+    @Column(name = "password_hash")
+    private String passwordHash;
 
-    private String email;
-
-    private boolean active;
+    private boolean activated;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id")
@@ -31,51 +29,36 @@ public class Account extends BaseEntity {
     protected Account() {
     }
 
-    Account(String username, String displayName, String email, boolean active, Role role) {
+    Account(String username, String passwordHash, Role role) {
         this.username = normalizeUsername(username);
-        this.displayName = normalizeDisplayName(displayName);
-        this.email = normalizeEmail(email);
-        this.active = active;
+        this.passwordHash = passwordHash;
+        this.activated = true;
         this.role = role;
     }
 
-    void update(String username, String displayName, String email, boolean active, Role role) {
-        this.username = normalizeUsername(username);
-        this.displayName = normalizeDisplayName(displayName);
-        this.email = normalizeEmail(email);
-        this.active = active;
+    void update(Role role, boolean activated) {
         this.role = role;
+        this.activated = activated;
+    }
+
+    void updatePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     static String normalizeUsername(String value) {
         return value == null ? null : value.strip().toLowerCase(Locale.ROOT);
     }
 
-    static String normalizeDisplayName(String value) {
-        return value == null ? null : value.strip();
-    }
-
-    static String normalizeEmail(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        return value.strip().toLowerCase(Locale.ROOT);
-    }
-
     public String getUsername() {
         return username;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public boolean isActive() {
-        return active;
+    public boolean isActivated() {
+        return activated;
     }
 
     public Role getRole() {

@@ -32,8 +32,12 @@ public class Role extends BaseEntity {
         this.description = description;
     }
 
-    static String normalizeCode(String value) {
-        return value == null ? null : value.strip().toUpperCase(Locale.ROOT);
+    public static String normalizeCode(String value) {
+        if (value == null) {
+            return null;
+        }
+        String code = value.strip().toUpperCase(Locale.ROOT);
+        return code.startsWith("ROLE_") ? code.substring("ROLE_".length()) : code;
     }
 
     static String normalizeLibelle(String value) {
@@ -42,6 +46,10 @@ public class Role extends BaseEntity {
 
     public String getCode() {
         return code;
+    }
+
+    public String getAuthority() {
+        return "ROLE_" + code;
     }
 
     public String getLibelle() {

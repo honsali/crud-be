@@ -27,19 +27,6 @@ app:
     jwt:
       secret-base64: ${APP_SECURITY_JWT_SECRET_BASE64:}
       issuer: ${APP_SECURITY_JWT_ISSUER:crud-reference}
-      audience: ${APP_SECURITY_JWT_AUDIENCE:crud-api}
-      ttl: ${APP_SECURITY_JWT_TTL:PT15M}
-      clock-skew: ${APP_SECURITY_JWT_CLOCK_SKEW:PT30S}
+      ttl: ${APP_SECURITY_JWT_TTL:PT1H}
     cors:
       allowed-origins: ${APP_SECURITY_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:9000}
-    login-rate-limit:
-      username-max-attempts: ${APP_SECURITY_LOGIN_USERNAME_MAX_ATTEMPTS:5}
-      username-window: ${APP_SECURITY_LOGIN_USERNAME_WINDOW:PT15M}
-      address-max-attempts: ${APP_SECURITY_LOGIN_ADDRESS_MAX_ATTEMPTS:20}
-      address-window: ${APP_SECURITY_LOGIN_ADDRESS_WINDOW:PT15M}
-      maximum-size: ${APP_SECURITY_LOGIN_MAXIMUM_SIZE:10000}
-    bootstrap:
-      enabled: ${APP_SECURITY_BOOTSTRAP_ENABLED:false}
-      username: ${APP_SECURITY_BOOTSTRAP_USERNAME:}
-      display-name: ${APP_SECURITY_BOOTSTRAP_DISPLAY_NAME:}
-      password: ${APP_SECURITY_BOOTSTRAP_PASSWORD:}

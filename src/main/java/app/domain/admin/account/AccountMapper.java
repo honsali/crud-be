@@ -11,10 +11,7 @@ public final class AccountMapper {
         return new AccountResponse(
                 account.getId(),
                 account.getUsername(),
-                account.getDisplayName(),
-                account.getEmail(),
-                account.isActive(),
                 RoleMapper.toReference(account.getRole()),
-                account.getVersion());
+                account.isActivated());
     }
 }
