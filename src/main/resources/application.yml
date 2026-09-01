@@ -3,8 +3,8 @@ spring:
     name: rh-reference-backend
   datasource:
     url: jdbc:postgresql://localhost:5432/rh
-    username: postgres
-    password: postgres
+    username: rh
+    password: rh
   data:
     web:
       pageable:

@@ -12,7 +12,12 @@ Le petit noyau manuel ajoute une authentification JWT et l'administration des co
 
 ## Démarrage
 
-Prérequis : Java 25, Maven et PostgreSQL. La configuration locale attend une base `rh` accessible avec `postgres` / `postgres`.
+Prérequis : Java 25, Maven et PostgreSQL. La configuration locale utilise une base et un compte de démonstration nommés `rh` :
+
+```bash
+sudo -u postgres psql -c "CREATE ROLE rh LOGIN PASSWORD 'rh'"
+sudo -u postgres createdb -O rh rh
+```
 
 ```bash
 mvn spring-boot:run
@@ -154,14 +159,10 @@ Tests unitaires et contrats HTTP :
 mvn test
 ```
 
-Les tests PostgreSQL peuvent utiliser une base locale dédiée, sans Docker :
+Le test d'intégration utilise la même base locale `rh`, dans un schéma temporaire isolé :
 
 ```bash
-export TEST_DB_URL='jdbc:postgresql://localhost:5432/rh_reference_it'
-export TEST_DB_USERNAME='<utilisateur>'
-export TEST_DB_PASSWORD='<mot-de-passe>'
-export TEST_DB_ALLOW_SCHEMA_MANAGEMENT='true'
 mvn verify
 ```
 
-La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Liquibase, laisse Hibernate valider le modèle, puis supprime uniquement ce schéma. Sans `TEST_DB_URL`, le scénario alternatif Testcontainers reste disponible.
+La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Liquibase, vérifie les données de démonstration et les trois patrons générés, puis supprime uniquement ce schéma. Elle ne nécessite ni Docker ni variable d'environnement.

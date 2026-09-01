@@ -83,7 +83,7 @@ class SecurityHttpTest {
 
     @Test
     void protectsApiRoutesAndRestrictsAdministrationToAdmins() throws Exception {
-        mockMvc.perform(get("/api/departements"))
+        mockMvc.perform(get("/api/rh/departements"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
 
