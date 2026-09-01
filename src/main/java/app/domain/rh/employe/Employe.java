@@ -38,7 +38,21 @@ public class Employe extends BaseEntity {
 
     protected Employe() {}
 
-    Employe(String matricule, String nom, String prenom, LocalDate dateNaissance, Sexe sexe, SituationFamiliale situationFamiliale, LocalDate dateEntree, String email, String telephone, String ville, String adresse, String fonction, String description, Departement departement) {
+    Employe(
+            String matricule,
+            String nom,
+            String prenom,
+            LocalDate dateNaissance,
+            Sexe sexe,
+            SituationFamiliale situationFamiliale,
+            LocalDate dateEntree,
+            String email,
+            String telephone,
+            String ville,
+            String adresse,
+            String fonction,
+            String description,
+            Departement departement) {
         this.matricule = matricule;
         this.nom = nom;
         this.prenom = prenom;
@@ -111,7 +125,21 @@ public class Employe extends BaseEntity {
         return departement;
     }
 
-    public void update(String matricule, String nom, String prenom, LocalDate dateNaissance, Sexe sexe, SituationFamiliale situationFamiliale, LocalDate dateEntree, String email, String telephone, String ville, String adresse, String fonction, String description, Departement departement) {
+    public void update(
+            String matricule,
+            String nom,
+            String prenom,
+            LocalDate dateNaissance,
+            Sexe sexe,
+            SituationFamiliale situationFamiliale,
+            LocalDate dateEntree,
+            String email,
+            String telephone,
+            String ville,
+            String adresse,
+            String fonction,
+            String description,
+            Departement departement) {
         this.matricule = matricule;
         this.nom = nom;
         this.prenom = prenom;

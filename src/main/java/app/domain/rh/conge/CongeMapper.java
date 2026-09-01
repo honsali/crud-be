@@ -12,11 +12,15 @@ public final class CongeMapper {
         return new CongeResponse(
                 conge.getId(),
                 conge.getCode(),
-                conge.getTypeConge() == null ? null : TypeCongeMapper.toReference(conge.getTypeConge()),
+                conge.getTypeConge() == null
+                        ? null
+                        : TypeCongeMapper.toReference(conge.getTypeConge()),
                 conge.getDateDebutConge(),
                 conge.getDateFinConge(),
                 conge.getCommentaire(),
-                conge.getEmploye() == null ? null : EmployeMapper.toReference(conge.getEmploye()),
+                conge.getEmploye() == null
+                        ? null
+                        : EmployeMapper.toReference(conge.getEmploye()),
                 conge.getVersion());
     }
 

@@ -12,7 +12,7 @@ Le petit noyau manuel ajoute une authentification JWT et l'administration des co
 
 ## Démarrage
 
-Prérequis : Java 25, Maven et PostgreSQL. La configuration locale utilise une base et un compte de démonstration nommés `rh` :
+Prérequis : Java 25 et PostgreSQL. Le wrapper Maven est fourni. La configuration locale utilise une base et un compte de démonstration nommés `rh` :
 
 ```bash
 sudo -u postgres psql -c "CREATE ROLE rh LOGIN PASSWORD 'rh'"
@@ -20,7 +20,7 @@ sudo -u postgres createdb -O rh rh
 ```
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
 Liquibase remet le schéma à zéro, recrée les tables et recharge les données de démonstration à chaque démarrage. Hibernate valide ensuite que les entités correspondent au schéma. Ce comportement destructif est volontaire pour cette application de démonstration.
@@ -153,16 +153,16 @@ La sécurité et `domain/admin` forment un petit noyau manuel. Engine se concent
 
 ## Tests
 
-Tests unitaires et contrats HTTP :
+Tests rapides et contrats HTTP :
 
 ```bash
-mvn test
+./mvnw test
 ```
 
 Le test d'intégration utilise la même base locale `rh`, dans un schéma temporaire isolé :
 
 ```bash
-mvn verify
+./mvnw verify
 ```
 
 La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Liquibase, vérifie les données de démonstration et les trois patrons générés, puis supprime uniquement ce schéma. Elle ne nécessite ni Docker ni variable d'environnement.

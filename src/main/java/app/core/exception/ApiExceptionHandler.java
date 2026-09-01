@@ -11,6 +11,7 @@ import app.core.security.web.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +100,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception, HttpServletRequest request) {
+    ResponseEntity<ApiError> handleDataIntegrity(
+            DataIntegrityViolationException exception,
+            HttpServletRequest request) {
         return response(
                 HttpStatus.CONFLICT,
                 "DATA_INTEGRITY_VIOLATION",
@@ -114,7 +117,12 @@ public class ApiExceptionHandler {
                 .map(this::toViolation)
                 .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::code))
                 .toList();
-        return response(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "La requête n'est pas valide", request, violations);
+        return response(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_FAILED",
+                "La requête n'est pas valide",
+                request,
+                violations);
     }
 
     @ExceptionHandler(BindException.class)
@@ -123,11 +131,17 @@ public class ApiExceptionHandler {
                 .map(this::toViolation)
                 .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::code))
                 .toList();
-        return response(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "La requête n'est pas valide", request, violations);
+        return response(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_FAILED",
+                "La requête n'est pas valide",
+                request,
+                violations);
     }
 
     @ExceptionHandler({
             InvalidRequestException.class,
+            PropertyReferenceException.class,
             ConstraintViolationException.class,
             HandlerMethodValidationException.class,
             MethodArgumentTypeMismatchException.class,

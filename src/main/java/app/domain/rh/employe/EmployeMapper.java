@@ -17,8 +17,12 @@ public final class EmployeMapper {
                 employe.getNom(),
                 employe.getPrenom(),
                 employe.getDateNaissance(),
-                employe.getSexe() == null ? null : SexeMapper.toReference(employe.getSexe()),
-                employe.getSituationFamiliale() == null ? null : SituationFamilialeMapper.toReference(employe.getSituationFamiliale()),
+                employe.getSexe() == null
+                        ? null
+                        : SexeMapper.toReference(employe.getSexe()),
+                employe.getSituationFamiliale() == null
+                        ? null
+                        : SituationFamilialeMapper.toReference(employe.getSituationFamiliale()),
                 employe.getDateEntree(),
                 employe.getEmail(),
                 employe.getTelephone(),
@@ -26,11 +30,17 @@ public final class EmployeMapper {
                 employe.getAdresse(),
                 employe.getFonction(),
                 employe.getDescription(),
-                employe.getDepartement() == null ? null : DepartementMapper.toReference(employe.getDepartement()),
+                employe.getDepartement() == null
+                        ? null
+                        : DepartementMapper.toReference(employe.getDepartement()),
                 employe.getVersion());
     }
 
-    public static Employe toEntity(EmployeCreateRequest request, Sexe sexe, SituationFamiliale situationFamiliale, Departement departement) {
+    public static Employe toEntity(
+            EmployeCreateRequest request,
+            Sexe sexe,
+            SituationFamiliale situationFamiliale,
+            Departement departement) {
         return new Employe(
                 request.matricule(),
                 request.nom(),
@@ -48,7 +58,12 @@ public final class EmployeMapper {
                 departement);
     }
 
-    public static void toEntity(Employe employe, EmployeUpdateRequest request, Sexe sexe, SituationFamiliale situationFamiliale, Departement departement) {
+    public static void toEntity(
+            Employe employe,
+            EmployeUpdateRequest request,
+            Sexe sexe,
+            SituationFamiliale situationFamiliale,
+            Departement departement) {
         employe.update(
                 request.matricule(),
                 request.nom(),

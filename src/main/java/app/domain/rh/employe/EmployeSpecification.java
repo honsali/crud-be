@@ -19,10 +19,20 @@ public final class EmployeSpecification extends BaseSpecification {
             addLike(predicates, builder, root.get("matricule"), filtre.matricule());
             addLike(predicates, builder, root.get("nom"), filtre.nom());
             addLike(predicates, builder, root.get("prenom"), filtre.prenom());
-            addDateRange(predicates, builder, root.get("dateNaissance"), filtre.debutDateNaissance(), filtre.finDateNaissance());
+            addDateRange(
+                    predicates,
+                    builder,
+                    root.get("dateNaissance"),
+                    filtre.debutDateNaissance(),
+                    filtre.finDateNaissance());
             addReference(predicates, builder, root, "sexe", filtre.sexe());
             addReference(predicates, builder, root, "situationFamiliale", filtre.situationFamiliale());
-            addDateRange(predicates, builder, root.get("dateEntree"), filtre.debutDateEntree(), filtre.finDateEntree());
+            addDateRange(
+                    predicates,
+                    builder,
+                    root.get("dateEntree"),
+                    filtre.debutDateEntree(),
+                    filtre.finDateEntree());
             addLike(predicates, builder, root.get("email"), filtre.email());
             addLike(predicates, builder, root.get("telephone"), filtre.telephone());
             addLike(predicates, builder, root.get("ville"), filtre.ville());

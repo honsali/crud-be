@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.Map;
 
 import app.core.exception.ApiExceptionHandler;
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.core.PropertyReferenceException;
+import org.springframework.data.core.TypeInformation;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,6 +68,18 @@ class ApiErrorHttpTest {
     }
 
     @Test
+    void invalidSortPropertyUsesTheStableBadRequestContract() throws Exception {
+        mockMvc.perform(get("/api/error-contract/invalid-sort"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("La requête n'est pas valide"))
+                .andExpect(jsonPath("$.path").value("/api/error-contract/invalid-sort"))
+                .andExpect(jsonPath("$.fieldErrors").isEmpty())
+                .andExpect(content().string(not(containsString("PropertyReferenceException"))))
+                .andExpect(content().string(not(containsString("unknownSortProperty"))));
+    }
+
+    @Test
     void unexpectedExceptionUsesGeneric500WithoutTechnicalDetails() throws Exception {
         mockMvc.perform(get("/api/error-contract/failure"))
                 .andExpect(status().isInternalServerError())
@@ -88,6 +103,14 @@ class ApiErrorHttpTest {
 
         @PostMapping(value = "/content", consumes = MediaType.APPLICATION_JSON_VALUE)
         public void content(@RequestBody Map<String, Object> body) {
+        }
+
+        @GetMapping("/invalid-sort")
+        public void invalidSort() {
+            throw new PropertyReferenceException(
+                    "unknownSortProperty",
+                    TypeInformation.of(FailureProbeController.class),
+                    List.of());
         }
 
         @GetMapping("/failure")

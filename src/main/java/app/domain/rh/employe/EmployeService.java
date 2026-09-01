@@ -24,7 +24,11 @@ public class EmployeService {
     private final SituationFamilialeRepository situationFamilialeRepository;
     private final DepartementRepository departementRepository;
 
-    public EmployeService(EmployeRepository employeRepository, SexeRepository sexeRepository, SituationFamilialeRepository situationFamilialeRepository, DepartementRepository departementRepository) {
+    public EmployeService(
+            EmployeRepository employeRepository,
+            SexeRepository sexeRepository,
+            SituationFamilialeRepository situationFamilialeRepository,
+            DepartementRepository departementRepository) {
         this.employeRepository = employeRepository;
         this.sexeRepository = sexeRepository;
         this.situationFamilialeRepository = situationFamilialeRepository;
@@ -48,12 +52,15 @@ public class EmployeService {
     @Transactional(readOnly = true)
     public Page<EmployeResponse> filtrer(EmployeFiltre filtre, Pageable pageable) {
         Pageable pagination = PageableUtils.paginationValide(pageable);
-        return employeRepository.findAll(EmployeSpecification.buildSpecification(filtre), pagination).map(EmployeMapper::toResponse);
+        return employeRepository
+                .findAll(EmployeSpecification.buildSpecification(filtre), pagination)
+                .map(EmployeMapper::toResponse);
     }
 
     @Transactional
     public EmployeResponse maj(Long id, EmployeUpdateRequest request) {
-        Employe employe = employeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = employeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
         if (employe.getVersion() != request.version()) {
             throw new StaleVersionException("Employe", id);
         }
@@ -71,13 +78,15 @@ public class EmployeService {
 
     @Transactional(readOnly = true)
     public EmployeResponse recupererParId(Long id) {
-        Employe employe = employeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = employeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
         return EmployeMapper.toResponse(employe);
     }
 
     @Transactional
     public void supprimer(Long id) {
-        Employe employe = employeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = employeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
         employeRepository.delete(employe);
         employeRepository.flush();
     }

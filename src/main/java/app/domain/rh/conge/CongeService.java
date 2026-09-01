@@ -19,7 +19,10 @@ public class CongeService {
     private final TypeCongeRepository typeCongeRepository;
     private final EmployeRepository employeRepository;
 
-    public CongeService(CongeRepository congeRepository, TypeCongeRepository typeCongeRepository, EmployeRepository employeRepository) {
+    public CongeService(
+            CongeRepository congeRepository,
+            TypeCongeRepository typeCongeRepository,
+            EmployeRepository employeRepository) {
         this.congeRepository = congeRepository;
         this.typeCongeRepository = typeCongeRepository;
         this.employeRepository = employeRepository;
@@ -48,7 +51,8 @@ public class CongeService {
 
     @Transactional
     public CongeResponse maj(Long id, CongeUpdateRequest request) {
-        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = congeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
         if (conge.getVersion() != request.version()) {
             throw new StaleVersionException("Conge", id);
         }
@@ -64,13 +68,15 @@ public class CongeService {
 
     @Transactional(readOnly = true)
     public CongeResponse recupererParId(Long id) {
-        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = congeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
         return CongeMapper.toResponse(conge);
     }
 
     @Transactional
     public void supprimer(Long id) {
-        Conge conge = congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = congeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
         congeRepository.delete(conge);
         congeRepository.flush();
     }
@@ -86,7 +92,8 @@ public class CongeService {
     }
 
     private Employe recupererEmploye(Long idEmploye) {
-        return employeRepository.findById(idEmploye).orElseThrow(() -> new ResourceNotFoundException("Employe", idEmploye));
+        return employeRepository.findById(idEmploye)
+                .orElseThrow(() -> new ResourceNotFoundException("Employe", idEmploye));
     }
 
 }

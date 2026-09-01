@@ -27,7 +27,13 @@ public class Conge extends BaseEntity {
 
     protected Conge() {}
 
-    Conge(String code, TypeConge typeConge, LocalDate dateDebutConge, LocalDate dateFinConge, String commentaire, Employe employe) {
+    Conge(
+            String code,
+            TypeConge typeConge,
+            LocalDate dateDebutConge,
+            LocalDate dateFinConge,
+            String commentaire,
+            Employe employe) {
         this.code = code;
         this.typeConge = typeConge;
         this.dateDebutConge = dateDebutConge;
@@ -60,7 +66,12 @@ public class Conge extends BaseEntity {
         return employe;
     }
 
-    public void update(String code, TypeConge typeConge, LocalDate dateDebutConge, LocalDate dateFinConge, String commentaire) {
+    public void update(
+            String code,
+            TypeConge typeConge,
+            LocalDate dateDebutConge,
+            LocalDate dateFinConge,
+            String commentaire) {
         this.code = code;
         this.typeConge = typeConge;
         this.dateDebutConge = dateDebutConge;

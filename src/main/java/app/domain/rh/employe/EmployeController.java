@@ -31,7 +31,9 @@ public class EmployeController {
     }
 
     @PostMapping("/employes/filtrer")
-    public PageResponse<EmployeResponse> filtrer(@Valid @RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
+    public PageResponse<EmployeResponse> filtrer(
+            @Valid @RequestBody(required = false) EmployeFiltre filtre,
+            Pageable pageable) {
         return PageResponse.from(employeService.filtrer(filtre, pageable));
     }
 

@@ -60,6 +60,7 @@ class PostgreSqlIT {
         assertThat(count("account")).isEqualTo(2);
         assertThat(count("departement")).isEqualTo(10);
         assertThat(count("employe")).isEqualTo(25);
+        assertThat(count("conge")).isEqualTo(5);
 
         String token = authService.login(new LoginRequest("admin", "Admin-local-2026!")).accessToken();
         assertThat(jwtDecoder.decode(token).getSubject()).isEqualTo("admin");
