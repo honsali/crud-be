@@ -251,13 +251,13 @@ class SecurityHttpTest {
 
         @Test
         void protectsEndpointsAndUsesTheLiveRoleForAuthorization() throws Exception {
-                mockMvc.perform(get("/api/rh/departement"))
+                mockMvc.perform(get("/api/rh/departements"))
                                 .andExpect(status().isUnauthorized())
                                 .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
                                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
 
                 String token = loginToken();
-                mockMvc.perform(get("/api/rh/departement").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                mockMvc.perform(get("/api/rh/departements").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].id").value("1"));
 
@@ -274,14 +274,14 @@ class SecurityHttpTest {
         @Test
         void rejectsBearerInQueryOrCookie() throws Exception {
                 String token = loginToken();
-                mockMvc.perform(get("/api/rh/departement").queryParam("access_token", token))
+                mockMvc.perform(get("/api/rh/departements").queryParam("access_token", token))
                                 .andExpect(status().isUnauthorized());
-                mockMvc.perform(get("/api/rh/departement").cookie(new Cookie("access_token", token)))
+                mockMvc.perform(get("/api/rh/departements").cookie(new Cookie("access_token", token)))
                                 .andExpect(status().isUnauthorized());
 
                 char replacement = token.endsWith("A") ? 'Q' : 'A';
                 String altered = token.substring(0, token.length() - 1) + replacement;
-                mockMvc.perform(get("/api/rh/departement").header(HttpHeaders.AUTHORIZATION, bearer(altered)))
+                mockMvc.perform(get("/api/rh/departements").header(HttpHeaders.AUTHORIZATION, bearer(altered)))
                                 .andExpect(status().isUnauthorized())
                                 .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer"))
                                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
@@ -317,14 +317,14 @@ class SecurityHttpTest {
 
         @Test
         void corsAllowsOnlyConfiguredExactOriginAndHandlesPreflight() throws Exception {
-                mockMvc.perform(options("/api/rh/departement")
+                mockMvc.perform(options("/api/rh/departements")
                                 .header(HttpHeaders.ORIGIN, "https://allowed.example")
                                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
                                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Authorization"))
                                 .andExpect(status().isOk())
                                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "https://allowed.example"));
 
-                mockMvc.perform(options("/api/rh/departement")
+                mockMvc.perform(options("/api/rh/departements")
                                 .header(HttpHeaders.ORIGIN, "https://evil.example")
                                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
                                 .andExpect(status().isForbidden())
@@ -336,7 +336,7 @@ class SecurityHttpTest {
                 String token = loginToken();
                 when(departementService.creer(any())).thenReturn(new DepartementResponse(42L, "Finance", null, 0));
 
-                mockMvc.perform(post("/api/rh/departement")
+                mockMvc.perform(post("/api/rh/departements")
                                 .header(HttpHeaders.AUTHORIZATION, bearer(token))
                                 .header(HttpHeaders.ORIGIN, "https://allowed.example")
                                 .contentType(MediaType.APPLICATION_JSON)

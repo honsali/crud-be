@@ -13,8 +13,8 @@ import app.domain.rh.departement.Departement;
 import app.domain.rh.departement.DepartementRepository;
 import app.domain.rh.sexe.Sexe;
 import app.domain.rh.sexe.SexeRepository;
-import app.domain.rh.situationFamiliale.SituationFamiliale;
-import app.domain.rh.situationFamiliale.SituationFamilialeRepository;
+import app.domain.rh.situationfamiliale.SituationFamiliale;
+import app.domain.rh.situationfamiliale.SituationFamilialeRepository;
 
 @Service
 public class EmployeService {

@@ -75,7 +75,7 @@ class RhHttpContractTest {
                                 .thenReturn(new DepartementResponse(
                                                 idBeyondJavascriptSafeInteger, "Support", "Services internes", 0));
 
-                mockMvc.perform(post("/api/rh/departement")
+                mockMvc.perform(post("/api/rh/departements")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                                 {"nom":"Support","description":"Services internes"}
@@ -93,7 +93,7 @@ class RhHttpContractTest {
                                 new DepartementResponse(2L, "Administration", null, 0),
                                 new DepartementResponse(1L, "Support", null, 0)));
 
-                mockMvc.perform(get("/api/rh/departement"))
+                mockMvc.perform(get("/api/rh/departements"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].id").value("2"))
                                 .andExpect(jsonPath("$[0].nom").value("Administration"))
@@ -103,14 +103,14 @@ class RhHttpContractTest {
 
         @Test
         void reportsBodyValidationErrorsWithTheStableErrorContract() throws Exception {
-                mockMvc.perform(post("/api/rh/departement")
+                mockMvc.perform(post("/api/rh/departements")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {"nom":"   "}
                                                 """))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
-                                .andExpect(jsonPath("$.path").value("/api/rh/departement"))
+                                .andExpect(jsonPath("$.path").value("/api/rh/departements"))
                                 .andExpect(jsonPath("$.fieldErrors[0].field").value("nom"))
                                 .andExpect(jsonPath("$.fieldErrors[0].code").value("NotBlank"));
         }
@@ -122,13 +122,13 @@ class RhHttpContractTest {
                 when(departementService.maj(org.mockito.ArgumentMatchers.eq(3L), any(DepartementUpdateRequest.class)))
                                 .thenReturn(new DepartementResponse(3L, "Assistance", "Services internes", 2));
 
-                mockMvc.perform(get("/api/rh/departement/3"))
+                mockMvc.perform(get("/api/rh/departements/3"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id").value("3"))
                                 .andExpect(jsonPath("$.nom").value("Support"))
                                 .andExpect(jsonPath("$.version").value(1));
 
-                mockMvc.perform(put("/api/rh/departement/3")
+                mockMvc.perform(put("/api/rh/departements/3")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {"nom":"Assistance","description":"Services internes","version":1}
@@ -141,7 +141,7 @@ class RhHttpContractTest {
 
         @Test
         void deletesADepartementWithoutResponseBody() throws Exception {
-                mockMvc.perform(delete("/api/rh/departement/3"))
+                mockMvc.perform(delete("/api/rh/departements/3"))
                                 .andExpect(status().isNoContent())
                                 .andExpect(content().string(""));
 
@@ -170,7 +170,7 @@ class RhHttpContractTest {
                 when(employeService.filtrer(any(EmployeFiltre.class), any(Pageable.class)))
                                 .thenReturn(new PageImpl<>(List.of(employe), PageRequest.of(1, 1), 3));
 
-                mockMvc.perform(post("/api/rh/employe/filtrer")
+                mockMvc.perform(post("/api/rh/employes/filtrer")
                                 .param("page", "1")
                                 .param("size", "1")
                                 .param("sort", "prenom,desc")
@@ -205,7 +205,7 @@ class RhHttpContractTest {
 
         @Test
         void rejectsATextSearchParameterLongerThan250Characters() throws Exception {
-                mockMvc.perform(post("/api/rh/employe/filtrer")
+                mockMvc.perform(post("/api/rh/employes/filtrer")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"nom\":\"" + "x".repeat(251) + "\"}"))
                                 .andExpect(status().isBadRequest())
@@ -237,7 +237,7 @@ class RhHttpContractTest {
                                 0);
                 when(employeService.creer(any(EmployeCreateRequest.class))).thenReturn(response);
 
-                mockMvc.perform(post("/api/rh/employe")
+                mockMvc.perform(post("/api/rh/employes")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {
@@ -263,7 +263,7 @@ class RhHttpContractTest {
 
         @Test
         void requiresTheBirthDateWhenCreatingAnEmploye() throws Exception {
-                mockMvc.perform(post("/api/rh/employe")
+                mockMvc.perform(post("/api/rh/employes")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {"matricule":"M-013","nom":"Martin","prenom":"Alice"}
@@ -277,7 +277,7 @@ class RhHttpContractTest {
 
         @Test
         void rejectsAReferenceWithoutAnIdBeforeCallingTheEmployeService() throws Exception {
-                mockMvc.perform(post("/api/rh/employe")
+                mockMvc.perform(post("/api/rh/employes")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {
@@ -310,7 +310,7 @@ class RhHttpContractTest {
                 when(congeService.creer(any(), any(CongeCreateRequest.class))).thenReturn(conge);
                 when(congeService.listerParIdEmploye(4L)).thenReturn(List.of(conge));
 
-                mockMvc.perform(post("/api/rh/conge/employe/4")
+                mockMvc.perform(post("/api/rh/employes/4/conges")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {
@@ -328,7 +328,7 @@ class RhHttpContractTest {
                                 .andExpect(jsonPath("$.typeConge.id").value("8"))
                                 .andExpect(jsonPath("$.employe.id").value("4"));
 
-                mockMvc.perform(get("/api/rh/conge/employe/4"))
+                mockMvc.perform(get("/api/rh/employes/4/conges"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].id").value("21"))
                                 .andExpect(jsonPath("$[0].employe.id").value("4"))
@@ -339,7 +339,7 @@ class RhHttpContractTest {
 
         @Test
         void rejectsABlankLeaveCodeBeforeCallingTheService() throws Exception {
-                mockMvc.perform(post("/api/rh/conge/employe/4")
+                mockMvc.perform(post("/api/rh/employes/4/conges")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {
@@ -360,10 +360,10 @@ class RhHttpContractTest {
         void mapsMissingResourcesToTheStableNotFoundContract() throws Exception {
                 when(employeService.recupererParId(99L)).thenThrow(new ResourceNotFoundException("Employé", 99L));
 
-                mockMvc.perform(get("/api/rh/employe/99"))
+                mockMvc.perform(get("/api/rh/employes/99"))
                                 .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
-                                .andExpect(jsonPath("$.path").value("/api/rh/employe/99"));
+                                .andExpect(jsonPath("$.path").value("/api/rh/employes/99"));
         }
 
         @Test
@@ -372,7 +372,7 @@ class RhHttpContractTest {
                                 "Hibernate stale entity details",
                                 new IllegalStateException("JPA internal state")));
 
-                mockMvc.perform(get("/api/rh/employe/7"))
+                mockMvc.perform(get("/api/rh/employes/7"))
                                 .andExpect(status().isConflict())
                                 .andExpect(jsonPath("$.code").value("CONFLICT"))
                                 .andExpect(jsonPath("$.message").value(
@@ -387,7 +387,7 @@ class RhHttpContractTest {
                                 org.mockito.ArgumentMatchers.eq(7L), any(EmployeUpdateRequest.class)))
                                                 .thenThrow(new StaleVersionException("Employe", 7L));
 
-                mockMvc.perform(put("/api/rh/employe/7")
+                mockMvc.perform(put("/api/rh/employes/7")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                                 {

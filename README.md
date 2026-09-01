@@ -45,21 +45,21 @@ java -jar target/rh-reference-backend-1.0.0.jar
 
 | Méthode | Route | Usage |
 |---|---|---|
-| `POST` | `/api/rh/departement` | Créer un département (201 avec corps, sans `Location`) |
-| `GET` | `/api/rh/departement` | Liste ordonnée par nom |
-| `GET` | `/api/rh/departement/{id}` | Consulter un département |
-| `PUT` | `/api/rh/departement/{id}` | Modifier un département |
-| `DELETE` | `/api/rh/departement/{id}` | Supprimer un département |
-| `POST` | `/api/rh/employe` | Créer un employé (201 avec corps, sans `Location`) |
-| `GET` | `/api/rh/employe/{id}` | Consulter un employé |
-| `POST` | `/api/rh/employe/filtrer` | Filtrer et paginer les employés |
-| `PUT` | `/api/rh/employe/{id}` | Modifier un employé |
-| `DELETE` | `/api/rh/employe/{id}` | Supprimer un employé |
-| `POST` | `/api/employes/{employeId}/conges` | Créer un congé pour un employé |
-| `GET` | `/api/employes/{employeId}/conges` | Lister les congés de l'employé |
-| `GET` | `/api/conges/{id}` | Consulter un congé |
-| `PUT` | `/api/conges/{id}` | Modifier un congé sans changer son parent |
-| `DELETE` | `/api/conges/{id}` | Supprimer un congé |
+| `POST` | `/api/rh/departements` | Créer un département (201 avec corps, sans `Location`) |
+| `GET` | `/api/rh/departements` | Liste ordonnée par nom |
+| `GET` | `/api/rh/departements/{id}` | Consulter un département |
+| `PUT` | `/api/rh/departements/{id}` | Modifier un département |
+| `DELETE` | `/api/rh/departements/{id}` | Supprimer un département |
+| `POST` | `/api/rh/employes` | Créer un employé (201 avec corps, sans `Location`) |
+| `GET` | `/api/rh/employes/{id}` | Consulter un employé |
+| `POST` | `/api/rh/employes/filtrer` | Filtrer et paginer les employés |
+| `PUT` | `/api/rh/employes/{id}` | Modifier un employé |
+| `DELETE` | `/api/rh/employes/{id}` | Supprimer un employé |
+| `POST` | `/api/rh/employes/{employeId}/conges` | Créer un congé pour un employé |
+| `GET` | `/api/rh/employes/{employeId}/conges` | Lister les congés de l'employé |
+| `GET` | `/api/rh/conges/{id}` | Consulter un congé |
+| `PUT` | `/api/rh/conges/{id}` | Modifier un congé sans changer son parent |
+| `DELETE` | `/api/rh/conges/{id}` | Supprimer un congé |
 | `POST` | `/api/admin/roles` | Créer un rôle |
 | `GET` | `/api/admin/roles` | Liste ordonnée par code puis identifiant |
 | `GET` | `/api/admin/roles/{id}` | Consulter un rôle |
@@ -76,7 +76,7 @@ java -jar target/rh-reference-backend-1.0.0.jar
 | `POST` | `/api/auth/logout-all` | Révoquer tous ses JWT |
 | `PUT` | `/api/admin/accounts/{id}/password` | Créer ou réinitialiser la credential locale |
 
-Le filtre des employés est envoyé comme corps JSON à `POST /api/rh/employe/filtrer`. Il couvre les champs textuels, les références `sexe`, `situationFamiliale` et `departement`, ainsi que les intervalles `debutDateNaissance`/`finDateNaissance` et `debutDateEntree`/`finDateEntree`. Les références ont la forme `{"id":"…"}` et sont comparées par identifiant. `page`, `size` et `sort` restent des paramètres de requête Spring (`sort=prenom,desc`, par exemple). L'identifiant est ajouté comme dernier critère de tri afin de stabiliser la pagination.
+Le filtre des employés est envoyé comme corps JSON à `POST /api/rh/employes/filtrer`. Il couvre les champs textuels, les références `sexe`, `situationFamiliale` et `departement`, ainsi que les intervalles `debutDateNaissance`/`finDateNaissance` et `debutDateEntree`/`finDateEntree`. Les références ont la forme `{"id":"…"}` et sont comparées par identifiant. `page`, `size` et `sort` restent des paramètres de requête Spring (`sort=prenom,desc`, par exemple). L'identifiant est ajouté comme dernier critère de tri afin de stabiliser la pagination.
 
 Conformément au DSL, `matricule`, `nom`, `prenom` et `dateNaissance` sont obligatoires. `sexe`, `situationFamiliale`, `dateEntree`, `departement` et les autres textes sont facultatifs. `email` est volontairement un simple `Text` de 250 caractères : le backend ne lui ajoute ni validation de format ni normalisation non exprimée par le DSL.
 
@@ -200,7 +200,7 @@ Les erreurs utilisent le contrat suivant :
 {
   "code": "VALIDATION_FAILED",
   "message": "La requête n'est pas valide",
-  "path": "/api/rh/departement",
+  "path": "/api/rh/departements",
   "fieldErrors": [
     {"field": "nom", "code": "NotBlank", "message": "ne doit pas être vide"}
   ]

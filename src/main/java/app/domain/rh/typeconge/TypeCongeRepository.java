@@ -1,4 +1,4 @@
-package app.domain.rh.typeConge;
+package app.domain.rh.typeconge;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import app.domain.rh.departement.Departement;
 import app.domain.rh.sexe.Sexe;
-import app.domain.rh.situationFamiliale.SituationFamiliale;
+import app.domain.rh.situationfamiliale.SituationFamiliale;
 
 class EmployeDslFieldsTest {
 

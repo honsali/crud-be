@@ -1,4 +1,4 @@
-package app.domain.rh.situationFamiliale;
+package app.domain.rh.situationfamiliale;
 
 import app.core.reference.Reference;
 

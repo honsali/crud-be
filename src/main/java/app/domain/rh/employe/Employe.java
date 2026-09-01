@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import app.core.persistence.BaseEntity;
 import app.domain.rh.departement.Departement;
 import app.domain.rh.sexe.Sexe;
-import app.domain.rh.situationFamiliale.SituationFamiliale;
+import app.domain.rh.situationfamiliale.SituationFamiliale;
 
 @Entity
 @Table(name = "employe")

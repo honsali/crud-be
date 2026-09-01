@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/rh/conge")
+@RequestMapping("/api/rh")
 public class CongeController {
 
     private final CongeService congeService;
@@ -23,28 +23,28 @@ public class CongeController {
         this.congeService = congeService;
     }
 
-    @PostMapping("/employe/{idEmploye}")
+    @PostMapping("/employes/{idEmploye}/conges")
     public ResponseEntity<CongeResponse> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeCreateRequest request) {
         CongeResponse response = congeService.creer(idEmploye, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/employe/{idEmploye}")
+    @GetMapping("/employes/{idEmploye}/conges")
     public List<CongeResponse> listerParIdEmploye(@PathVariable Long idEmploye) {
         return congeService.listerParIdEmploye(idEmploye);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/conges/{id}")
     public CongeResponse maj(@PathVariable Long id, @Valid @RequestBody CongeUpdateRequest request) {
         return congeService.maj(id, request);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/conges/{id}")
     public CongeResponse recupererParId(@PathVariable Long id) {
         return congeService.recupererParId(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/conges/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         congeService.supprimer(id);
         return ResponseEntity.noContent().build();

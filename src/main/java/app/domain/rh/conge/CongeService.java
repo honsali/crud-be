@@ -9,8 +9,8 @@ import app.core.exception.StaleVersionException;
 import app.core.reference.Reference;
 import app.domain.rh.employe.Employe;
 import app.domain.rh.employe.EmployeRepository;
-import app.domain.rh.typeConge.TypeConge;
-import app.domain.rh.typeConge.TypeCongeRepository;
+import app.domain.rh.typeconge.TypeConge;
+import app.domain.rh.typeconge.TypeCongeRepository;
 
 @Service
 public class CongeService {

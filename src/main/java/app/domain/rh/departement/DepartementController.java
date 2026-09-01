@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/rh/departement")
+@RequestMapping("/api/rh")
 public class DepartementController {
 
     private final DepartementService departementService;
@@ -23,28 +23,28 @@ public class DepartementController {
         this.departementService = departementService;
     }
 
-    @PostMapping
+    @PostMapping("/departements")
     public ResponseEntity<DepartementResponse> creer(@Valid @RequestBody DepartementCreateRequest request) {
         DepartementResponse response = departementService.creer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/departements")
     public List<DepartementResponse> lister() {
         return departementService.lister();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/departements/{id}")
     public DepartementResponse maj(@PathVariable Long id, @Valid @RequestBody DepartementUpdateRequest request) {
         return departementService.maj(id, request);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/departements/{id}")
     public DepartementResponse recupererParId(@PathVariable Long id) {
         return departementService.recupererParId(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/departements/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         departementService.supprimer(id);
         return ResponseEntity.noContent().build();

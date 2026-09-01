@@ -1,4 +1,4 @@
-package app.domain.rh.typeConge;
+package app.domain.rh.typeconge;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

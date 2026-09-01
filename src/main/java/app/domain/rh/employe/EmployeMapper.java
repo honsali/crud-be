@@ -5,8 +5,8 @@ import app.domain.rh.departement.Departement;
 import app.domain.rh.departement.DepartementMapper;
 import app.domain.rh.sexe.Sexe;
 import app.domain.rh.sexe.SexeMapper;
-import app.domain.rh.situationFamiliale.SituationFamiliale;
-import app.domain.rh.situationFamiliale.SituationFamilialeMapper;
+import app.domain.rh.situationfamiliale.SituationFamiliale;
+import app.domain.rh.situationfamiliale.SituationFamilialeMapper;
 
 public final class EmployeMapper {
 

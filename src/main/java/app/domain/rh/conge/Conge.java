@@ -8,7 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import app.core.persistence.BaseEntity;
 import app.domain.rh.employe.Employe;
-import app.domain.rh.typeConge.TypeConge;
+import app.domain.rh.typeconge.TypeConge;
 
 @Entity
 @Table(name = "conge")

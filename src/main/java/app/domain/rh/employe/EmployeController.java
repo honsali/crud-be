@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import app.core.pagination.PageResponse;
 
 @RestController
-@RequestMapping("/api/rh/employe")
+@RequestMapping("/api/rh")
 public class EmployeController {
 
     private final EmployeService employeService;
@@ -24,28 +24,28 @@ public class EmployeController {
         this.employeService = employeService;
     }
 
-    @PostMapping
+    @PostMapping("/employes")
     public ResponseEntity<EmployeResponse> creer(@Valid @RequestBody EmployeCreateRequest request) {
         EmployeResponse response = employeService.creer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/filtrer")
+    @PostMapping("/employes/filtrer")
     public PageResponse<EmployeResponse> filtrer(@Valid @RequestBody(required = false) EmployeFiltre filtre, Pageable pageable) {
         return PageResponse.from(employeService.filtrer(filtre, pageable));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/employes/{id}")
     public EmployeResponse maj(@PathVariable Long id, @Valid @RequestBody EmployeUpdateRequest request) {
         return employeService.maj(id, request);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/employes/{id}")
     public EmployeResponse recupererParId(@PathVariable Long id) {
         return employeService.recupererParId(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/employes/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         employeService.supprimer(id);
         return ResponseEntity.noContent().build();
