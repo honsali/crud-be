@@ -57,9 +57,10 @@ abstract class AbstractPostgreSqlPersistenceIT {
 
     protected static void registerIsolatedSchemaProperties(DynamicPropertyRegistry registry) {
         requireSafeSchemaName();
-        registry.add("spring.flyway.create-schemas", () -> true);
-        registry.add("spring.flyway.default-schema", () -> ISOLATED_SCHEMA);
-        registry.add("spring.flyway.schemas", () -> ISOLATED_SCHEMA);
+        registry.add("spring.datasource.hikari.connection-init-sql",
+                () -> "CREATE SCHEMA IF NOT EXISTS " + ISOLATED_SCHEMA);
+        registry.add("spring.liquibase.default-schema", () -> ISOLATED_SCHEMA);
+        registry.add("spring.liquibase.liquibase-schema", () -> ISOLATED_SCHEMA);
         registry.add("spring.jpa.properties.hibernate.default_schema", () -> ISOLATED_SCHEMA);
     }
 
@@ -101,7 +102,7 @@ abstract class AbstractPostgreSqlPersistenceIT {
     }
 
     @Test
-    void migrationCreatesTheSimplifiedAccountSchema() {
+    void liquibaseCreatesTheSimplifiedAccountSchema() {
         assertThat(columnExists("account", "password_hash")).isTrue();
         assertThat(columnExists("account", "activated")).isTrue();
         assertThat(columnExists("account", "display_name")).isFalse();

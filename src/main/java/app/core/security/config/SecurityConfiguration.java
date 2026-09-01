@@ -1,9 +1,9 @@
 package app.core.security.config;
 
 import static jakarta.servlet.DispatcherType.ERROR;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.time.Duration;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -92,15 +92,11 @@ public class SecurityConfiguration {
         if (ttl == null || ttl.isNegative() || ttl.isZero()) {
             throw new IllegalStateException("APP_SECURITY_JWT_TTL doit être positif");
         }
-        try {
-            byte[] secret = Base64.getDecoder().decode(jwt.getSecretBase64());
-            if (secret.length < 32) {
-                throw new IllegalStateException("APP_SECURITY_JWT_SECRET_BASE64 doit contenir au moins 32 octets");
-            }
-            return new SecretKeySpec(secret, "HmacSHA256");
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException("APP_SECURITY_JWT_SECRET_BASE64 doit être un Base64 valide", exception);
+        byte[] secret = jwt.getSecret() == null ? new byte[0] : jwt.getSecret().getBytes(UTF_8);
+        if (secret.length < 32) {
+            throw new IllegalStateException("Le secret JWT doit contenir au moins 32 caractères");
         }
+        return new SecretKeySpec(secret, "HmacSHA256");
     }
 
     @Bean

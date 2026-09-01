@@ -21,16 +21,16 @@ public class SecurityProperties {
     }
 
     public static class Jwt {
-        private String secretBase64 = "";
+        private String secret = "";
         private String issuer = "crud-reference";
         private Duration ttl = Duration.ofHours(1);
 
-        public String getSecretBase64() {
-            return secretBase64;
+        public String getSecret() {
+            return secret;
         }
 
-        public void setSecretBase64(String secretBase64) {
-            this.secretBase64 = secretBase64;
+        public void setSecret(String secret) {
+            this.secret = secret;
         }
 
         public String getIssuer() {

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-2" author="app_core">
+        <addForeignKeyConstraint
+            baseColumnNames="employe_id"
+            baseTableName="conge"
+            constraintName="fk_conge_employe_id"
+            referencedColumnNames="id"
+            referencedTableName="employe" />
+        <addForeignKeyConstraint
+            baseColumnNames="type_conge_id"
+            baseTableName="conge"
+            constraintName="fk_conge_type_conge_id"
+            referencedColumnNames="id"
+            referencedTableName="type_conge" />
+    </changeSet>
+
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-3" author="app_core">
+        <createIndex indexName="ix_conge_employe_code" tableName="conge">
+            <column name="employe_id" />
+            <column name="code" />
+        </createIndex>
+        <createIndex indexName="ix_conge_type_conge_id" tableName="conge">
+            <column name="type_conge_id" />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

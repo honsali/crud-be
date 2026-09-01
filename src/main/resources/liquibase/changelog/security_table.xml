@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="security-tables" author="app_core">
+        <createTable tableName="app_role">
+            <column name="id" type="bigint" autoIncrement="true" startWith="100">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="varchar(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_role_code"/>
+            </column>
+            <column name="libelle" type="varchar(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text"/>
+        </createTable>
+
+        <createTable tableName="account">
+            <column name="id" type="bigint" autoIncrement="true" startWith="100">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="varchar(100)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_account_username"/>
+            </column>
+            <column name="password_hash" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activated" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseColumnNames="role_id"
+            baseTableName="account"
+            constraintName="fk_account_role_id"
+            referencedColumnNames="id"
+            referencedTableName="app_role"/>
+    </changeSet>
+
+    <changeSet id="security-demo-data" author="app_core">
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="1"/>
+            <column name="code" value="ADMIN"/>
+            <column name="libelle" value="Administrateur"/>
+            <column name="description" value="Administration des comptes"/>
+        </insert>
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="2"/>
+            <column name="code" value="GESTIONNAIRE_RH"/>
+            <column name="libelle" value="Gestionnaire RH"/>
+            <column name="description" value="Gestion des ressources humaines"/>
+        </insert>
+
+        <insert tableName="account">
+            <column name="id" valueNumeric="1"/>
+            <column name="username" value="admin"/>
+            <column name="password_hash" value="{argon2id}$argon2id$v=19$m=19456,t=2,p=1$34dR01AOneq8vQS8Nh0Z9w$5RcUCJvE9iOaa3a354oNAwTmJgWuXz+n/8o8k0yYGcA"/>
+            <column name="activated" valueBoolean="true"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="account">
+            <column name="id" valueNumeric="2"/>
+            <column name="username" value="gestionnaire-rh"/>
+            <column name="password_hash" value="{argon2id}$argon2id$v=19$m=19456,t=2,p=1$cfyvBA2Cgk2pexTQuhBk5g$5nCzbv4HfXoO7H/9Zgn3l2XnpvWiPVZObJJgSX9OJKM"/>
+            <column name="activated" valueBoolean="true"/>
+            <column name="role_id" valueNumeric="2"/>
+        </insert>
+
+        <sql dbms="postgresql">SELECT setval(pg_get_serial_sequence('app_role', 'id'), 100, false)</sql>
+        <sql dbms="postgresql">SELECT setval(pg_get_serial_sequence('account', 'id'), 100, false)</sql>
+    </changeSet>
+</databaseChangeLog>

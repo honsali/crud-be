@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-1" author="app_core">
+        <createTable tableName="conge">
+            <column name="id" type="bigint" autoIncrement="true" startWith="100" incrementBy="1">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="version" type="bigint" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
+            <column name="code" type="nvarchar(250)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_conge_code" />
+            </column>
+            <column name="type_conge_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_debut_conge" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_fin_conge" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="commentaire" type="text">
+                <constraints nullable="true" />
+            </column>
+            <column name="employe_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-data" author="app_core">
+        <loadData
+            file="liquibase/data/conge.csv"
+            separator=";"
+            tableName="conge"
+            usePreparedStatements="true">
+            <column name="id" type="numeric" />
+            <column name="code" type="nvarchar(250)" />
+            <column name="type_conge_id" type="numeric" />
+            <column name="date_debut_conge" type="date" />
+            <column name="date_fin_conge" type="date" />
+            <column name="commentaire" type="text" />
+            <column name="employe_id" type="numeric" />
+        </loadData>
+    </changeSet>
+
+    <changeSet id="7fccd16d-78d3-317f-9819-d1f4857618de-sequence-sync" author="app_core">
+        <sql dbms="postgresql">SELECT setval(pg_get_serial_sequence('conge', 'id'), GREATEST(COALESCE(MAX(id), 0) + 1, 100), false) FROM conge;</sql>
+    </changeSet>
+</databaseChangeLog>

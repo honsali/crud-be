@@ -12,17 +12,13 @@ Le petit noyau manuel ajoute une authentification JWT et l'administration des co
 
 ## Démarrage
 
-Prérequis : Java 25, Maven et PostgreSQL.
+Prérequis : Java 25, Maven et PostgreSQL. La configuration locale attend une base `rh` accessible avec `postgres` / `postgres`.
 
 ```bash
-export DB_URL='jdbc:postgresql://localhost:5432/rh'
-export DB_USERNAME='<utilisateur>'
-export DB_PASSWORD='<mot-de-passe>'
-export APP_SECURITY_JWT_SECRET_BASE64="$(openssl rand -base64 32)"
 mvn spring-boot:run
 ```
 
-Flyway applique les migrations `V1` à `V5`, puis Hibernate valide le schéma sans le modifier.
+Liquibase remet le schéma à zéro, recrée les tables et recharge les données de démonstration à chaque démarrage. Hibernate valide ensuite que les entités correspondent au schéma. Ce comportement destructif est volontaire pour cette application de démonstration.
 
 Deux comptes de démonstration sont insérés :
 
@@ -61,7 +57,7 @@ Le fonctionnement est volontairement simple : le mot de passe Argon2id est véri
 
 Une désactivation, un changement de rôle ou une réinitialisation de mot de passe s'applique donc aux prochaines connexions ; un JWT déjà émis reste valable jusqu'à son expiration. Le TTL vaut une heure par défaut et se règle avec `APP_SECURITY_JWT_TTL`. Un déploiement plus exposé peut réduire ce TTL et placer la limitation des tentatives au niveau du reverse proxy.
 
-Le secret `APP_SECURITY_JWT_SECRET_BASE64` est obligatoire et doit représenter au moins 32 octets. `APP_SECURITY_JWT_ISSUER` et `APP_SECURITY_CORS_ALLOWED_ORIGINS` sont optionnels.
+La clé JWT, l'issuer et l'origine CORS locale sont écrits directement dans `application.yml` afin que la démonstration démarre sans configuration supplémentaire.
 
 ## API d'administration
 
@@ -168,4 +164,4 @@ export TEST_DB_ALLOW_SCHEMA_MANAGEMENT='true'
 mvn verify
 ```
 
-La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Flyway, laisse Hibernate valider le modèle, puis supprime uniquement ce schéma. Sans `TEST_DB_URL`, le scénario alternatif Testcontainers reste disponible.
+La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Liquibase, laisse Hibernate valider le modèle, puis supprime uniquement ce schéma. Sans `TEST_DB_URL`, le scénario alternatif Testcontainers reste disponible.
