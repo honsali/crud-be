@@ -137,7 +137,7 @@ class SecurityHttpTest {
         Role role = mock(Role.class);
         when(account.getUsername()).thenReturn(username);
         when(account.getPasswordHash()).thenReturn(passwordEncoder.encode(password));
-        when(account.isActivated()).thenReturn(activated);
+        when(account.getActivated()).thenReturn(activated);
         when(account.getRole()).thenReturn(role);
         when(role.getAuthority()).thenReturn("ROLE_" + roleCode);
         return account;

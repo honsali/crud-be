@@ -30,7 +30,8 @@ public class AuthService {
         String username = request.username().strip().toLowerCase(Locale.ROOT);
         Account account = accountRepository.findByUsername(username)
                 .orElseThrow(InvalidCredentialsException::new);
-        if (!account.isActivated() || !passwordEncoder.matches(request.password(), account.getPasswordHash())) {
+        if (!Boolean.TRUE.equals(account.getActivated())
+                || !passwordEncoder.matches(request.password(), account.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
         return tokenService.issue(account);

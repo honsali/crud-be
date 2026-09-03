@@ -18,7 +18,7 @@ public class Account extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-    private boolean activated;
+    private Boolean activated;
     @Column(name = "password_hash")
     private String passwordHash;
 
@@ -39,7 +39,7 @@ public class Account extends BaseEntity {
         return role;
     }
 
-    public boolean isActivated() {
+    public Boolean getActivated() {
         return activated;
     }
 
@@ -47,7 +47,7 @@ public class Account extends BaseEntity {
         return passwordHash;
     }
 
-    void update(Role role, boolean activated) {
+    void update(Role role, Boolean activated) {
         this.role = role;
         this.activated = activated;
     }
