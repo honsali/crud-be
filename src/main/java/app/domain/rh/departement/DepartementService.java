@@ -58,8 +58,7 @@ public class DepartementService {
     }
 
     private Departement recupererDepartement(Long id) {
-        return departementRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Departement", id));
+        return departementRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Departement", id));
     }
 
 }

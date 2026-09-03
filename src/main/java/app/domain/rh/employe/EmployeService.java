@@ -89,8 +89,7 @@ public class EmployeService {
     }
 
     private Employe recupererEmploye(Long id) {
-        return employeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        return employeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employe", id));
     }
 
     private Sexe recupererSexe(Reference reference) {
@@ -106,9 +105,7 @@ public class EmployeService {
             return null;
         }
         Long id = reference.id();
-        return situationFamilialeRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("SituationFamiliale", id));
+        return situationFamilialeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("SituationFamiliale", id));
     }
 
     private Departement recupererDepartement(Reference reference) {
@@ -116,9 +113,7 @@ public class EmployeService {
             return null;
         }
         Long id = reference.id();
-        return departementRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Departement", id));
+        return departementRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Departement", id));
     }
 
 }

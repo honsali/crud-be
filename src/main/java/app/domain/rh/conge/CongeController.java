@@ -24,9 +24,7 @@ public class CongeController {
     }
 
     @PostMapping("/employes/{idEmploye}/conges")
-    public ResponseEntity<CongeResponse> creer(
-            @PathVariable Long idEmploye,
-            @Valid @RequestBody CongeCreateRequest request) {
+    public ResponseEntity<CongeResponse> creer(@PathVariable Long idEmploye, @Valid @RequestBody CongeCreateRequest request) {
         CongeResponse response = congeService.creer(idEmploye, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

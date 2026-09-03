@@ -79,8 +79,7 @@ public class CongeService {
     }
 
     private Conge recupererConge(Long id) {
-        return congeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        return congeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Conge", id));
     }
 
     private TypeConge recupererTypeConge(Reference reference) {
@@ -88,14 +87,11 @@ public class CongeService {
             return null;
         }
         Long id = reference.id();
-        return typeCongeRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TypeConge", id));
+        return typeCongeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("TypeConge", id));
     }
 
     private Employe recupererEmploye(Long idEmploye) {
-        return employeRepository.findById(idEmploye)
-                .orElseThrow(() -> new ResourceNotFoundException("Employe", idEmploye));
+        return employeRepository.findById(idEmploye).orElseThrow(() -> new ResourceNotFoundException("Employe", idEmploye));
     }
 
 }
