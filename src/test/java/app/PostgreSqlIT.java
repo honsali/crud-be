@@ -69,11 +69,10 @@ class PostgreSqlIT {
         DepartementResponse departement = departementService.creer(
                 new DepartementCreateRequest("Support test", "Département créé par le test"));
         EmployeResponse employe = employeService.creer(new EmployeCreateRequest(
-                "TEST-001", "Martin", "Alice", LocalDate.of(1990, 5, 12),
-                new Reference(2L, null), new Reference(1L, null),
-                LocalDate.of(2020, 1, 2), "alice@example.test", "0600000000",
-                "Paris", "1 rue du Test", "Gestionnaire", null,
-                new Reference(departement.id(), null)));
+                "TEST-001", LocalDate.of(2020, 1, 2), new Reference(departement.id(), null),
+                "Gestionnaire", null, "Martin", "Alice", LocalDate.of(1990, 5, 12),
+                new Reference(2L, null), new Reference(1L, null), "alice@example.test",
+                "0600000000", "Paris", "1 rue du Test"));
         CongeResponse conge = congeService.creer(employe.id(), new CongeCreateRequest(
                 "TEST-CONGE-001", new Reference(2L, null),
                 LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 2), "Repos"));
