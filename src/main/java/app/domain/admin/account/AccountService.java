@@ -1,78 +1,71 @@
 package app.domain.admin.account;
 
 import java.util.List;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import app.core.exception.ConflictException;
 import app.core.exception.ResourceNotFoundException;
 import app.domain.admin.role.Role;
 import app.domain.admin.role.RoleRepository;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class AccountService {
 
-    private final AccountRepository repository;
+    private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AccountService(
-            AccountRepository repository,
-            RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder) {
-        this.repository = repository;
+    public AccountService(AccountRepository accountRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public AccountResponse creer(AccountCreateRequest request) {
-        if (repository.existsByUsername(request.username())) {
+        if (accountRepository.existsByUsername(request.username())) {
             throw new ConflictException("Un compte porte déjà ce nom d'utilisateur");
         }
-        Account account = new Account(
-                request.username(),
-                passwordEncoder.encode(request.password()),
-                requireRole(request.role()));
-        return AccountMapper.toResponse(repository.saveAndFlush(account));
+
+        Role role = recupererRole(request.role());
+        Account account = AccountMapper.toEntity(request, role, passwordEncoder.encode(request.password()));
+        Account saved = accountRepository.saveAndFlush(account);
+        return AccountMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public List<AccountResponse> lister() {
-        return repository.findAllByOrderByUsernameAsc().stream()
-                .map(AccountMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public AccountResponse recupererParId(Long id) {
-        return AccountMapper.toResponse(requireAccount(id));
+        return accountRepository.findAllByOrderByUsername().stream().map(AccountMapper::toResponse).toList();
     }
 
     @Transactional
     public AccountResponse maj(Long id, AccountUpdateRequest request) {
-        Account account = requireAccount(id);
-        account.update(requireRole(request.role()), request.activated());
-        repository.flush();
+        Account account = recupererAccount(id);
+        Role role = recupererRole(request.role());
+        AccountMapper.toEntity(account, request, role);
+        accountRepository.flush();
+        return AccountMapper.toResponse(account);
+    }
+
+    @Transactional(readOnly = true)
+    public AccountResponse recupererParId(Long id) {
+        Account account = recupererAccount(id);
         return AccountMapper.toResponse(account);
     }
 
     @Transactional
     public void reinitialiserMotDePasse(Long id, PasswordResetRequest request) {
-        Account account = requireAccount(id);
+        Account account = recupererAccount(id);
         account.updatePassword(passwordEncoder.encode(request.password()));
-        repository.flush();
+        accountRepository.flush();
     }
 
-    private Account requireAccount(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Compte", id));
+    private Account recupererAccount(Long id) {
+        return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Compte", id));
     }
 
-    private Role requireRole(String code) {
-        return roleRepository.findByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Rôle", code));
+    private Role recupererRole(String code) {
+        return roleRepository.findByCode(code).orElseThrow(() -> new ResourceNotFoundException("Rôle", code));
     }
 }

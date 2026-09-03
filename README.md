@@ -8,7 +8,7 @@ Le domaine RH illustre trois formes de génération :
 - recherche paginée avec `Employe` ;
 - relation parent/enfant avec `Employe` et `Conge`.
 
-Le petit noyau manuel ajoute une authentification JWT et l'administration des comptes. Il ne cherche pas à être une plateforme IAM.
+L'administration des comptes et les rôles possèdent une baseline dans le DSL d'Engine. Le petit noyau manuel y ajoute l'authentification JWT, la gestion des mots de passe et les adaptations de sécurité ; il ne cherche pas à être une plateforme IAM.
 
 ## Démarrage
 
@@ -149,7 +149,7 @@ app/
     └── rh/            domaine générable
 ```
 
-La sécurité et `domain/admin` forment un petit noyau manuel. Engine se concentre sur le domaine métier RH, car générer une moitié de sécurité conduirait à exposer des champs techniques ou à produire des actions artificielles.
+Engine décrit le domaine RH ainsi que la structure commune de `Account` et `Role`. Les contrats publics des rôles, l'encodage et la réinitialisation des mots de passe, la normalisation des identifiants et l'authentification restent des adaptations locales de `domain/admin` et de `core/security` afin de ne jamais exposer un champ sensible dans le code généré.
 
 ## Tests
 
