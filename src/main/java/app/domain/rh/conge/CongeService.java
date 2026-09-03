@@ -51,8 +51,7 @@ public class CongeService {
 
     @Transactional
     public CongeResponse maj(Long id, CongeUpdateRequest request) {
-        Conge conge = congeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = recupererConge(id);
         if (conge.getVersion() != request.version()) {
             throw new StaleVersionException("Conge", id);
         }
@@ -68,17 +67,20 @@ public class CongeService {
 
     @Transactional(readOnly = true)
     public CongeResponse recupererParId(Long id) {
-        Conge conge = congeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = recupererConge(id);
         return CongeMapper.toResponse(conge);
     }
 
     @Transactional
     public void supprimer(Long id) {
-        Conge conge = congeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
+        Conge conge = recupererConge(id);
         congeRepository.delete(conge);
         congeRepository.flush();
+    }
+
+    private Conge recupererConge(Long id) {
+        return congeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conge", id));
     }
 
     private TypeConge recupererTypeConge(Reference reference) {

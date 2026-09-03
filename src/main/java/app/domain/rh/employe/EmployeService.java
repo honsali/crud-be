@@ -59,8 +59,7 @@ public class EmployeService {
 
     @Transactional
     public EmployeResponse maj(Long id, EmployeUpdateRequest request) {
-        Employe employe = employeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = recupererEmploye(id);
         if (employe.getVersion() != request.version()) {
             throw new StaleVersionException("Employe", id);
         }
@@ -78,17 +77,20 @@ public class EmployeService {
 
     @Transactional(readOnly = true)
     public EmployeResponse recupererParId(Long id) {
-        Employe employe = employeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = recupererEmploye(id);
         return EmployeMapper.toResponse(employe);
     }
 
     @Transactional
     public void supprimer(Long id) {
-        Employe employe = employeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
+        Employe employe = recupererEmploye(id);
         employeRepository.delete(employe);
         employeRepository.flush();
+    }
+
+    private Employe recupererEmploye(Long id) {
+        return employeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employe", id));
     }
 
     private Sexe recupererSexe(Reference reference) {

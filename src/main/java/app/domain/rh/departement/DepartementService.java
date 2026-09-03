@@ -33,8 +33,7 @@ public class DepartementService {
 
     @Transactional
     public DepartementResponse maj(Long id, DepartementUpdateRequest request) {
-        Departement departement = departementRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Departement", id));
+        Departement departement = recupererDepartement(id);
         if (departement.getVersion() != request.version()) {
             throw new StaleVersionException("Departement", id);
         }
@@ -48,16 +47,19 @@ public class DepartementService {
 
     @Transactional(readOnly = true)
     public DepartementResponse recupererParId(Long id) {
-        return DepartementMapper.toResponse(
-                departementRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Departement", id)));
+        return DepartementMapper.toResponse(recupererDepartement(id));
     }
 
     @Transactional
     public void supprimer(Long id) {
-        Departement departement = departementRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Departement", id));
+        Departement departement = recupererDepartement(id);
         departementRepository.delete(departement);
         departementRepository.flush();
     }
+
+    private Departement recupererDepartement(Long id) {
+        return departementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Departement", id));
+    }
+
 }
