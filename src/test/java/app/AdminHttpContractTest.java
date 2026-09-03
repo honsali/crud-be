@@ -18,6 +18,7 @@ import app.domain.admin.account.AccountResponse;
 import app.domain.admin.account.AccountService;
 import app.domain.admin.account.AccountUpdateRequest;
 import app.domain.admin.account.PasswordResetRequest;
+import app.domain.admin.role.Role;
 import app.domain.admin.role.RoleReference;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +55,7 @@ class AdminHttpContractTest {
                 .andExpect(jsonPath("$.id").value("9007199254740993"))
                 .andExpect(jsonPath("$.username").value("alice"))
                 .andExpect(jsonPath("$.role.code").value("ROLE_ADMIN"))
+                .andExpect(jsonPath("$.role.libelle").value("ADMIN"))
                 .andExpect(jsonPath("$.activated").value(true));
 
         mockMvc.perform(get("/api/admin/accounts"))
@@ -107,6 +109,6 @@ class AdminHttpContractTest {
     }
 
     private AccountResponse account(Long id, String username, String role, boolean activated) {
-        return new AccountResponse(id, username, new RoleReference(1L, role, "Administrateur"), activated);
+        return new AccountResponse(id, username, new RoleReference(1L, role, Role.normalizeCode(role)), activated);
     }
 }

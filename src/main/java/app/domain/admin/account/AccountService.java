@@ -65,7 +65,7 @@ public class AccountService {
         return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Compte", id));
     }
 
-    private Role recupererRole(String code) {
-        return roleRepository.findByCode(code).orElseThrow(() -> new ResourceNotFoundException("Rôle", code));
+    private Role recupererRole(String libelle) {
+        return roleRepository.findByLibelle(libelle).orElseThrow(() -> new ResourceNotFoundException("Rôle", libelle));
     }
 }

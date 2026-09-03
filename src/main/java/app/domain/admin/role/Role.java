@@ -1,7 +1,6 @@
 package app.domain.admin.role;
 
 import java.util.Locale;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import app.core.persistence.BaseEntity;
@@ -10,33 +9,20 @@ import app.core.persistence.BaseEntity;
 @Table(name = "app_role")
 public class Role extends BaseEntity {
 
-    @Column(updatable = false)
-    private String code;
     private String libelle;
-    private String description;
 
     protected Role() {}
 
-    Role(String code, String libelle, String description) {
-        this.code = normalizeCode(code);
-        this.libelle = normalizeLibelle(libelle);
-        this.description = description;
-    }
-
-    public String getCode() {
-        return code;
+    Role(String libelle) {
+        this.libelle = normalizeCode(libelle);
     }
 
     public String getLibelle() {
         return libelle;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public String getAuthority() {
-        return "ROLE_" + code;
+        return "ROLE_" + libelle;
     }
 
     public static String normalizeCode(String value) {
@@ -45,9 +31,5 @@ public class Role extends BaseEntity {
         }
         String code = value.strip().toUpperCase(Locale.ROOT);
         return code.startsWith("ROLE_") ? code.substring("ROLE_".length()) : code;
-    }
-
-    static String normalizeLibelle(String value) {
-        return value == null ? null : value.strip();
     }
 }

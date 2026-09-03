@@ -66,7 +66,7 @@ La clé JWT, l'issuer et l'origine CORS locale sont écrits directement dans `ap
 
 ## API d'administration
 
-Les rôles `ADMIN` et `GESTIONNAIRE_RH` sont des données de référence fixes. Ils ne possèdent pas de CRUD REST.
+Les rôles `ADMIN` et `GESTIONNAIRE_RH` sont des référentiels fixes dont le `libelle` sert de code technique. Ils ne possèdent pas de CRUD REST et ne peuvent donc être ni créés ni modifiés par l'API.
 
 | Méthode | Route | Corps principal |
 |---|---|---|
@@ -102,7 +102,7 @@ Les réponses n'exposent jamais le hash :
   "role": {
     "id": "2",
     "code": "ROLE_GESTIONNAIRE_RH",
-    "libelle": "Gestionnaire RH"
+    "libelle": "GESTIONNAIRE_RH"
   },
   "activated": true
 }

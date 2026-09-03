@@ -12,13 +12,9 @@
             <column name="version" type="bigint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="code" type="varchar(50)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_role_code"/>
+            <column name="libelle" type="varchar(250)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_role_libelle"/>
             </column>
-            <column name="libelle" type="varchar(150)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="description" type="text"/>
         </createTable>
 
         <createTable tableName="account">
@@ -53,15 +49,11 @@
     <changeSet id="security-demo-data" author="app_core">
         <insert tableName="app_role">
             <column name="id" valueNumeric="1"/>
-            <column name="code" value="ADMIN"/>
-            <column name="libelle" value="Administrateur"/>
-            <column name="description" value="Administration des comptes"/>
+            <column name="libelle" value="ADMIN"/>
         </insert>
         <insert tableName="app_role">
             <column name="id" valueNumeric="2"/>
-            <column name="code" value="GESTIONNAIRE_RH"/>
-            <column name="libelle" value="Gestionnaire RH"/>
-            <column name="description" value="Gestion des ressources humaines"/>
+            <column name="libelle" value="GESTIONNAIRE_RH"/>
         </insert>
 
         <insert tableName="account">
