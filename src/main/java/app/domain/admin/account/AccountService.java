@@ -27,12 +27,13 @@ public class AccountService {
 
     @Transactional
     public AccountResponse creer(AccountCreateRequest request) {
-        if (accountRepository.existsByUsername(request.username())) {
-            throw new FieldConflictException("Account", "username", request.username());
+        String username = normalizeUsername(request.username());
+        if (accountRepository.existsByUsername(username)) {
+            throw new FieldConflictException("Account", "username", username);
         }
 
         Role role = recupererRole(request.role());
-        Account account = AccountMapper.toEntity(normalizeUsername(request.username()), role, passwordEncoder.encode(request.password()));
+        Account account = AccountMapper.toEntity(username, role, passwordEncoder.encode(request.password()));
         Account saved = accountRepository.saveAndFlush(account);
         return AccountMapper.toResponse(saved);
     }
@@ -79,7 +80,6 @@ public class AccountService {
         Long id = reference.id();
         return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role", id));
     }
-
 
     private String normalizeUsername(String value) {
         return value == null ? null : value.strip().toLowerCase(Locale.ROOT);

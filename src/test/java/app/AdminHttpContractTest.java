@@ -76,7 +76,7 @@ class AdminHttpContractTest {
     }
 
     @Test
-    void normalizesTheUsernameAndReadsTheRole() throws Exception {
+    void acceptsAUsernameToNormalizeAndReadsTheRole() throws Exception {
         when(accountService.creer(any())).thenReturn(account(1L, "alice", "ROLE_ADMIN", true, 0L));
         ArgumentCaptor<AccountCreateRequest> captor = ArgumentCaptor.forClass(AccountCreateRequest.class);
 
@@ -88,7 +88,7 @@ class AdminHttpContractTest {
                 .andExpect(status().isCreated());
 
         verify(accountService).creer(captor.capture());
-        org.assertj.core.api.Assertions.assertThat(captor.getValue().username()).isEqualTo("alice.admin");
+        org.assertj.core.api.Assertions.assertThat(captor.getValue().username()).isEqualTo(" Alice.Admin ");
         org.assertj.core.api.Assertions.assertThat(captor.getValue().role()).isEqualTo(new Reference(1L, null));
     }
 
