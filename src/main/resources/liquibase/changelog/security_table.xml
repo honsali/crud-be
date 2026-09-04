@@ -49,11 +49,11 @@
     <changeSet id="security-demo-data" author="app_core">
         <insert tableName="app_role">
             <column name="id" valueNumeric="1"/>
-            <column name="libelle" value="ADMIN"/>
+            <column name="libelle" value="ROLE_ADMIN"/>
         </insert>
         <insert tableName="app_role">
             <column name="id" valueNumeric="2"/>
-            <column name="libelle" value="GESTIONNAIRE_RH"/>
+            <column name="libelle" value="ROLE_GESTIONNAIRE_RH"/>
         </insert>
 
         <insert tableName="account">

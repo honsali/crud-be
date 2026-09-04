@@ -1,11 +1,11 @@
 package app.domain.admin.account;
 
 import app.core.reference.JsonId;
-import app.domain.admin.role.RoleReference;
+import app.core.reference.Reference;
 
 public record AccountResponse(
         @JsonId Long id,
         String username,
-        RoleReference role,
+        Reference role,
         boolean activated) {
 }

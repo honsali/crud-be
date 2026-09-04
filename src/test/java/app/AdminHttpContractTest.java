@@ -12,14 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import app.core.reference.Reference;
 import app.domain.admin.account.AccountController;
 import app.domain.admin.account.AccountCreateRequest;
 import app.domain.admin.account.AccountResponse;
 import app.domain.admin.account.AccountService;
 import app.domain.admin.account.AccountUpdateRequest;
 import app.domain.admin.account.PasswordResetRequest;
-import app.domain.admin.role.Role;
-import app.domain.admin.role.RoleReference;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -48,14 +47,14 @@ class AdminHttpContractTest {
         mockMvc.perform(post("/api/admin/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":" Alice ","password":"password-123","role":"ROLE_ADMIN"}
+                                {"username":" Alice ","password":"password-123","role":{"id":"1"}}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/admin/accounts/" + account.id()))
                 .andExpect(jsonPath("$.id").value("9007199254740993"))
                 .andExpect(jsonPath("$.username").value("alice"))
-                .andExpect(jsonPath("$.role.code").value("ROLE_ADMIN"))
-                .andExpect(jsonPath("$.role.libelle").value("ADMIN"))
+                .andExpect(jsonPath("$.role.id").value("1"))
+                .andExpect(jsonPath("$.role.libelle").value("ROLE_ADMIN"))
                 .andExpect(jsonPath("$.activated").value(true));
 
         mockMvc.perform(get("/api/admin/accounts"))
@@ -65,7 +64,7 @@ class AdminHttpContractTest {
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/admin/accounts/{id}", account.id())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\":\"ROLE_ADMIN\",\"activated\":true}"))
+                        .content("{\"role\":{\"id\":\"1\"},\"activated\":true}"))
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/admin/accounts/{id}/password", account.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,31 +75,31 @@ class AdminHttpContractTest {
     }
 
     @Test
-    void normalizesTheUsernameAndPublicRolePrefix() throws Exception {
+    void normalizesTheUsernameAndReadsTheRole() throws Exception {
         when(accountService.creer(any())).thenReturn(account(1L, "alice", "ROLE_ADMIN", true));
         ArgumentCaptor<AccountCreateRequest> captor = ArgumentCaptor.forClass(AccountCreateRequest.class);
 
         mockMvc.perform(post("/api/admin/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":" Alice.Admin ","password":"password-123","role":"ROLE_ADMIN"}
+                                {"username":" Alice.Admin ","password":"password-123","role":{"id":"1"}}
                                 """))
                 .andExpect(status().isCreated());
 
         verify(accountService).creer(captor.capture());
         org.assertj.core.api.Assertions.assertThat(captor.getValue().username()).isEqualTo("alice.admin");
-        org.assertj.core.api.Assertions.assertThat(captor.getValue().role()).isEqualTo("ADMIN");
+        org.assertj.core.api.Assertions.assertThat(captor.getValue().role()).isEqualTo(new Reference(1L, null));
     }
 
     @Test
     void validatesCreateUpdateAndPasswordBodies() throws Exception {
         mockMvc.perform(post("/api/admin/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"a\",\"password\":\"short\",\"role\":\"\"}"))
+                        .content("{\"username\":\"a\",\"password\":\"short\",\"role\":{}}"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/admin/accounts/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\":\"ROLE_ADMIN\"}"))
+                        .content("{\"role\":{\"id\":\"1\"}}"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/admin/accounts/1/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,6 +108,6 @@ class AdminHttpContractTest {
     }
 
     private AccountResponse account(Long id, String username, String role, boolean activated) {
-        return new AccountResponse(id, username, new RoleReference(1L, role, Role.normalizeCode(role)), activated);
+        return new AccountResponse(id, username, new Reference(1L, role), activated);
     }
 }

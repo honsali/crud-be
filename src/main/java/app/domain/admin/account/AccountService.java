@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import app.core.exception.ConflictException;
 import app.core.exception.ResourceNotFoundException;
+import app.core.reference.Reference;
 import app.domain.admin.role.Role;
 import app.domain.admin.role.RoleRepository;
 
@@ -65,7 +66,14 @@ public class AccountService {
         return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Compte", id));
     }
 
-    private Role recupererRole(String libelle) {
-        return roleRepository.findByLibelle(libelle).orElseThrow(() -> new ResourceNotFoundException("Rôle", libelle));
+    private Role recupererRole(Reference reference) {
+        if (reference == null) {
+            return null;
+        }
+        Long id = reference.id();
+        if (id == null) {
+            return null;
+        }
+        return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Rôle", id));
     }
 }

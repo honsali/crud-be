@@ -66,7 +66,7 @@ La clé JWT, l'issuer et l'origine CORS locale sont écrits directement dans `ap
 
 ## API d'administration
 
-Les rôles `ADMIN` et `GESTIONNAIRE_RH` sont des référentiels fixes dont le `libelle` sert de code technique. Ils ne possèdent pas de CRUD REST et ne peuvent donc être ni créés ni modifiés par l'API.
+Les rôles `ROLE_ADMIN` et `ROLE_GESTIONNAIRE_RH` sont des référentiels fixes dont le `libelle` sert directement d'autorité Spring Security. Ils ne possèdent pas de CRUD REST et ne peuvent donc être ni créés ni modifiés par l'API.
 
 | Méthode | Route | Corps principal |
 |---|---|---|
@@ -82,13 +82,17 @@ Exemples :
 {
   "username": "nouveau-compte",
   "password": "mot-de-passe-initial",
-  "role": "ROLE_GESTIONNAIRE_RH"
+  "role": {
+    "id": "2"
+  }
 }
 ```
 
 ```json
 {
-  "role": "ROLE_ADMIN",
+  "role": {
+    "id": "1"
+  },
   "activated": true
 }
 ```
@@ -101,8 +105,7 @@ Les réponses n'exposent jamais le hash :
   "username": "nouveau-compte",
   "role": {
     "id": "2",
-    "code": "ROLE_GESTIONNAIRE_RH",
-    "libelle": "GESTIONNAIRE_RH"
+    "libelle": "ROLE_GESTIONNAIRE_RH"
   },
   "activated": true
 }
@@ -149,7 +152,7 @@ app/
     └── rh/            domaine générable
 ```
 
-Engine décrit le domaine RH ainsi que la structure commune de `Account` et `Role`. Les contrats publics des rôles, l'encodage et la réinitialisation des mots de passe, la normalisation des identifiants et l'authentification restent des adaptations locales de `domain/admin` et de `core/security` afin de ne jamais exposer un champ sensible dans le code généré.
+Engine décrit le domaine RH ainsi que la structure commune de `Account` et `Role`. L'encodage et la réinitialisation des mots de passe, la normalisation des identifiants et l'authentification restent des adaptations locales de `domain/admin` et de `core/security` afin de ne jamais exposer un champ sensible dans le code généré.
 
 ## Tests
 

@@ -69,7 +69,7 @@ class SecurityHttpTest {
 
     @Test
     void loginReturnsTheFrontendJwtContract() throws Exception {
-        Account account = account("alice.admin", "ADMIN", true, "password-123");
+        Account account = account("alice.admin", "ROLE_ADMIN", true, "password-123");
         when(accountRepository.findByUsername("alice.admin"))
                 .thenReturn(Optional.of(account));
 
@@ -87,7 +87,7 @@ class SecurityHttpTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
 
-        Account user = account("rh.user", "GESTIONNAIRE_RH", true, "password-123");
+        Account user = account("rh.user", "ROLE_GESTIONNAIRE_RH", true, "password-123");
         when(accountRepository.findByUsername("rh.user"))
                 .thenReturn(Optional.of(user));
         String userToken = login("rh.user", "password-123");
@@ -95,7 +95,7 @@ class SecurityHttpTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
 
-        Account admin = account("admin", "ADMIN", true, "password-123");
+        Account admin = account("admin", "ROLE_ADMIN", true, "password-123");
         when(accountRepository.findByUsername("admin"))
                 .thenReturn(Optional.of(admin));
         when(accountService.lister()).thenReturn(List.of());
@@ -106,7 +106,7 @@ class SecurityHttpTest {
 
     @Test
     void rejectsBadCredentialsAndInactiveAccounts() throws Exception {
-        Account inactive = account("inactive", "ADMIN", false, "password-123");
+        Account inactive = account("inactive", "ROLE_ADMIN", false, "password-123");
         when(accountRepository.findByUsername("inactive"))
                 .thenReturn(Optional.of(inactive));
 
@@ -132,14 +132,14 @@ class SecurityHttpTest {
         return body.get("accessToken").asText();
     }
 
-    private Account account(String username, String roleCode, boolean activated, String password) {
+    private Account account(String username, String roleLibelle, boolean activated, String password) {
         Account account = mock(Account.class);
         Role role = mock(Role.class);
         when(account.getUsername()).thenReturn(username);
         when(account.getPasswordHash()).thenReturn(passwordEncoder.encode(password));
         when(account.getActivated()).thenReturn(activated);
         when(account.getRole()).thenReturn(role);
-        when(role.getAuthority()).thenReturn("ROLE_" + roleCode);
+        when(role.getLibelle()).thenReturn(roleLibelle);
         return account;
     }
 

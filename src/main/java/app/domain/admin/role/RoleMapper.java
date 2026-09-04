@@ -1,9 +1,11 @@
 package app.domain.admin.role;
 
+import app.core.reference.Reference;
+
 public final class RoleMapper {
 
-    public static RoleReference toReference(Role role) {
-        return new RoleReference(role.getId(), role.getAuthority(), role.getLibelle());
+    public static Reference toReference(Role role) {
+        return new Reference(role.getId(), role.getLibelle());
     }
 
     private RoleMapper() {}
