@@ -38,7 +38,7 @@ class AdminHttpContractTest {
 
     @Test
     void exposesTheFiveAccountOperationsUsedByTheFrontend() throws Exception {
-        AccountResponse account = account(9_007_199_254_740_993L, "alice", "ROLE_ADMIN", true);
+        AccountResponse account = account(9_007_199_254_740_993L, "alice", "ROLE_ADMIN", true, 4L);
         when(accountService.creer(any())).thenReturn(account);
         when(accountService.lister()).thenReturn(List.of(account));
         when(accountService.recupererParId(account.id())).thenReturn(account);
@@ -50,12 +50,13 @@ class AdminHttpContractTest {
                                 {"username":" Alice ","password":"password-123","role":{"id":"1"}}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/admin/accounts/" + account.id()))
+                .andExpect(header().doesNotExist("Location"))
                 .andExpect(jsonPath("$.id").value("9007199254740993"))
                 .andExpect(jsonPath("$.username").value("alice"))
                 .andExpect(jsonPath("$.role.id").value("1"))
                 .andExpect(jsonPath("$.role.libelle").value("ROLE_ADMIN"))
-                .andExpect(jsonPath("$.activated").value(true));
+                .andExpect(jsonPath("$.activated").value(true))
+                .andExpect(jsonPath("$.version").value(4));
 
         mockMvc.perform(get("/api/admin/accounts"))
                 .andExpect(status().isOk())
@@ -64,7 +65,7 @@ class AdminHttpContractTest {
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/admin/accounts/{id}", account.id())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\":{\"id\":\"1\"},\"activated\":true}"))
+                        .content("{\"role\":{\"id\":\"1\"},\"activated\":true,\"version\":4}"))
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/admin/accounts/{id}/password", account.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +77,7 @@ class AdminHttpContractTest {
 
     @Test
     void normalizesTheUsernameAndReadsTheRole() throws Exception {
-        when(accountService.creer(any())).thenReturn(account(1L, "alice", "ROLE_ADMIN", true));
+        when(accountService.creer(any())).thenReturn(account(1L, "alice", "ROLE_ADMIN", true, 0L));
         ArgumentCaptor<AccountCreateRequest> captor = ArgumentCaptor.forClass(AccountCreateRequest.class);
 
         mockMvc.perform(post("/api/admin/accounts")
@@ -99,7 +100,7 @@ class AdminHttpContractTest {
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/admin/accounts/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\":{\"id\":\"1\"}}"))
+                        .content("{\"role\":{\"id\":\"1\"},\"activated\":true}"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/admin/accounts/1/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +108,7 @@ class AdminHttpContractTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private AccountResponse account(Long id, String username, String role, boolean activated) {
-        return new AccountResponse(id, username, new Reference(1L, role), activated);
+    private AccountResponse account(Long id, String username, String role, boolean activated, long version) {
+        return new AccountResponse(id, username, new Reference(1L, role), activated, version);
     }
 }

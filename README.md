@@ -73,7 +73,7 @@ Les rôles `ROLE_ADMIN` et `ROLE_GESTIONNAIRE_RH` sont des référentiels fixes 
 | `POST` | `/api/admin/accounts` | `username`, `password`, `role` |
 | `GET` | `/api/admin/accounts` | — |
 | `GET` | `/api/admin/accounts/{id}` | — |
-| `PUT` | `/api/admin/accounts/{id}` | `role`, `activated` |
+| `PUT` | `/api/admin/accounts/{id}` | `role`, `activated`, `version` |
 | `PUT` | `/api/admin/accounts/{id}/password` | `password` |
 
 Exemples :
@@ -93,7 +93,8 @@ Exemples :
   "role": {
     "id": "1"
   },
-  "activated": true
+  "activated": true,
+  "version": 0
 }
 ```
 
@@ -107,7 +108,8 @@ Les réponses n'exposent jamais le hash :
     "id": "2",
     "libelle": "ROLE_GESTIONNAIRE_RH"
   },
-  "activated": true
+  "activated": true,
+  "version": 0
 }
 ```
 

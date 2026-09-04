@@ -1,8 +1,8 @@
 package app.domain.admin.account;
 
-import java.net.URI;
 import java.util.List;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +25,7 @@ public class AccountController {
     @PostMapping("/accounts")
     public ResponseEntity<AccountResponse> creer(@Valid @RequestBody AccountCreateRequest request) {
         AccountResponse response = accountService.creer(request);
-        return ResponseEntity.created(URI.create("/api/admin/accounts/" + response.id())).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/accounts")

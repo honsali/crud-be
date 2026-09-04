@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import app.core.exception.ConflictException;
 import app.core.exception.ResourceNotFoundException;
+import app.core.exception.StaleVersionException;
 import app.core.reference.Reference;
 import app.domain.admin.role.Role;
 import app.domain.admin.role.RoleRepository;
@@ -43,6 +44,10 @@ public class AccountService {
     @Transactional
     public AccountResponse maj(Long id, AccountUpdateRequest request) {
         Account account = recupererAccount(id);
+        if (account.getVersion() != request.version()) {
+            throw new StaleVersionException("Compte", id);
+        }
+
         Role role = recupererRole(request.role());
         AccountMapper.toEntity(account, request, role);
         accountRepository.flush();

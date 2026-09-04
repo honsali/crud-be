@@ -12,7 +12,8 @@ public final class AccountMapper {
                 account.getRole() == null
                         ? null
                         : RoleMapper.toReference(account.getRole()),
-                account.getActivated());
+                account.getActivated(),
+                account.getVersion());
     }
 
     public static Account toEntity(AccountCreateRequest request, Role role, String passwordHash) {
