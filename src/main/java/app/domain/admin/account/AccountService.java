@@ -68,7 +68,7 @@ public class AccountService {
     }
 
     private Account recupererAccount(Long id) {
-        return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Compte", id));
+        return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account", id));
     }
 
     private Role recupererRole(Reference reference) {
@@ -76,9 +76,6 @@ public class AccountService {
             return null;
         }
         Long id = reference.id();
-        if (id == null) {
-            return null;
-        }
-        return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Rôle", id));
+        return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role", id));
     }
 }
