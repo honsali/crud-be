@@ -16,9 +16,9 @@ public final class AccountMapper {
                 account.getVersion());
     }
 
-    public static Account toEntity(AccountCreateRequest request, Role role, String passwordHash) {
+    public static Account toEntity(String username, Role role, String passwordHash) {
         return new Account(
-                request.username(),
+                username,
                 role,
                 passwordHash);
     }

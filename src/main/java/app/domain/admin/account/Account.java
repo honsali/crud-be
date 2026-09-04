@@ -1,6 +1,5 @@
 package app.domain.admin.account;
 
-import java.util.Locale;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,7 +24,7 @@ public class Account extends BaseEntity {
     protected Account() {}
 
     Account(String username, Role role, String passwordHash) {
-        this.username = normalizeUsername(username);
+        this.username = username;
         this.role = role;
         this.activated = true;
         this.passwordHash = passwordHash;
@@ -56,7 +55,4 @@ public class Account extends BaseEntity {
         this.passwordHash = passwordHash;
     }
 
-    static String normalizeUsername(String value) {
-        return value == null ? null : value.strip().toLowerCase(Locale.ROOT);
-    }
 }

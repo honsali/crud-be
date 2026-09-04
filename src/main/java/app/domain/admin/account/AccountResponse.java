@@ -7,6 +7,6 @@ public record AccountResponse(
         @JsonId Long id,
         String username,
         Reference role,
-        boolean activated,
+        Boolean activated,
         long version) {
 }
