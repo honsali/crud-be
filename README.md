@@ -1,173 +1,74 @@
-# Backend CRUD de démonstration
+# CRUD RH Backend
 
-Backend Spring Boot du mini-SIRH utilisé comme cible de référence par Engine. Le projet privilégie un code court, conventionnel et directement montrable : contrôleurs REST, services transactionnels, repositories Spring Data et DTO explicites.
+Ce backend constitue, avec [crud-fe](../crud-fe/README.md), une seule application RH de démonstration. Il sert à éprouver une manière de construire des applications CRUD-like avec [Engine](../engine/README.md), puis à disposer d'un point de départ pour un bootstrap ou un POC.
 
-Le domaine RH illustre trois formes de génération :
+Le parti pris est un code court, conventionnel et facile à comprendre : les parcours de l'application doivent être visibles dans les contrôleurs, les services et la persistance. La simplicité du backend est un choix de contexte ; les mécanismes ajoutés doivent répondre aux besoins réels de cette cible.
 
-- liste CRUD simple avec `Departement` ;
-- recherche paginée avec `Employe` ;
-- relation parent/enfant avec `Employe` et `Conge`.
+## Concevoir une application complète
 
-L'administration des comptes et les rôles possèdent une baseline dans le DSL d'Engine. Le petit noyau manuel y ajoute l'authentification JWT, la gestion des mots de passe et les adaptations de sécurité ; il ne cherche pas à être une plateforme IAM.
+Le frontend et le backend sont développés et livrés ensemble. Les contrats HTTP se définissent à partir des écrans et des parcours utilisateur : données nécessaires à un formulaire, références à sélectionner, recherche paginée, erreurs à présenter ou résultat d'une action.
 
-## Démarrage
+Le backend tient donc compte du frontend qui le consomme. Il fournit notamment des identifiants compatibles avec JavaScript, un contrat de pagination explicite et des erreurs exploitables dans l'interface.
 
-Prérequis : Java 25 et PostgreSQL. Le wrapper Maven est fourni. La configuration locale utilise une base et un compte de démonstration nommés `rh` :
+Les responsabilités restent claires : le backend porte les décisions métier, la validation faisant autorité, les autorisations, les transactions et l'intégrité des données. Le frontend organise les interactions et présente leurs résultats. Les contrôles backend s'appliquent également lorsqu'un appel arrive sans passer par l'interface.
 
-```bash
-sudo -u postgres psql -c "CREATE ROLE rh LOGIN PASSWORD 'rh'"
-sudo -u postgres createdb -O rh rh
-```
+## Un core commun et une partie issue du générateur
 
-```bash
-./mvnw spring-boot:run
-```
+L'application associe un socle réutilisable et du code applicatif produit puis adapté :
 
-Liquibase remet le schéma à zéro, recrée les tables et recharge les données de démonstration à chaque démarrage. Hibernate valide ensuite que les entités correspondent au schéma. Ce comportement destructif est volontaire pour cette application de démonstration.
+| Partie | Rôle |
+|---|---|
+| `app/core` | Persistance commune, références, pagination, erreurs et authentification |
+| `app/domain/rh` | Gros œuvre générable : départements, employés, congés et référentiels |
+| `app/domain/admin` | Base Account/Role issue du DSL et adaptations locales de gestion des comptes |
 
-Deux comptes de démonstration sont insérés :
+Le core est destiné à être repris dans les applications partageant ces conventions techniques. Il représente le fonctionnement commun que chaque nouveau domaine utilise. L'évolution du socle reste une décision explicite du projet.
 
-| Username | Mot de passe | Rôle public |
-|---|---|---|
-| `admin` | `Admin-local-2026!` | `ROLE_ADMIN` |
-| `gestionnaire-rh` | `Gestionnaire-local-2026!` | `ROLE_GESTIONNAIRE_RH` |
+Engine décrit le domaine et les actions, puis produit les entités, contrats, contrôleurs, services, repositories et fichiers Liquibase qui s'appuient sur ce core. Son moteur est conçu pour être adapté à d'autres technologies ou architectures ; cette application en constitue la cible Java/Spring actuelle.
 
-## Authentification
+Pour Account et Role, la génération fournit une base structurelle. Le traitement des mots de passe, la normalisation des identifiants de connexion et l'authentification restent dans le code de l'application. Les fichiers Account backend générés ne doivent pas écraser cette implémentation de sécurité.
 
-```bash
-curl -X POST http://localhost:8080/api/login \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"Admin-local-2026!"}'
-```
+## Le gros œuvre donne des repères
 
-La réponse contient `accessToken`, `tokenType` et `expiresIn`. Le JWT HS256 contient seulement les informations attendues par le frontend :
+Trois parcours servent de référence :
 
-```json
-{
-  "sub": "admin",
-  "role": "ROLE_ADMIN",
-  "iat": 1788249600,
-  "exp": 1788253200,
-  "iss": "crud-reference"
-}
-```
+- les départements illustrent un CRUD en liste simple ;
+- les employés illustrent la recherche et la pagination ;
+- les congés illustrent une relation parent/enfant et ses parcours associés.
 
-Une requête protégée utilise ensuite :
+Leur organisation répétée donne une forme prévisible à l'application. En découvrant une nouvelle entité, le développeur retrouve les mêmes emplacements pour ses contrats, son comportement métier et son accès aux données.
 
-```text
-Authorization: Bearer <accessToken>
-```
+Cette forme facilite le démarrage, la lecture et les changements transversaux. Les règles particulières ajoutées ensuite deviennent le travail propre à l'application.
 
-Le fonctionnement est volontairement simple : le mot de passe Argon2id est vérifié dans `AuthService`, puis le JWT est autonome jusqu'à son expiration. Il n'existe ni refresh token, blacklist, révocation globale, bootstrap dynamique, cache de sécurité, ni lecture du compte à chaque requête.
+## Reprendre le code, puis choisir ses évolutions
 
-Une désactivation, un changement de rôle ou une réinitialisation de mot de passe s'applique donc aux prochaines connexions ; un JWT déjà émis reste valable jusqu'à son expiration. Le TTL vaut une heure par défaut et se règle avec `APP_SECURITY_JWT_TTL`. Un déploiement plus exposé peut réduire ce TTL et placer la limitation des tentatives au niveau du reverse proxy.
+À `t = 0`, une fois le core et les conventions de la cible préparés, le gros œuvre d'un nouveau module peut être repris tel quel depuis `engine/result/be`. Le développeur poursuit ensuite le travail dans ce dépôt.
 
-La clé JWT, l'issuer et l'origine CORS locale sont écrits directement dans `application.yml` afin que la démonstration démarre sans configuration supplémentaire.
+Lorsqu'Engine ou le DSL évolue, la nouvelle génération fournit une proposition. Le développeur utilise son outil de diff pour récupérer uniquement les fichiers, blocs ou lignes utiles, en préservant les adaptations de l'application. Les printers d'Engine écrivent dans `result` ; le transfert est une opération explicite.
 
-## API d'administration
+Le résultat de départ conserve sa valeur de plan de base. Comparer l'application actuelle à cette référence permet de retrouver les règles et adaptations ajoutées depuis, comme les transformations d'une maison par rapport à son plan d'origine.
 
-Les rôles `ROLE_ADMIN` et `ROLE_GESTIONNAIRE_RH` sont des référentiels fixes dont le `libelle` sert directement d'autorité Spring Security. Ils ne possèdent pas de CRUD REST et ne peuvent donc être ni créés ni modifiés par l'API.
+Pour intégrer une nouvelle génération, on distingue l'ancien résultat `G0`, l'application actuelle `P` et le nouveau résultat `G1`. Les fichiers restés identiques peuvent être remplacés ; ceux qui ont été personnalisés demandent un report sélectif. Cette méthode suppose de conserver le bon `G0` ou de pouvoir le reproduire.
 
-| Méthode | Route | Corps principal |
-|---|---|---|
-| `POST` | `/api/admin/accounts` | `username`, `password`, `role` |
-| `GET` | `/api/admin/accounts` | — |
-| `GET` | `/api/admin/accounts/{id}` | — |
-| `PUT` | `/api/admin/accounts/{id}` | `role`, `activated`, `version` |
-| `PUT` | `/api/admin/accounts/{id}/password` | `password` |
+Une amélioration qui doit se répéter dans les modules remonte dans Engine. Une règle propre à cette application reste dans son code métier. Le [workflow Engine](../engine/README.md) décrit cette démarche commune au frontend et au backend.
 
-Exemples :
+## Une complexité proportionnée à la démonstration
 
-```json
-{
-  "username": "nouveau-compte",
-  "password": "mot-de-passe-initial",
-  "role": {
-    "id": "2"
-  }
-}
-```
+Cette cible privilégie les usages de démonstration, de bootstrap et de POC. Les exigences d'une application bancaire ou d'une plateforme d'identité complète ne constituent pas son contrat de départ.
 
-```json
-{
-  "role": {
-    "id": "1"
-  },
-  "activated": true,
-  "version": 0
-}
-```
+Les choix actuels rendent ce positionnement concret : données de démonstration recréées au démarrage, configuration locale prête à utiliser, authentification JWT simple et couches Spring conventionnelles. Les détails de ces comportements sont décrits dans le [guide de développement](DEVELOPMENT.md).
 
-Les réponses n'exposent jamais le hash :
+La simplicité conserve les mécanismes utiles au fonctionnement de l'application : validation des requêtes, contraintes d'unicité, gestion des références, transactions et versions optimistes. Une exigence supplémentaire se traite lorsqu'elle correspond au contexte de l'application que l'on construit.
 
-```json
-{
-  "id": "3",
-  "username": "nouveau-compte",
-  "role": {
-    "id": "2",
-    "libelle": "ROLE_GESTIONNAIRE_RH"
-  },
-  "activated": true,
-  "version": 0
-}
-```
+## Quand utiliser ce projet
 
-## API RH
+- Pour montrer rapidement des parcours RH complets avec leur interface.
+- Pour valider les sorties backend d'Engine sur une application exécutable.
+- Pour amorcer une application CRUD-like à partir d'un core et de conventions connus.
+- Pour explorer une règle métier ou un changement transversal avant de décider ce qui mérite d'être réutilisé.
 
-| Méthode | Route | Usage |
-|---|---|---|
-| `POST` | `/api/rh/departements` | Créer un département |
-| `GET` | `/api/rh/departements` | Lister les départements |
-| `GET` | `/api/rh/departements/{id}` | Consulter un département |
-| `PUT` | `/api/rh/departements/{id}` | Modifier un département |
-| `DELETE` | `/api/rh/departements/{id}` | Supprimer un département |
-| `POST` | `/api/rh/employes` | Créer un employé |
-| `POST` | `/api/rh/employes/filtrer` | Filtrer et paginer les employés |
-| `GET` | `/api/rh/employes/{id}` | Consulter un employé |
-| `PUT` | `/api/rh/employes/{id}` | Modifier un employé |
-| `DELETE` | `/api/rh/employes/{id}` | Supprimer un employé |
-| `POST` | `/api/rh/employes/{idEmploye}/conges` | Créer un congé |
-| `GET` | `/api/rh/employes/{idEmploye}/conges` | Lister les congés d'un employé |
-| `GET` | `/api/rh/conges/{id}` | Consulter un congé |
-| `PUT` | `/api/rh/conges/{id}` | Modifier un congé |
-| `DELETE` | `/api/rh/conges/{id}` | Supprimer un congé |
+## Pour poursuivre
 
-Les relations de formulaire utilisent des références courtes comme `{"id":"2","libelle":"…"}`. Le backend utilise l'identifiant et n'a pas besoin d'un mapper intermédiaire supplémentaire.
-
-Les réponses modifiables du domaine RH contiennent `version`, à renvoyer lors d'un `PUT`. Une version périmée produit un HTTP 409. Les identifiants Java `Long` sont sérialisés en chaînes afin d'éviter une perte de précision dans JavaScript.
-
-La recherche d'employés reçoit ses filtres dans le corps de `POST /api/rh/employes/filtrer`; `page`, `size` et `sort` restent des paramètres de requête. La réponse utilise `PageResponse` plutôt que le contrat interne de Spring Data.
-
-## Organisation
-
-```text
-app/
-├── core/
-│   ├── exception/     contrat d'erreur commun
-│   ├── pagination/    contrat de page REST
-│   ├── persistence/   BaseEntity et helpers JPA
-│   ├── reference/     référence JSON et identifiants sûrs pour JavaScript
-│   └── security/      configuration, login et JWT
-└── domain/
-    ├── admin/         Account et Role
-    └── rh/            domaine générable
-```
-
-Engine décrit le domaine RH ainsi que la structure commune de `Account` et `Role`. L'encodage et la réinitialisation des mots de passe, la normalisation des identifiants et l'authentification restent des adaptations locales de `domain/admin` et de `core/security` afin de ne jamais exposer un champ sensible dans le code généré.
-
-## Tests
-
-Tests rapides et contrats HTTP :
-
-```bash
-./mvnw test
-```
-
-Le test d'intégration utilise la même base locale `rh`, dans un schéma temporaire isolé :
-
-```bash
-./mvnw verify
-```
-
-La suite crée un schéma aléatoire `rh_it_<identifiant>`, exécute réellement Liquibase, vérifie les données de démonstration et les trois patrons générés, puis supprime uniquement ce schéma. Elle ne nécessite ni Docker ni variable d'environnement.
+- [Guide de développement](DEVELOPMENT.md) : prérequis, démarrage, données de démonstration, authentification, API et tests.
+- [Frontend](../crud-fe/README.md) : l'autre partie de la même application et ses choix d'architecture.
+- [Engine](../engine/README.md) : composition, génération et intégration par comparaison.
