@@ -69,6 +69,7 @@ La simplicité conserve les mécanismes utiles au fonctionnement de l'applicatio
 
 ## Pour poursuivre
 
+- [Décisions et contexte de reprise](../crud-fe/docs/DECISIONS.md) : raisons des arbitrages communs et distinction entre bootstrap, défauts constatés et exigences futures.
 - [Guide de développement](DEVELOPMENT.md) : prérequis, démarrage, données de démonstration, authentification, API et tests.
 - [Frontend](../crud-fe/README.md) : l'autre partie de la même application et ses choix d'architecture.
 - [Engine](../engine/README.md) : composition, génération et intégration par comparaison.

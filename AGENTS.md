@@ -1,0 +1,11 @@
+# Consignes de travail pour le backend
+
+- Lire [README.md](README.md) pour l'intention du projet et [DEVELOPMENT.md](DEVELOPMENT.md) pour les contrats et commandes actuels. Avant une review ou un travail architectural ou coordonné, lire les [décisions de la passation](../crud-fe/docs/DECISIONS.md).
+- Le frontend et le backend sont deux runtimes d'une application co-conçue. Les contrats HTTP répondent aux parcours de l'interface ; le backend conserve l'autorité sur le métier, les validations, les autorisations, les transactions et l'intégrité, même lorsque l'appel contourne le frontend.
+- Évaluer les choix de cette cible dans son contexte démo, bootstrap et POC. Distinguer un défaut fonctionnel réel d'une exigence de mise en production ou bancaire non demandée. Cette distinction ne justifie pas de supprimer les contrôles métier ou de sécurité existants.
+- Le projet associe un core réutilisable et du code issu d'Engine puis personnalisé. Le gros œuvre donne une forme et un plan de référence ; l'application n'a pas à rester identique à chaque nouvelle génération.
+- Pour une correction répétée générable, travailler dans Engine puis conserver `G0`, examiner `G1` et transférer sélectivement les changements utiles dans l'application `P`. Une adaptation isolée peut rester locale. Engine écrit seulement dans `result`.
+- Ne jamais écraser l'implémentation de sécurité Account/Role avec le backend généré. Préserver les contrats distincts des commandes, la normalisation des identifiants de connexion et le traitement des mots de passe.
+- Les identifiants restent `Long` en interne et sont exposés comme chaînes JSON via `@JsonId`. Vérifier les contrats dans le code courant et le guide de développement ; ne pas réintroduire les anciennes hypothèses d'API de référence générique, de dates JSON `dd/MM/yyyy` ou de Problem Details à partir d'une review historique.
+- Inspecter le statut Git et le diff avant et après le travail, préserver les changements existants et ne pas stage, commit ou push sans demande explicite. Conserver LF et exactement un saut de ligne final dans les textes modifiés.
+- Adapter les tests au lot demandé et distinguer compilation, tests backend, génération, comparaison et vérification navigateur. Ne pas annoncer une validation E2E sur la seule réussite des tests locaux.
